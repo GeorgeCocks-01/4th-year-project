@@ -72,7 +72,7 @@ def main(args):
       pTt1.Fill(pt)
       #print(pt)
 
-  if (args.outputfile[-5:] != ".root"):
+  if (args.outputfile[-5:] != ".root"): #adds .root to end of output file if not present
     args.outputfile += ".root"
   outHistFile = ROOT.TFile.Open(args.outputfile, "RECREATE")
   outHistFile.cd()
