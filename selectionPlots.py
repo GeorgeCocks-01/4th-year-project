@@ -1,7 +1,7 @@
 import ROOT
 import copy, os, re, sys
 import argparse
-
+import math
 
 ## Method to resolve regular expressions in file names.
 #  TChain::Add only supports wildcards in the last items, i.e. on file level.
@@ -88,8 +88,8 @@ def main(args):
         leptonMass = (leptons_p4[0] + leptons_p4[1]).M() # maybe faster to do (leptons_p4[0].M() + leptons_p4[1].M())?
         dRZ = leptons_p4[0].DeltaR(leptons_p4[1])
         dRH = taus_p4[0].DeltaR(taus_p4[1])
-        dEtaZ = leptons_p4[0].DeltaR(leptons_p4[1])
-        dEtaH = taus_p4[0].DeltaR(taus_p4[1])
+        dEtaZ = math.fabs(leptons_p4[0].Eta() - leptons_p4[1].Eta())
+        dEtaH = math.fabs(taus_p4[0].Eta() - taus_p4[1].Eta())
 
         pTtsum.Fill(pt)
         diLeptonMass.Fill(leptonMass)
