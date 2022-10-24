@@ -2,8 +2,8 @@ from ROOT import *
 import copy, os, re, sys
 import argparse
 
-gROOT.LoadMacro('/storage/epp2/phsngj/Htautau/CAF/hlepcaf/tools/atlasrootstyle/AtlasStyle.C')
-gROOT.LoadMacro('/storage/epp2/phsngj/Htautau/CAF/hlepcaf/tools/atlasrootstyle/AtlasUtils.C')
+gROOT.LoadMacro('../atlasrootstyle/AtlasStyle.C')
+gROOT.LoadMacro('../atlasrootstyle/AtlasUtils.C')
 gROOT.SetBatch(kTRUE)
 SetAtlasStyle()
 
@@ -11,12 +11,10 @@ canv = TCanvas('c','c',600,600)
 canv.cd()
 colorList = [kBlack,kRed,kBlue,kGreen,kViolet,kMagenta,kAzure,kViolet,kOrange,kYellow,kMagenta+3,kCyan,kYellow+2]
 
-samples = [('ZH','Ztt/ZH2elptons.root', kRed),
-       ('ZZ', 'Ztt/ZZ2leptons.root', kBlue)
-        ]
+samples = [('ZH','Ztt/ZHselection.root', kRed),
+       ('ZZ', 'Ztt/ZZselection.root', kBlue)]
 
-
-varList = ['lep0_pt','lep1_pt']
+varList = ['lep0_pt','lep1_pt'] # Change these to the variables in root files given above
 
 for var in varList:
 
