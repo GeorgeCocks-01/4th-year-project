@@ -3,6 +3,8 @@ import copy, os, re, sys
 import argparse
 import math
 
+Zmass = 91.1876
+
 ## Method to resolve regular expressions in file names.
 #  TChain::Add only supports wildcards in the last items, i.e. on file level.
 #  This method can resolve all wildcards at any directory level,
@@ -41,6 +43,20 @@ def findAllFilesInPath( pattern ,path ):
   checkPath( path, items )
   return files
 
+def fillHistograms(tau1, tauOrLep, Zlep1, Zlep2, pTtSum, diLeptonMass, metpTSum, deltaRZ, deltaRH, deltaEtaZ, deltaEtaH):
+  pt = tau1.Pt() + tauOrLep.Pt()
+  leptonMass = (Zlep1 + Zlep2).M() # get different answer doing (Zlep1.M() + Zlep2.M())?
+  dRZ = Zlep1.DeltaR(Zlep2)
+  dRH = tau1.DeltaR(tauOrLep)
+  dEtaZ = math.fabs(Zlep1.Eta() - Zlep2.Eta())
+  dEtaH = math.fabs(tau1.Eta() - tauOrLep.Eta())
+
+  pTtSum.Fill(pt)
+  diLeptonMass.Fill(leptonMass)
+  deltaRZ.Fill(dRZ)
+  deltaRH.Fill(dRH)
+  deltaEtaZ.Fill(dEtaZ)
+  deltaEtaH.Fill(dEtaH)
 
 def main(args):
   if (args.inputsample[-1] != "/"): #adds / to end of file path if not present
@@ -55,20 +71,28 @@ def main(args):
   print(nFiles, "files")
 
   # define histograms
-  pTtsum = ROOT.TH1D("tau_pt_sum", "p_{T}^{#tau_sum}", 200, 0, 500)
-  diLeptonMass = ROOT.TH1D("lepton_mass_sum", "M(ll)", 150, 0, 200)
-  metpTsum = ROOT.TH1D("met_pt_sum", "met.Pt()_sum", 150, 0, 500)
-  deltaRZ = ROOT.TH1D("delta_R_Z", "delta_R_Z", 150, 0, 5)
-  deltaRH = ROOT.TH1D("delta_R_H", "delta_R_H", 150, 0, 5)
-  deltaEtaZ = ROOT.TH1D("delta_Eta_Z", "delta_Eta_Z", 150, 0, 5)
-  deltaEtaH = ROOT.TH1D("delta_Eta_H", "delta_Eta_H", 150, 0, 5)
-  pTtsum.Sumw2()
-  diLeptonMass.Sumw2()
-  metpTsum.Sumw2()
-  deltaRZ.Sumw2()
-  deltaRH.Sumw2()
-  deltaEtaZ.Sumw2()
-  deltaEtaH.Sumw2()
+  diLepPTtsum = ROOT.TH1D("2_lep_tau_pt_sum", "p_{T}^{#tau_sum}", 200, 0, 500)
+  diLepDiLeptonMass = ROOT.TH1D("2_lep_lepton_mass_sum", "M(ll)", 150, 0, 200)
+  diLepMetpTsum = ROOT.TH1D("2_lep_met_pt_sum", "met.Pt()_sum", 150, 0, 500)
+  diLepDeltaRZ = ROOT.TH1D("2_lep_delta_R_Z", "delta_R_Z", 150, 0, 5)
+  diLepDeltaRH = ROOT.TH1D("2_lep_delta_R_H", "delta_R_H", 150, 0, 5)
+  diLepDeltaEtaZ = ROOT.TH1D("2_lep_delta_Eta_Z", "delta_Eta_Z", 150, 0, 5)
+  diLepDeltaEtaH = ROOT.TH1D("2_lep_delta_Eta_H", "delta_Eta_H", 150, 0, 5)
+  diLepPTtsum.Sumw2()
+  diLepDiLeptonMass.Sumw2()
+  diLepMetpTsum.Sumw2()
+  diLepDeltaRZ.Sumw2()
+  diLepDeltaRH.Sumw2()
+  diLepDeltaEtaZ.Sumw2()
+  diLepDeltaEtaH.Sumw2()
+
+  triLepPTtsum = diLepPTtsum.Clone("3_lep_tau_pt_sum")
+  triLepDiLeptonMass = diLepDiLeptonMass.Clone("3_lep_Z_lepton_mass_sum")
+  triLepMetpTsum = diLepMetpTsum.Clone("3_lep_met_pt_sum")
+  triLepDeltaRZ = diLepDeltaRZ.Clone("3_lep_delta_R_Z")
+  triLepDeltaRH = diLepDeltaRH.Clone("3_lep_delta_R_H")
+  triLepDeltaEtaZ = diLepDeltaEtaZ.Clone("3_lep_delta_Eta_Z")
+  triLepDeltaEtaH = diLepDeltaEtaH.Clone("3_lep_delta_Eta_H")
 
   #FILL HISTOGRAMS LOOP
   for i in range(0, tree.GetEntries()):
@@ -82,25 +106,43 @@ def main(args):
 
     # we need to have at least 2 taus
     if len(taus_p4) > 1:
-      # selection cut for 2 leptons in final state
+      # selection cut for 2 lepton final state
       if (len(leptons_p4) == 2) and (lFlavour[0] == lFlavour[1]) and (lCharge[0] == -lCharge[1]):
-        pt = taus_p4[0].Pt() + taus_p4[1].Pt()
-        leptonMass = (leptons_p4[0] + leptons_p4[1]).M() # maybe faster to do (leptons_p4[0].M() + leptons_p4[1].M())?
-        dRZ = leptons_p4[0].DeltaR(leptons_p4[1])
-        dRH = taus_p4[0].DeltaR(taus_p4[1])
-        dEtaZ = math.fabs(leptons_p4[0].Eta() - leptons_p4[1].Eta())
-        dEtaH = math.fabs(taus_p4[0].Eta() - taus_p4[1].Eta())
+        fillHistograms(taus_p4[0], taus_p4[1], leptons_p4[0], leptons_p4[1], diLepPTtsum, diLepDiLeptonMass, diLepMetpTsum, diLepDeltaRZ, diLepDeltaRH, diLepDeltaEtaZ, diLepDeltaEtaH)
+        diLepMetpTsum.Fill(met_p4.Pt())
 
-        pTtsum.Fill(pt)
-        diLeptonMass.Fill(leptonMass)
-        metpTsum.Fill(met_p4.Pt())
-        deltaRZ.Fill(dRZ)
-        deltaRH.Fill(dRH)
-        deltaEtaZ.Fill(dEtaZ)
-        deltaEtaH.Fill(dEtaH)
+      # selection cut for 3 lepton final state
+      elif (len(leptons_p4) == 3):
+        flavList = [lFlavour[0], lFlavour[1], lFlavour[2]]
+        chargeList = [lCharge[0], lCharge[1], lCharge[2]]
+        if (flavList.count(1) == 1) and (flavList.count(2) == 2): # One muon, two electrons. Could do sum(flavList) == 5
+          muonIndex = flavList.index(1)
+          fillHistograms(taus_p4[0], leptons_p4[muonIndex], leptons_p4[(muonIndex + 1)%3], leptons_p4[(muonIndex - 1)%3], triLepPTtsum, triLepDiLeptonMass, triLepMetpTsum, triLepDeltaRZ, triLepDeltaRH, triLepDeltaEtaZ, triLepDeltaEtaH)
+          triLepMetpTsum.Fill(met_p4.Pt())
 
-      # selection cut for 3 leptons in final state
-      #elif (len(leptons_p4) == 3) and (lFlavour[0] )
+        elif (flavList.count(2) == 1) and (flavList.count(1) == 2): # Two muons, one electron. Could do sum(flavList) == 4
+          electronIndex = flavList.index(2)
+          fillHistograms(taus_p4[0], leptons_p4[electronIndex], leptons_p4[(electronIndex + 1)%3], leptons_p4[(electronIndex - 1)%3], triLepPTtsum, triLepDiLeptonMass, triLepMetpTsum, triLepDeltaRZ, triLepDeltaRH, triLepDeltaEtaZ, triLepDeltaEtaH)
+          triLepMetpTsum.Fill(met_p4.Pt())
+
+        elif (chargeList.count(+1) == 1) and (chargeList.count(-1) == 2): # One positive charge, two negatives
+          posIndex = chargeList.index(+1)
+          if math.fabs((leptons_p4[posIndex] + leptons_p4[(posIndex + 1)%3]).M() - Zmass) < math.fabs((leptons_p4[posIndex] + leptons_p4[(posIndex - 1)%3]).M() - Zmass):
+            fillHistograms(taus_p4[0], leptons_p4[(posIndex - 1)%3], leptons_p4[posIndex], leptons_p4[(posIndex + 1)%3], triLepPTtsum, triLepDiLeptonMass, triLepMetpTsum, triLepDeltaRZ, triLepDeltaRH, triLepDeltaEtaZ, triLepDeltaEtaH)
+            triLepMetpTsum.Fill(met_p4.Pt())
+          else:
+            fillHistograms(taus_p4[0], leptons_p4[(posIndex + 1)%3], leptons_p4[posIndex], leptons_p4[(posIndex - 1)%3], triLepPTtsum, triLepDiLeptonMass, triLepMetpTsum, triLepDeltaRZ, triLepDeltaRH, triLepDeltaEtaZ, triLepDeltaEtaH)
+            triLepMetpTsum.Fill(met_p4.Pt())
+
+        elif (chargeList.count(-1) == 1) and (chargeList.count(+1) == 2): # Two positive charges, one negative
+          negIndex = chargeList.index(-1)
+          if math.fabs((leptons_p4[negIndex] + leptons_p4[(negIndex + 1)%3]).M() - Zmass) < math.fabs((leptons_p4[negIndex] + leptons_p4[(negIndex - 1)%3]).M() - Zmass):
+            fillHistograms(taus_p4[0], leptons_p4[(negIndex - 1)%3], leptons_p4[negIndex], leptons_p4[(negIndex + 1)%3], triLepPTtsum, triLepDiLeptonMass, triLepMetpTsum, triLepDeltaRZ, triLepDeltaRH, triLepDeltaEtaZ, triLepDeltaEtaH)
+            triLepMetpTsum.Fill(met_p4.Pt())
+          else:
+            fillHistograms(taus_p4[0], leptons_p4[(negIndex + 1)%3], leptons_p4[negIndex], leptons_p4[(negIndex - 1)%3], triLepPTtsum, triLepDiLeptonMass, triLepMetpTsum, triLepDeltaRZ, triLepDeltaRH, triLepDeltaEtaZ, triLepDeltaEtaH)
+            triLepMetpTsum.Fill(met_p4.Pt())
+
 
   #OUTPUT LOOP
   if (args.outputfile[-5:] != ".root"): #adds .root to end of output file if not present
@@ -108,13 +150,21 @@ def main(args):
   outHistFile = ROOT.TFile.Open(args.outputfile, "RECREATE")
   outHistFile.cd()
 
-  pTtsum.Write()
-  diLeptonMass.Write()
-  metpTsum.Write()
-  deltaRZ.Write()
-  deltaRH.Write()
-  deltaEtaZ.Write()
-  deltaEtaH.Write()
+  diLepPTtsum.Write()
+  diLepDiLeptonMass.Write()
+  diLepMetpTsum.Write()
+  diLepDeltaRZ.Write()
+  diLepDeltaRH.Write()
+  diLepDeltaEtaZ.Write()
+  diLepDeltaEtaH.Write()
+
+  triLepPTtsum.Write()
+  triLepDiLeptonMass.Write()
+  triLepMetpTsum.Write()
+  triLepDeltaRZ.Write()
+  triLepDeltaRH.Write()
+  triLepDeltaEtaZ.Write()
+  triLepDeltaEtaH.Write()
 
   outHistFile.Close()
 
