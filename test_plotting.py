@@ -11,13 +11,12 @@ canv = TCanvas('c','c',600,600)
 canv.cd()
 colorList = [kBlack,kRed,kBlue,kGreen,kViolet,kMagenta,kAzure,kViolet,kOrange,kYellow,kMagenta+3,kCyan,kYellow+2]
 
-samples = [('ZH','Ztt/ZHselection.root', kRed),
-       ('ZZ', 'Ztt/ZZselection.root', kBlue)]
+samples = [('ZH','Zttoutput/ZH-weighted.root', kRed),
+       ('ZZ', 'Zttoutput/ZZ-weighted.root', kBlue)]
 
-varList = ['lep0_pt','lep1_pt'] # Change these to the variables in root files given above
+varList = ['2_lep_tau_pt_sum','2_lep_lepton_mass_sum'] # Change these to the variables in root files given above
 
 for var in varList:
-
   leg = TLegend(0.7,0.7,0.8,0.85)
   leg.SetBorderSize(0)
   leg.SetTextSize(0.03)
@@ -62,4 +61,3 @@ for var in varList:
 
   canv.SaveAs('ShapePlot_'+var+'.pdf')
   canv.Clear()
-
