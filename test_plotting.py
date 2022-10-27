@@ -11,10 +11,12 @@ canv = TCanvas('c','c',600,600)
 canv.cd()
 colorList = [kBlack,kRed,kBlue,kGreen,kViolet,kMagenta,kAzure,kViolet,kOrange,kYellow,kMagenta+3,kCyan,kYellow+2]
 
-samples = [('ZH','Zttoutput/ZH-weighted.root', kRed),
-       ('ZZ', 'Zttoutput/ZZ-weighted.root', kBlue)]
+samples = [('ZH','Ztt/ZH-weighted.root', kRed),
+       ('ZZ', 'Ztt/ZZ-weighted.root', kBlue)]
 
-varList = ['2_lep_tau_pt_sum','2_lep_lepton_mass_sum'] # Change these to the variables in root files given above
+varList = ['2_lep_delta_Eta_H', '2_lep_delta_Eta_Z', '2_lep_delta_R_H', '2_lep_delta_R_Z', '2_lep_lepton_mass_sum',
+ '2_lep_met_pt_sum', '2_lep_tau_pt_sum', '3_lep_Z_lepton_mass_sum', '3_lep_delta_Eta_H', '3_lep_delta_Eta_Z', '3_lep_delta_R_H',
+ '3_lep_delta_R_Z', '3_lep_met_pt_sum', '3_lep_tau_pt_sum']
 
 for var in varList:
   leg = TLegend(0.7,0.7,0.8,0.85)
