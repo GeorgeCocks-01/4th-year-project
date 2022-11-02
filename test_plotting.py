@@ -15,8 +15,9 @@ samples = [('ZH','Ztt/ZH-weighted.root', kRed),
        ('ZZ', 'Ztt/ZZ-weighted.root', kBlue)]
 
 varList = ['2_lep_delta_Eta_H', '2_lep_delta_Eta_Z', '2_lep_delta_R_H', '2_lep_delta_R_Z', '2_lep_lepton_mass_sum',
- '2_lep_met_pt', '2_lep_tau_pt_sum', '3_lep_Z_lepton_mass_sum', '3_lep_delta_Eta_H', '3_lep_delta_Eta_Z',
- '3_lep_delta_R_H', '3_lep_delta_R_Z', '3_lep_met_pt', '3_lep_tau_pt_sum']
+ '2_lep_met_pt', '2_lep_tau_pt_sum', '2_lep_delta_R_tau_l', '2_lep_n_jets', '3_lep_Z_lepton_mass_sum',
+ '3_lep_delta_Eta_H', '3_lep_delta_Eta_Z', '3_lep_delta_R_H', '3_lep_delta_R_Z', '3_lep_met_pt', '3_lep_tau_pt_sum',
+ '3_lep_delta_R_tau_l', '3_lep_n_jets']
 
 for var in varList:
   leg = TLegend(0.7,0.7,0.8,0.85)
@@ -60,5 +61,5 @@ for var in varList:
 
   #myText(0.19,0.76,kBlack,'#sqrt{s} = 13 TeV, 140 fb^{-1}')
 
-  canv.SaveAs('ShapePlot_' + var + '.pdf')
+  canv.SaveAs(var + '.pdf')
   canv.Clear()
