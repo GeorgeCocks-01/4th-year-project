@@ -100,8 +100,8 @@ def main(args):
   "3_lep_delta_R_Z", "3_lep_delta_R_H", "3_lep_delta_Eta_Z", "3_lep_delta_Eta_H",
   "3_lep_delta_R_tau_l", "3_lep_n_jets", "3_lep_delta_phi_Z", "3_lep_delta_phi_H", "3_lep_delta_phi_tau_l"]
 
-  for i in range(0, len(triLepHistograms)): #generates histograms for 3 lepton cut by cloning those from the 2 lep cut
-    triLepHistograms[i] = diLepHistograms[i].Clone(histNames[i])
+  for i in range(0, len(diLepHistograms)): #generates histograms for 3 lepton cut by cloning those from the 2 lep cut
+    triLepHistograms.append(diLepHistograms[i].Clone(histNames[i]))
 
   #FILL HISTOGRAMS LOOP
   for i in range(0, tree.GetEntries()):
