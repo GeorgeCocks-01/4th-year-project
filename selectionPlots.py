@@ -60,7 +60,7 @@ def fillHistograms(tau1, tauOrLep, Zlep1, Zlep2, met_p4, nJets, totalWeight, his
   fillers.append((Zlep1 + Zlep2).DeltaPhi(tau1 + tauOrLep))
 
   for i in range(0, len(histograms)): #fills histograms
-    histograms[i].Fill(fillers[i])
+    histograms[i].Fill(fillers[i], totalWeight)
 
 def main(args):
   if (args.inputsample[-1] != "/"): #adds / to end of file path if not present
