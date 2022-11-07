@@ -82,18 +82,18 @@ def main(args):
 
   # define histograms
   diLepHistograms = [] #array for histograms of the two lepton cut
-  diLepHistograms.append(ROOT.TH1D("2_lep_tau_pt_sum", "p_{T}^{#tau_sum};pT(GeV);Counts", 200, 0, 500))
-  diLepHistograms.append(ROOT.TH1D("2_lep_lepton_mass_sum", "M(ll);Mass(GeV);Counts", 150, 0, 200))
-  diLepHistograms.append(ROOT.TH1D("2_lep_met_pt", "met.Pt();pT(GeV);Counts", 150, 0, 500))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_R_Z", "delta_R_Z;Delta R;Counts", 150, 0, 5))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_R_H", "delta_R_H;Delta R;Counts", 150, 0, 5))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_Eta_Z", "delta_Eta_Z;Delta Eta;Counts", 150, 0, 5))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_Eta_H", "delta_Eta_H;Delta Eta;Counts", 150, 0, 5))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_R_tau_l", "delta_R_tl;Delta R;Counts", 150, 0, 5))
-  diLepHistograms.append(ROOT.TH1D("2_lep_n_jets", "n_jets;n_jets;Counts", 10, 0, 10))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_phi_Z", "delta_phi_Z;Delta Phi;Counts", 150, -4, 4))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_phi_H", "delta_phi_H;Delta Phi;Counts", 150, -4, 4))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_phi_tau_l", "delta_eta_tl;Delta;Counts", 150, -4, 4))
+  diLepHistograms.append(ROOT.TH1D("2_lep_tau_pt_sum", "p_{T}^{#tau_sum};pT(GeV);Normalised Counts", 200, 0, 500))
+  diLepHistograms.append(ROOT.TH1D("2_lep_lepton_mass_sum", "M(ll);Mass(GeV);Normalised Counts", 150, 0, 200))
+  diLepHistograms.append(ROOT.TH1D("2_lep_met_pt", "met.Pt();pT(GeV);Normalised Counts", 150, 0, 500))
+  diLepHistograms.append(ROOT.TH1D("2_lep_delta_R_Z", "delta_R_Z;Delta R(Rad);Normalised Counts", 150, 0, 5))
+  diLepHistograms.append(ROOT.TH1D("2_lep_delta_R_H", "delta_R_H;Delta R(Rad);Normalised Counts", 150, 0, 5))
+  diLepHistograms.append(ROOT.TH1D("2_lep_delta_Eta_Z", "delta_Eta_Z;Delta Eta(Rad);Normalised Counts", 150, -5, 5))
+  diLepHistograms.append(ROOT.TH1D("2_lep_delta_Eta_H", "delta_Eta_H;Delta Eta(Rad);Normalised Counts", 150, -5, 5))
+  diLepHistograms.append(ROOT.TH1D("2_lep_delta_R_tau_l", "delta_R_tl;Delta R(Rad);Normalised Counts", 150, 0, 5))
+  diLepHistograms.append(ROOT.TH1D("2_lep_n_jets", "n_jets;n_jets;Normalised Counts", 10, 0, 10))
+  diLepHistograms.append(ROOT.TH1D("2_lep_delta_phi_Z", "delta_phi_Z;Delta Phi(Rad);Normalised Counts", 150, -4, 4))
+  diLepHistograms.append(ROOT.TH1D("2_lep_delta_phi_H", "delta_phi_H;Delta Phi(Rad);Normalised Counts", 150, -4, 4))
+  diLepHistograms.append(ROOT.TH1D("2_lep_delta_phi_tau_l", "delta_eta_tl;Delta Phi(Rad);Normalised Counts", 150, -4, 4))
 
   triLepHistograms = [] #array for histograms of the three lepton cut
   histNames = ["3_lep_tau_pt_sum", "3_lep_Z_lepton_mass_sum", "3_lep_met_pt",
@@ -102,6 +102,11 @@ def main(args):
 
   for i in range(0, len(diLepHistograms)): #generates histograms for 3 lepton cut by cloning those from the 2 lep cut
     triLepHistograms.append(diLepHistograms[i].Clone(histNames[i]))
+    diLepHistograms[i].Sumw2()
+    triLepHistograms[i].Sumw2()
+
+  diLepYield = 0
+  triLepYield = 0
 
   #FILL HISTOGRAMS LOOP
   for i in range(0, tree.GetEntries()):
@@ -114,14 +119,14 @@ def main(args):
     lFlavour = getattr(tree, "leptons")
     lCharge = getattr(tree, "leptons_q")
     crossSection = getattr(tree, "cross_section")
-    weight = getattr(tree, "pu_NOMINAL_pileup_combined_weight") * getattr(tree, "weight_mc")
+    wTotal = (crossSection * luminosity * getattr(tree, "pu_NOMINAL_pileup_combined_weight") * getattr(tree, "weight_mc"))/sumAllMC
 
     # we need to have at least 2 taus
     if len(taus_p4) > 1:
       # selection cut for 2 lepton final state
       if (len(leptons_p4) == 2) and (lFlavour[0] == lFlavour[1]) and (lCharge[0] == -lCharge[1]):
-        wTotal = (weight/sumAllMC) * crossSection * luminosity
         fillHistograms(taus_p4[0], taus_p4[1], leptons_p4[0], leptons_p4[1], met_p4.Pt(), nJets30, wTotal, diLepHistograms)
+        diLepYield += wTotal
 
       # selection cut for 3 lepton final state
       elif (len(leptons_p4) == 3):
@@ -138,36 +143,38 @@ def main(args):
           posIndex = chargeList.index(+1)
           if math.fabs((leptons_p4[posIndex] + leptons_p4[(posIndex + 1)%3]).M() - Zmass) < math.fabs((leptons_p4[posIndex]
           + leptons_p4[(posIndex - 1)%3]).M() - Zmass):
-            wTotal = (weight/sumAllMC) * crossSection * luminosity
             fillHistograms(taus_p4[0], leptons_p4[(posIndex - 1)%3], leptons_p4[posIndex],
              leptons_p4[(posIndex + 1)%3], met_p4.Pt(), nJets30, wTotal, triLepHistograms)
+            triLepYield += wTotal
             continue
 
           else:
-            wTotal = (weight/sumAllMC) * crossSection * luminosity
             fillHistograms(taus_p4[0], leptons_p4[(posIndex + 1)%3], leptons_p4[posIndex],
              leptons_p4[(posIndex - 1)%3], met_p4.Pt(), nJets30, wTotal, triLepHistograms)
+            triLepYield += wTotal
             continue
 
         elif (chargeList.count(-1) == 1) and (chargeList.count(+1) == 2): # Two positive charges, one negative
           negIndex = chargeList.index(-1)
           if math.fabs((leptons_p4[negIndex] + leptons_p4[(negIndex + 1)%3]).M() - Zmass) < math.fabs((leptons_p4[negIndex]
           + leptons_p4[(negIndex - 1)%3]).M() - Zmass):
-            wTotal = (weight/sumAllMC) * crossSection * luminosity
             fillHistograms(taus_p4[0], leptons_p4[(negIndex - 1)%3], leptons_p4[negIndex],
              leptons_p4[(negIndex + 1)%3], met_p4.Pt(), nJets30, wTotal, triLepHistograms)
+            triLepYield += wTotal
             continue
 
           else:
-            wTotal = (weight/sumAllMC) * crossSection * luminosity
             fillHistograms(taus_p4[0], leptons_p4[(negIndex + 1)%3], leptons_p4[negIndex],
              leptons_p4[(negIndex - 1)%3], met_p4.Pt(), nJets30, wTotal, triLepHistograms)
+            triLepYield += wTotal
             continue
 
-        wTotal = (weight/sumAllMC) * crossSection * luminosity
         fillHistograms(taus_p4[0], leptons_p4[index], leptons_p4[(index + 1)%3],
          leptons_p4[(index - 1)%3], met_p4.Pt(), nJets30, wTotal, triLepHistograms)
+        triLepYield += wTotal
 
+  print("2lep selection cut:", diLepYield)
+  print("3lep selection cut:", triLepYield)
 
   if (args.outputfile[-5:] != ".root"): #adds .root to end of output file if not present
     args.outputfile += ".root"

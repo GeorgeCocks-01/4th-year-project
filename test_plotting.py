@@ -30,6 +30,7 @@ for var in varList:
   histos=[]
   legnames=[]
   maximum = -999.
+  stackedHisto = THStack()
   for sample in samples:
     infile = TFile.Open(sample[1],"READ")
     histo = infile.Get(var)
@@ -46,6 +47,7 @@ for var in varList:
     histo.SetMarkerColor(sample[2])
     histo.SetLineColor(sample[2])
     histos.append(histo)
+    stackedHisto.Add(histo)
     legnames.append(legName)
 
   for i in range(0, len(histos)):
@@ -64,3 +66,11 @@ for var in varList:
 
   canv.SaveAs(var + '.pdf')
   canv.Clear()
+  # stackedHisto.SetLineWidth(3)
+  # stackedHisto.SetMarkerColor(sample[2])
+  # stackedHisto.SetLineColor(sample[2])
+
+  # stackedHisto.SetMaximum(maximum * 1.3)
+  stackedHisto.Draw('hist')
+  leg.Draw('SAME')
+  canv.SaveAs('stack_' + var + '.pdf')
