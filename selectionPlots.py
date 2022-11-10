@@ -118,6 +118,7 @@ def main(args):
     nJets30 = getattr(tree, "n_jets_30")
     lFlavour = getattr(tree, "leptons")
     lCharge = getattr(tree, "leptons_q")
+    tauCharge = getattr(tree, "taus_q")
     crossSection = getattr(tree, "cross_section")
     rnnID = getattr(tree, "taus_jet_rnn_medium")
     wTotal = (crossSection * luminosity * getattr(tree, "pu_NOMINAL_pileup_combined_weight") *
@@ -126,7 +127,7 @@ def main(args):
     if len(taus_p4) > 0:
       # selection cut for 2 lepton final state
       if ((len(leptons_p4) == 2) and (len(taus_p4) == 2) and (lFlavour[0] == lFlavour[1]) and
-      (lCharge[0] == -lCharge[1]) and (rnnID[0] == 1) and (rnnID[1] == 1)):
+      (lCharge[0] == -lCharge[1]) and (rnnID[0] == 1) and (rnnID[1] == 1) and (tauCharge[0] == -tauCharge[1])):
         fillHistograms(taus_p4[0], taus_p4[1], leptons_p4[0], leptons_p4[1], met_p4.Pt(), nJets30, wTotal, diLepHistograms)
         diLepYield += wTotal
 
@@ -141,7 +142,7 @@ def main(args):
         elif (flavList.count(2) == 1) and (flavList.count(1) == 2): # Two muons, one electron. Could do sum(flavList) == 4
           index = flavList.index(2)
 
-        elif (chargeList.count(+1) == 1) and (chargeList.count(-1) == 2): # One positive charge, two negatives
+        elif (chargeList.count(+1) == 1) and (chargeList.count(-1) == 2) and (lCharge[chargeList.index(+1)] == -tauCharge[0]): # One positive charge, two negatives
           posIndex = chargeList.index(+1)
           if math.fabs((leptons_p4[posIndex] + leptons_p4[(posIndex + 1)%3]).M() - Zmass) < math.fabs((leptons_p4[posIndex]
           + leptons_p4[(posIndex - 1)%3]).M() - Zmass):
@@ -156,7 +157,7 @@ def main(args):
             triLepYield += wTotal
             continue
 
-        elif (chargeList.count(-1) == 1) and (chargeList.count(+1) == 2): # Two positive charges, one negative
+        elif (chargeList.count(-1) == 1) and (chargeList.count(+1) == 2) and (lCharge[chargeList.index(-1)] == -tauCharge[0]): # Two positive charges, one negative
           negIndex = chargeList.index(-1)
           if math.fabs((leptons_p4[negIndex] + leptons_p4[(negIndex + 1)%3]).M() - Zmass) < math.fabs((leptons_p4[negIndex]
           + leptons_p4[(negIndex - 1)%3]).M() - Zmass):
