@@ -65,7 +65,7 @@ def fillHistograms(tau1, tauOrLep, Zlep1, Zlep2, met_p4, nJets, totalWeight, his
 def main(args):
   if (args.inputsample[-1] != "/"): #adds / to end of file path if not present
     args.inputsample += "/"
-  directory = "Ztt/"+args.inputsample
+  directory = "rootData/"+args.inputsample
   pattern = "*.root"
 
   tree = ROOT.TChain("NOMINAL")
@@ -178,6 +178,7 @@ def main(args):
 
   if (args.outputfile[-5:] != ".root"): #adds .root to end of output file if not present
     args.outputfile += ".root"
+  args.outputfile = "outputRoot/" + args.outputfile
   outHistFile = ROOT.TFile.Open(args.outputfile, "RECREATE")
   outHistFile.cd()
 

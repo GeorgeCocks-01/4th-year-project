@@ -64,7 +64,7 @@ for var in varList:
 
   #myText(0.19,0.76,kBlack,'#sqrt{s} = 13 TeV, 140 fb^{-1}')
 
-  canv.SaveAs(var + '.pdf')
+  canv.SaveAs('plots/' + var + '.pdf')
   canv.Clear()
   # stackedHisto.SetLineWidth(3)
   # stackedHisto.SetMarkerColor(sample[2])
@@ -73,4 +73,4 @@ for var in varList:
   # stackedHisto.SetMaximum(maximum * 1.3)
   stackedHisto.Draw('hist')
   leg.Draw('SAME')
-  canv.SaveAs('stack_' + var + '.pdf')
+  canv.SaveAs('stackPlots/stack_' + var + '.pdf')
