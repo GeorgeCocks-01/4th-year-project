@@ -9,10 +9,16 @@ SetAtlasStyle()
 
 canv = TCanvas('c','c',600,600)
 canv.cd()
-colorList = [kBlack,kRed,kBlue,kGreen,kViolet,kMagenta,kAzure,kViolet,kOrange,kYellow,kMagenta+3,kCyan,kYellow+2]
+colorList = [kBlack,kRed,kBlue,kGreen,kViolet,kMagenta,kAzure,kOrange,kYellow,kMagenta+3,kCyan,kYellow+2]
 
-samples = [('ZH','Ztt/ZH-weighted.root', kRed),
-       ('ZZ', 'Ztt/ZZ-weighted.root', kBlue)]
+samples = [('ZH','outputRoot/ZH-weighted.root', kRed),
+       ('ZZ', 'outputRoot/ZZ-weighted.root', kBlue),
+       ('ggZH', 'outputRoot/ggZH-weighted.root', kGreen),
+       ('llll', 'outputRoot/llll-weighted.root', kMagenta),
+       ('lllv', 'outputRoot/lllv-weighted.root', kAzure),
+       ('llvv', 'outputRoot/llvv-weighted.root', kOrange),
+       ('ttH', 'outputRoot/ttH-weighted.root', kYellow),
+       ('WqqZll', 'outputRoot/WqqZll-weighted.root', kBlack)]
 
 varList = ["2_lep_tau_pt_sum", "2_lep_lepton_mass_sum", "2_lep_met_pt", "2_lep_delta_R_Z", "2_lep_delta_R_H",
 "2_lep_delta_Eta_Z", "2_lep_delta_Eta_H", "2_lep_delta_R_tau_l", "2_lep_n_jets", "2_lep_delta_phi_Z",
@@ -21,7 +27,7 @@ varList = ["2_lep_tau_pt_sum", "2_lep_lepton_mass_sum", "2_lep_met_pt", "2_lep_d
 "3_lep_delta_phi_Z", "3_lep_delta_phi_H", "3_lep_delta_phi_tau_l"]
 
 for var in varList:
-  leg = TLegend(0.7,0.7,0.8,0.85)
+  leg = TLegend(0.7,0.6,0.8,0.85)
   leg.SetBorderSize(0)
   leg.SetTextSize(0.03)
   leg.SetEntrySeparation(0.001)
