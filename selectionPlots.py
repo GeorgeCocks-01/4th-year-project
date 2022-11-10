@@ -82,18 +82,18 @@ def main(args):
 
   # define histograms
   diLepHistograms = [] #array for histograms of the two lepton cut
-  diLepHistograms.append(ROOT.TH1D("2_lep_tau_pt_sum", "p_{T}^{#tau_sum};pT(GeV);Normalised Counts", 200, 0, 500))
-  diLepHistograms.append(ROOT.TH1D("2_lep_lepton_mass_sum", "M(ll);Mass(GeV);Normalised Counts", 150, 0, 200))
-  diLepHistograms.append(ROOT.TH1D("2_lep_met_pt", "met.Pt();pT(GeV);Normalised Counts", 150, 0, 500))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_R_Z", "delta_R_Z;Delta R(Rad);Normalised Counts", 150, 0, 5))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_R_H", "delta_R_H;Delta R(Rad);Normalised Counts", 150, 0, 5))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_Eta_Z", "delta_Eta_Z;Delta Eta(Rad);Normalised Counts", 150, 0, 5))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_Eta_H", "delta_Eta_H;Delta Eta(Rad);Normalised Counts", 150, 0, 5))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_R_tau_l", "delta_R_tl;Delta R(Rad);Normalised Counts", 150, 0, 5))
+  diLepHistograms.append(ROOT.TH1D("2_lep_tau_pt_sum", "p_{T}^{#tau_sum};pT(GeV);Normalised Counts", 50, 0, 500))
+  diLepHistograms.append(ROOT.TH1D("2_lep_lepton_mass_sum", "M(ll);Mass(GeV);Normalised Counts", 50, 0, 200))
+  diLepHistograms.append(ROOT.TH1D("2_lep_met_pt", "met.Pt();pT(GeV);Normalised Counts", 50, 0, 500))
+  diLepHistograms.append(ROOT.TH1D("2_lep_delta_R_Z", "delta_R_Z;Delta R(Rad);Normalised Counts", 50, 0, 5))
+  diLepHistograms.append(ROOT.TH1D("2_lep_delta_R_H", "delta_R_H;Delta R(Rad);Normalised Counts", 50, 0, 5))
+  diLepHistograms.append(ROOT.TH1D("2_lep_delta_Eta_Z", "delta_Eta_Z;Delta Eta(Rad);Normalised Counts", 50, 0, 5))
+  diLepHistograms.append(ROOT.TH1D("2_lep_delta_Eta_H", "delta_Eta_H;Delta Eta(Rad);Normalised Counts", 50, 0, 5))
+  diLepHistograms.append(ROOT.TH1D("2_lep_delta_R_tau_l", "delta_R_tl;Delta R(Rad);Normalised Counts", 50, 0, 5))
   diLepHistograms.append(ROOT.TH1D("2_lep_n_jets", "n_jets;n_jets;Normalised Counts", 10, 0, 10))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_phi_Z", "delta_phi_Z;Delta Phi(Rad);Normalised Counts", 150, -4, 4))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_phi_H", "delta_phi_H;Delta Phi(Rad);Normalised Counts", 150, -4, 4))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_phi_tau_l", "delta_eta_tl;Delta Phi(Rad);Normalised Counts", 150, -4, 4))
+  diLepHistograms.append(ROOT.TH1D("2_lep_delta_phi_Z", "delta_phi_Z;Delta Phi(Rad);Normalised Counts", 50, -4, 4))
+  diLepHistograms.append(ROOT.TH1D("2_lep_delta_phi_H", "delta_phi_H;Delta Phi(Rad);Normalised Counts", 50, -4, 4))
+  diLepHistograms.append(ROOT.TH1D("2_lep_delta_phi_tau_l", "delta_eta_tl;Delta Phi(Rad);Normalised Counts", 50, -4, 4))
 
   triLepHistograms = [] #array for histograms of the three lepton cut
   histNames = ["3_lep_tau_pt_sum", "3_lep_Z_lepton_mass_sum", "3_lep_met_pt",
@@ -119,18 +119,19 @@ def main(args):
     lFlavour = getattr(tree, "leptons")
     lCharge = getattr(tree, "leptons_q")
     crossSection = getattr(tree, "cross_section")
-    wTotal = (crossSection * luminosity * getattr(tree, "pu_NOMINAL_pileup_combined_weight") * getattr(tree, "weight_mc"))/sumAllMC
+    rnnID = getattr(tree, "taus_jet_rnn_medium")
+    wTotal = (crossSection * luminosity * getattr(tree, "pu_NOMINAL_pileup_combined_weight") *
+    getattr(tree, "weight_mc"))/sumAllMC
 
-    # we need to have at least 2 taus
     if len(taus_p4) > 0:
       # selection cut for 2 lepton final state
-      if (len(leptons_p4) == 2) and (len(taus_p4) == 2) and (lFlavour[0] == lFlavour[1]) and (lCharge[0] == -lCharge[1]):
+      if ((len(leptons_p4) == 2) and (len(taus_p4) == 2) and (lFlavour[0] == lFlavour[1]) and
+      (lCharge[0] == -lCharge[1]) and (rnnID[0] == 1) and (rnnID[1] == 1)):
         fillHistograms(taus_p4[0], taus_p4[1], leptons_p4[0], leptons_p4[1], met_p4.Pt(), nJets30, wTotal, diLepHistograms)
         diLepYield += wTotal
 
       # selection cut for 3 lepton final state
-      elif ((len(leptons_p4) == 3) and len(taus_p4) == 1):
-        triLeptotalYield += wTotal
+      elif ((len(leptons_p4) == 3) and len(taus_p4) == 1) and (rnnID[0] == 1):
         flavList = [lFlavour[0], lFlavour[1], lFlavour[2]]
         chargeList = [lCharge[0], lCharge[1], lCharge[2]]
 
