@@ -1,4 +1,10 @@
 *.root
 *.pdf
 *.zip
-*:Zone.Identifier
+*Output.txt
+oldrootfiles/
+outputRoot/
+plots/
+rootData/
+stackPlots/
+zippedData/
