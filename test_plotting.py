@@ -12,7 +12,7 @@ canv.cd()
 colorList = [kBlack,kRed,kBlue,kGreen,kViolet,kMagenta,kAzure,kOrange,kYellow,kMagenta+3,kCyan,kYellow+2]
 
 samples = [('ZH','outputRoot/ZH-weighted.root', kRed),
-       ('ZZ', 'outputRoot/ZZ-weighted.root', kBlue),
+       ('ZqqZll', 'outputRoot/ZqqZll-weighted.root', kBlue),
        ('ggZH', 'outputRoot/ggZH-weighted.root', kGreen),
        ('llll', 'outputRoot/llll-weighted.root', kMagenta),
        ('lllv', 'outputRoot/lllv-weighted.root', kAzure),
