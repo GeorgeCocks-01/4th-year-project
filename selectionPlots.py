@@ -125,9 +125,10 @@ def main(args):
     crossSection = getattr(tree, "cross_section")
     rnnID = getattr(tree, "taus_jet_rnn_medium")
     wTotal = (crossSection * luminosity * getattr(tree, "pu_NOMINAL_pileup_combined_weight") *
-    getattr(tree, "weight_mc"))/sumAllMC
+    getattr(tree, "weight_mc"))/sumAllMC #calculates weight for each event
 
-    if len(taus_p4) > 0:
+    if len(taus_p4) > 0: #checks if there is a tau
+      if len(leptons_p4) == 3: flavList = [lFlavour[0], lFlavour[1], lFlavour[2]] #list of lepton flavours
       # selection cut for 2 lepton final state
       if ((len(leptons_p4) == 2) and (len(taus_p4) == 2) and (lFlavour[0] == lFlavour[1]) and
       (lCharge[0] == -lCharge[1]) and (rnnID[0] == 1) and (rnnID[1] == 1) and (tauCharge[0] == -tauCharge[1])
@@ -136,55 +137,74 @@ def main(args):
         diLepHistograms)
         diLepYield += wTotal
 
+
       # selection cut for 3 lepton final state
-      elif ((len(leptons_p4) == 3) and len(taus_p4) == 1) and (rnnID[0] == 1):
-        flavList = [lFlavour[0], lFlavour[1], lFlavour[2]]
-        chargeList = [lCharge[0], lCharge[1], lCharge[2]]
+      elif ((len(leptons_p4) == 3) and len(taus_p4) == 1 and (rnnID[0] == 1) and (flavList.count(1) + flavList.count(2) == 3)):
+        chargeList = [lCharge[0], lCharge[1], lCharge[2]] #list of lepton charges
+        try:
+          muIndex = flavList.index(1) #index of muon
+          eIndex = flavList.index(2) #index of electron
+        except ValueError:
+          pass
 
-        if ((flavList.count(1) == 1) and (flavList.count(2) == 2) and (lCharge[flavList.index(1)] == -tauCharge[0])
-        and (leptons_p4[flavList.index(1)].Pt() + taus_p4[0].Pt() > 60)): # One muon, two electrons. Could do sum(flavList) == 5
-          index = flavList.index(1)
-          fillHistograms(taus_p4[0], leptons_p4[index], leptons_p4[(index + 1)%3],
-          leptons_p4[(index - 1)%3], met_p4.Pt(), nJets30, wTotal, triLepHistograms)
+        # One muon, two electrons
+        if ((flavList.count(1) == 1) and (flavList.count(2) == 2) and (lCharge[muIndex] == -tauCharge[0])
+        and (leptons_p4[muIndex].Pt() + taus_p4[0].Pt() > 60) and (lCharge[(muIndex + 1)%3] == -lCharge[(muIndex - 1)%3])
+        ): #and (lFlavour[(muIndex + 1)%3] == lFlavour[(muIndex - 1)%3]) is implied
+
+          fillHistograms(taus_p4[0], leptons_p4[muIndex], leptons_p4[(muIndex + 1)%3],
+          leptons_p4[(muIndex - 1)%3], met_p4.Pt(), nJets30, wTotal, triLepHistograms)
           triLepYield += wTotal
 
-        elif ((flavList.count(2) == 1) and (flavList.count(1) == 2) and (lCharge[flavList.index(2) == -tauCharge[0]])
-        and (leptons_p4[flavList.index(2)].Pt() + taus_p4[0].Pt() > 60)): # Two muons, one electron. Could do sum(flavList) == 4
-          index = flavList.index(2)
-          fillHistograms(taus_p4[0], leptons_p4[index], leptons_p4[(index + 1)%3],
-          leptons_p4[(index - 1)%3], met_p4.Pt(), nJets30, wTotal, triLepHistograms)
+        # Two muons, one electron
+        elif ((flavList.count(2) == 1) and (flavList.count(1) == 2) and (lCharge[eIndex] == -tauCharge[0])
+        and (leptons_p4[eIndex].Pt() + taus_p4[0].Pt() > 60) and (lCharge[(eIndex + 1)%3] == -lCharge[(eIndex - 1)%3])
+        ): #and (lFlavour[(eIndex + 1)%3] == lFlavour[(eIndex - 1)%3]) is implied
+
+          fillHistograms(taus_p4[0], leptons_p4[eIndex], leptons_p4[(eIndex + 1)%3],
+          leptons_p4[(eIndex - 1)%3], met_p4.Pt(), nJets30, wTotal, triLepHistograms)
           triLepYield += wTotal
 
-        elif (chargeList.count(+1) == 1) and (chargeList.count(-1) == 2): # One positive charge, two negatives
+        # One positive charge, two negatives
+        elif (chargeList.count(+1) == 1) and (chargeList.count(-1) == 2):
+        #and (lCharge[(chargeList.index(+1) - 1)%3] == -lCharge[(chargeList.index(+1) + 1)%3])) is implied
+
           posIndex = chargeList.index(+1)
           zCandidate1 = math.fabs((leptons_p4[posIndex] + leptons_p4[(posIndex + 1)%3]).M() - Zmass)
           zCandidate2 = math.fabs((leptons_p4[posIndex] + leptons_p4[(posIndex - 1)%3]).M() - Zmass)
 
           if ((zCandidate1 < zCandidate2) and ((lCharge[(posIndex - 1)%3] == -tauCharge[0]))
           and (leptons_p4[(posIndex - 1)%3].Pt() + taus_p4[0].Pt() > 60)):
+
             fillHistograms(taus_p4[0], leptons_p4[(posIndex - 1)%3], leptons_p4[posIndex],
              leptons_p4[(posIndex + 1)%3], met_p4.Pt(), nJets30, wTotal, triLepHistograms)
             triLepYield += wTotal
 
           elif ((zCandidate1 > zCandidate2) and ((lCharge[(posIndex + 1)%3] == -tauCharge[0]))
           and (leptons_p4[(posIndex + 1)%3].Pt() + taus_p4[0].Pt() > 60)):
+
             fillHistograms(taus_p4[0], leptons_p4[(posIndex + 1)%3], leptons_p4[posIndex],
              leptons_p4[(posIndex - 1)%3], met_p4.Pt(), nJets30, wTotal, triLepHistograms)
             triLepYield += wTotal
 
-        elif (chargeList.count(-1) == 1) and (chargeList.count(+1) == 2): # Two positive charges, one negative
+        # Two positive charges, one negative
+        elif (chargeList.count(-1) == 1) and (chargeList.count(+1) == 2):
+        #and(lCharge[(chargeList.index(-1) - 1)%3] == -lCharge[(chargeList.index(-1) + 1)%3])): is implied
+
           negIndex = chargeList.index(-1)
           zCandidate1 = math.fabs((leptons_p4[negIndex] + leptons_p4[(negIndex + 1)%3]).M() - Zmass)
           zCandidate2 = math.fabs((leptons_p4[negIndex] + leptons_p4[(negIndex - 1)%3]).M() - Zmass)
 
           if ((zCandidate1 < zCandidate2) and ((lCharge[(negIndex - 1)%3] == -tauCharge[0]))
           and (leptons_p4[(negIndex - 1)%3].Pt() + taus_p4[0].Pt() > 60)):
+
             fillHistograms(taus_p4[0], leptons_p4[(negIndex - 1)%3], leptons_p4[negIndex],
              leptons_p4[(negIndex + 1)%3], met_p4.Pt(), nJets30, wTotal, triLepHistograms)
             triLepYield += wTotal
 
           elif ((zCandidate1 > zCandidate2) and ((lCharge[(negIndex + 1)%3] == -tauCharge[0]))
           and (leptons_p4[(negIndex + 1)%3].Pt() + taus_p4[0].Pt() > 60)):
+
             fillHistograms(taus_p4[0], leptons_p4[(negIndex + 1)%3], leptons_p4[negIndex],
              leptons_p4[(negIndex - 1)%3], met_p4.Pt(), nJets30, wTotal, triLepHistograms)
             triLepYield += wTotal
