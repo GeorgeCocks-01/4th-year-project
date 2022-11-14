@@ -3,7 +3,7 @@ import copy, os, re, sys
 import argparse
 import math
 
-Zmass = 91.1876
+REALZMASS = 91.1876
 
 ## Method to resolve regular expressions in file names.
 #  TChain::Add only supports wildcards in the last items, i.e. on file level.
@@ -132,7 +132,7 @@ def main(args):
       # selection cut for 2 lepton final state
       if ((len(leptons_p4) == 2) and (len(taus_p4) == 2) and (lFlavour[0] == lFlavour[1]) and
       (lCharge[0] == -lCharge[1]) and (rnnID[0] == 1) and (rnnID[1] == 1) and (tauCharge[0] == -tauCharge[1])
-      and (taus_p4[0].Pt() + taus_p4[1].Pt() > 75)):
+      and (taus_p4[0].Pt() + taus_p4[1].Pt() > 75) and ((leptons_p4[0] + leptons_p4[1]).M() > 71) and ((leptons_p4[0] + leptons_p4[1]).M() < 111)):
         fillHistograms(taus_p4[0], taus_p4[1], leptons_p4[0], leptons_p4[1], met_p4.Pt(), nJets30, wTotal,
         diLepHistograms)
         diLepYield += wTotal
@@ -150,7 +150,8 @@ def main(args):
         # One muon, two electrons
         if ((flavList.count(1) == 1) and (flavList.count(2) == 2) and (lCharge[muIndex] == -tauCharge[0])
         and (leptons_p4[muIndex].Pt() + taus_p4[0].Pt() > 60) and (lCharge[(muIndex + 1)%3] == -lCharge[(muIndex - 1)%3])
-        ): #and (lFlavour[(muIndex + 1)%3] == lFlavour[(muIndex - 1)%3]) is implied
+        and ((leptons_p4[(muIndex + 1)%3] + leptons_p4[(muIndex - 1)%3]).M() > 81)
+        and ((leptons_p4[(muIndex + 1)%3] + leptons_p4[(muIndex - 1)%3]).M() < 101)): #and (lFlavour[(muIndex + 1)%3] == lFlavour[(muIndex - 1)%3]) is implied
 
           fillHistograms(taus_p4[0], leptons_p4[muIndex], leptons_p4[(muIndex + 1)%3],
           leptons_p4[(muIndex - 1)%3], met_p4.Pt(), nJets30, wTotal, triLepHistograms)
@@ -159,7 +160,8 @@ def main(args):
         # Two muons, one electron
         elif ((flavList.count(2) == 1) and (flavList.count(1) == 2) and (lCharge[eIndex] == -tauCharge[0])
         and (leptons_p4[eIndex].Pt() + taus_p4[0].Pt() > 60) and (lCharge[(eIndex + 1)%3] == -lCharge[(eIndex - 1)%3])
-        ): #and (lFlavour[(eIndex + 1)%3] == lFlavour[(eIndex - 1)%3]) is implied
+        and ((leptons_p4[(eIndex + 1)%3] + leptons_p4[(eIndex - 1)%3]).M() > 81)
+        and ((leptons_p4[(eIndex + 1)%3] + leptons_p4[(eIndex - 1)%3]).M() < 101)): #and (lFlavour[(eIndex + 1)%3] == lFlavour[(eIndex - 1)%3]) is implied
 
           fillHistograms(taus_p4[0], leptons_p4[eIndex], leptons_p4[(eIndex + 1)%3],
           leptons_p4[(eIndex - 1)%3], met_p4.Pt(), nJets30, wTotal, triLepHistograms)
@@ -170,18 +172,20 @@ def main(args):
         #and (lCharge[(chargeList.index(+1) - 1)%3] == -lCharge[(chargeList.index(+1) + 1)%3])) is implied
 
           posIndex = chargeList.index(+1)
-          zCandidate1 = math.fabs((leptons_p4[posIndex] + leptons_p4[(posIndex + 1)%3]).M() - Zmass)
-          zCandidate2 = math.fabs((leptons_p4[posIndex] + leptons_p4[(posIndex - 1)%3]).M() - Zmass)
+          zMass1 = (leptons_p4[posIndex] + leptons_p4[(posIndex + 1)%3]).M()
+          zMass2 = (leptons_p4[posIndex] + leptons_p4[(posIndex - 1)%3]).M()
+          zCandidate1 = math.fabs(zMass1 - REALZMASS)
+          zCandidate2 = math.fabs(zMass2 - REALZMASS)
 
           if ((zCandidate1 < zCandidate2) and ((lCharge[(posIndex - 1)%3] == -tauCharge[0]))
-          and (leptons_p4[(posIndex - 1)%3].Pt() + taus_p4[0].Pt() > 60)):
+          and (leptons_p4[(posIndex - 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass1 > 81) and (zMass1 < 101)):
 
             fillHistograms(taus_p4[0], leptons_p4[(posIndex - 1)%3], leptons_p4[posIndex],
              leptons_p4[(posIndex + 1)%3], met_p4.Pt(), nJets30, wTotal, triLepHistograms)
             triLepYield += wTotal
 
           elif ((zCandidate1 > zCandidate2) and ((lCharge[(posIndex + 1)%3] == -tauCharge[0]))
-          and (leptons_p4[(posIndex + 1)%3].Pt() + taus_p4[0].Pt() > 60)):
+          and (leptons_p4[(posIndex + 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass2 > 81) and (zMass2 < 101)):
 
             fillHistograms(taus_p4[0], leptons_p4[(posIndex + 1)%3], leptons_p4[posIndex],
              leptons_p4[(posIndex - 1)%3], met_p4.Pt(), nJets30, wTotal, triLepHistograms)
@@ -192,18 +196,20 @@ def main(args):
         #and(lCharge[(chargeList.index(-1) - 1)%3] == -lCharge[(chargeList.index(-1) + 1)%3])): is implied
 
           negIndex = chargeList.index(-1)
-          zCandidate1 = math.fabs((leptons_p4[negIndex] + leptons_p4[(negIndex + 1)%3]).M() - Zmass)
-          zCandidate2 = math.fabs((leptons_p4[negIndex] + leptons_p4[(negIndex - 1)%3]).M() - Zmass)
+          zMass1 = (leptons_p4[negIndex] + leptons_p4[(negIndex + 1)%3]).M()
+          zMass2 = (leptons_p4[negIndex] + leptons_p4[(negIndex - 1)%3]).M()
+          zCandidate1 = math.fabs(zMass1 - REALZMASS)
+          zCandidate2 = math.fabs(zMass2 - REALZMASS)
 
           if ((zCandidate1 < zCandidate2) and ((lCharge[(negIndex - 1)%3] == -tauCharge[0]))
-          and (leptons_p4[(negIndex - 1)%3].Pt() + taus_p4[0].Pt() > 60)):
+          and (leptons_p4[(negIndex - 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass1 > 81) and (zMass1 < 101)):
 
             fillHistograms(taus_p4[0], leptons_p4[(negIndex - 1)%3], leptons_p4[negIndex],
              leptons_p4[(negIndex + 1)%3], met_p4.Pt(), nJets30, wTotal, triLepHistograms)
             triLepYield += wTotal
 
           elif ((zCandidate1 > zCandidate2) and ((lCharge[(negIndex + 1)%3] == -tauCharge[0]))
-          and (leptons_p4[(negIndex + 1)%3].Pt() + taus_p4[0].Pt() > 60)):
+          and (leptons_p4[(negIndex + 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass2 > 81) and (zMass2 < 101)):
 
             fillHistograms(taus_p4[0], leptons_p4[(negIndex + 1)%3], leptons_p4[negIndex],
              leptons_p4[(negIndex - 1)%3], met_p4.Pt(), nJets30, wTotal, triLepHistograms)
