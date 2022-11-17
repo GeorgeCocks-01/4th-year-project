@@ -137,7 +137,9 @@ def main(args):
       if ((len(leptons_p4) == 2) and (len(taus_p4) == 2) and (lFlavour[0] == lFlavour[1])
       and (lCharge[0] == -lCharge[1]) and (rnnID[0] == 1) and (rnnID[1] == 1) and (tauCharge[0] == -tauCharge[1])
       and (taus_p4[0].Pt() + taus_p4[1].Pt() > 75) and ((leptons_p4[0] + leptons_p4[1]).M() > 71)
-      and ((leptons_p4[0] + leptons_p4[1]).M() < 111) and (leptonsIDTight[0] == 1) and (leptonsIDTight[1] == 1)):
+      and ((leptons_p4[0] + leptons_p4[1]).M() < 111) and (leptonsIDTight[0] == 1) and (leptonsIDTight[1] == 1)
+      and ((lFlavour[0] == 1 and muIsoPass[0] == 1 and muIsoPass[1] == 1)
+      or (lFlavour[0] == 2 and eIsoPass[0] == 1 and eIsoPass[1] == 1))):
         fillHistograms(taus_p4[0], taus_p4[1], leptons_p4[0], leptons_p4[1], met_p4.Pt(), nJets30, wTotal,
         diLepHistograms)
         diLepYield += wTotal
@@ -158,7 +160,9 @@ def main(args):
         if ((flavList.count(1) == 1) and (flavList.count(2) == 2) and (lCharge[muIndex] == -tauCharge[0])
         and (leptons_p4[muIndex].Pt() + taus_p4[0].Pt() > 60) and (lCharge[(muIndex + 1)%3] == -lCharge[(muIndex - 1)%3])
         and ((leptons_p4[(muIndex + 1)%3] + leptons_p4[(muIndex - 1)%3]).M() > 81)
-        and ((leptons_p4[(muIndex + 1)%3] + leptons_p4[(muIndex - 1)%3]).M() < 101)): #and (lFlavour[(muIndex + 1)%3] == lFlavour[(muIndex - 1)%3]) is implied
+        and ((leptons_p4[(muIndex + 1)%3] + leptons_p4[(muIndex - 1)%3]).M() < 101) and (muIsoPass[muIndex] == 1)
+        and (eIsoPass[(muIndex + 1)%3] == 1) and (eIsoPass[(muIndex - 1)%3] == 1)):
+        #and (lFlavour[(muIndex + 1)%3] == lFlavour[(muIndex - 1)%3]) is implied
 
           fillHistograms(taus_p4[0], leptons_p4[muIndex], leptons_p4[(muIndex + 1)%3],
           leptons_p4[(muIndex - 1)%3], met_p4.Pt(), nJets30, wTotal, triLepHistograms)
@@ -168,14 +172,18 @@ def main(args):
         elif ((flavList.count(2) == 1) and (flavList.count(1) == 2) and (lCharge[eIndex] == -tauCharge[0])
         and (leptons_p4[eIndex].Pt() + taus_p4[0].Pt() > 60) and (lCharge[(eIndex + 1)%3] == -lCharge[(eIndex - 1)%3])
         and ((leptons_p4[(eIndex + 1)%3] + leptons_p4[(eIndex - 1)%3]).M() > 81)
-        and ((leptons_p4[(eIndex + 1)%3] + leptons_p4[(eIndex - 1)%3]).M() < 101)): #and (lFlavour[(eIndex + 1)%3] == lFlavour[(eIndex - 1)%3]) is implied
+        and ((leptons_p4[(eIndex + 1)%3] + leptons_p4[(eIndex - 1)%3]).M() < 101) and (eIsoPass[eIndex] == 1)
+        and (muIsoPass[(eIndex + 1)%3] == 1) and (muIsoPass[(eIndex - 1)%3] == 1)):
+        #and (lFlavour[(eIndex + 1)%3] == lFlavour[(eIndex - 1)%3]) is implied
 
           fillHistograms(taus_p4[0], leptons_p4[eIndex], leptons_p4[(eIndex + 1)%3],
           leptons_p4[(eIndex - 1)%3], met_p4.Pt(), nJets30, wTotal, triLepHistograms)
           triLepYield += wTotal
 
         # One positive charge, two negatives
-        elif (chargeList.count(+1) == 1) and (chargeList.count(-1) == 2):
+        elif ((chargeList.count(+1) == 1) and (chargeList.count(-1) == 2)
+        and ((flavList.count(1) == 3 and muIsoPass[0] == 1 and muIsoPass[1] == 1 and muIsoPass[2] == 1)
+        or (flavList.count(2) == 3 and eIsoPass[0] == 1 and eIsoPass[1] == 1 and eIsoPass[2] == 1))):
         #and (lCharge[(chargeList.index(+1) - 1)%3] == -lCharge[(chargeList.index(+1) + 1)%3])) is implied
 
           posIndex = chargeList.index(+1)
@@ -199,7 +207,9 @@ def main(args):
             triLepYield += wTotal
 
         # Two positive charges, one negative
-        elif (chargeList.count(-1) == 1) and (chargeList.count(+1) == 2):
+        elif ((chargeList.count(-1) == 1) and (chargeList.count(+1) == 2)
+        and ((flavList.count(1) == 3 and muIsoPass[0] == 1 and muIsoPass[1] == 1 and muIsoPass[2] == 1)
+        or (flavList.count(2) == 3 and eIsoPass[0] == 1 and eIsoPass[1] == 1 and eIsoPass[2] == 1))):
         #and(lCharge[(chargeList.index(-1) - 1)%3] == -lCharge[(chargeList.index(-1) + 1)%3])): is implied
 
           negIndex = chargeList.index(-1)
