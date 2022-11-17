@@ -55,7 +55,10 @@ def fillHistograms(tau1, tauOrLep, Zlep1, Zlep2, met_p4, nJets, totalWeight, his
   fillers.append(math.fabs(tau1.Eta() - tauOrLep.Eta()))
   fillers.append((tau1 + tauOrLep).DeltaR(Zlep1 + Zlep2))
   fillers.append(nJets)
-  fillers.append(Zlep1.DeltaPhi(Zlep2))
+  if(Zlep1.Eta() > Zlep2.Eta()):
+    fillers.append(Zlep1.DeltaPhi(Zlep2))
+  else:
+    fillers.append(Zlep2.DeltaPhi(Zlep1))
   fillers.append(tau1.DeltaPhi(tauOrLep))
   fillers.append((Zlep1 + Zlep2).DeltaPhi(tau1 + tauOrLep))
 
@@ -83,7 +86,7 @@ def main(args):
   # define histograms
   diLepHistograms = [] #array for histograms of the two lepton cut
   diLepHistograms.append(ROOT.TH1D("2_lep_tau_pt_sum", "p_{T}^{#tau_sum};pT(GeV);Normalised Counts", 50, 0, 500))
-  diLepHistograms.append(ROOT.TH1D("2_lep_lepton_mass_sum", "M(ll);Mass(GeV);Normalised Counts", 50, 0, 200))
+  diLepHistograms.append(ROOT.TH1D("2_lep_lepton_mass_sum", "M(ll);Mass(GeV);Normalised Counts", 50, 70, 115))
   diLepHistograms.append(ROOT.TH1D("2_lep_met_pt", "met.Pt();pT(GeV);Normalised Counts", 50, 0, 500))
   diLepHistograms.append(ROOT.TH1D("2_lep_delta_R_Z", "delta_R_Z;Delta R(Rad);Normalised Counts", 50, 0, 5))
   diLepHistograms.append(ROOT.TH1D("2_lep_delta_R_H", "delta_R_H;Delta R(Rad);Normalised Counts", 50, 0, 5))
