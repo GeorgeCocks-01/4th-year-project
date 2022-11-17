@@ -114,7 +114,7 @@ def main(args):
   #FILL HISTOGRAMS LOOP
   for i in range(0, tree.GetEntries()):
     tree.GetEntry(i)
-    # vector of TLorentzVectors of the taus
+
     taus_p4 = getattr(tree, "taus_p4")
     leptons_p4 = getattr(tree, "leptons_p4")
     met_p4 = getattr(tree, "met_p4")
@@ -125,21 +125,28 @@ def main(args):
     crossSection = getattr(tree, "cross_section")
     rnnID = getattr(tree, "taus_jet_rnn_medium")
     wTotal = (crossSection * luminosity * getattr(tree, "pu_NOMINAL_pileup_combined_weight") *
-    getattr(tree, "weight_mc"))/sumAllMC #calculates weight for each event
+     getattr(tree, "weight_mc"))/sumAllMC #calculates weight for each event
+    leptonsIDTight = getattr(tree, "leptons_id_tight")
+    tauBdt = getattr(tree, "taus_ele_bdt_loose_retuned")
+    eIsoPass = getattr(tree, "leptons_iso_FCLoose")
+    muIsoPass = getattr(tree, "leptons_iso_TightTrackOnly_FixedRad")
 
     if len(taus_p4) > 0: #checks if there is a tau
       if len(leptons_p4) == 3: flavList = [lFlavour[0], lFlavour[1], lFlavour[2]] #list of lepton flavours
       # selection cut for 2 lepton final state
-      if ((len(leptons_p4) == 2) and (len(taus_p4) == 2) and (lFlavour[0] == lFlavour[1]) and
-      (lCharge[0] == -lCharge[1]) and (rnnID[0] == 1) and (rnnID[1] == 1) and (tauCharge[0] == -tauCharge[1])
-      and (taus_p4[0].Pt() + taus_p4[1].Pt() > 75) and ((leptons_p4[0] + leptons_p4[1]).M() > 71) and ((leptons_p4[0] + leptons_p4[1]).M() < 111)):
+      if ((len(leptons_p4) == 2) and (len(taus_p4) == 2) and (lFlavour[0] == lFlavour[1])
+      and (lCharge[0] == -lCharge[1]) and (rnnID[0] == 1) and (rnnID[1] == 1) and (tauCharge[0] == -tauCharge[1])
+      and (taus_p4[0].Pt() + taus_p4[1].Pt() > 75) and ((leptons_p4[0] + leptons_p4[1]).M() > 71)
+      and ((leptons_p4[0] + leptons_p4[1]).M() < 111) and (leptonsIDTight[0] == 1) and (leptonsIDTight[1] == 1)):
         fillHistograms(taus_p4[0], taus_p4[1], leptons_p4[0], leptons_p4[1], met_p4.Pt(), nJets30, wTotal,
         diLepHistograms)
         diLepYield += wTotal
 
 
       # selection cut for 3 lepton final state
-      elif ((len(leptons_p4) == 3) and len(taus_p4) == 1 and (rnnID[0] == 1) and (flavList.count(1) + flavList.count(2) == 3)):
+      elif ((len(leptons_p4) == 3) and len(taus_p4) == 1 and (rnnID[0] == 1)
+      and (flavList.count(1) + flavList.count(2) == 3) and (leptonsIDTight[0] == 1) and (leptonsIDTight[1] == 1)
+      and (leptonsIDTight[2] == 1)):
         chargeList = [lCharge[0], lCharge[1], lCharge[2]] #list of lepton charges
         try:
           muIndex = flavList.index(1) #index of muon
@@ -236,8 +243,10 @@ def main(args):
 if __name__ == "__main__":
   # parse the CLI arguments
   parser = argparse.ArgumentParser(description='script to run over ntuple dataset')
-  parser.add_argument('--inputsample', '-i', metavar='INPUT', type=str, dest="inputsample", default="ZHlltt/", help='directory for input root files')
-  parser.add_argument('--outputfile', '-o', metavar='OUTPUT', type=str, dest="outputfile", default="lltautauhistograms.root", help='outputfile for process')
+  parser.add_argument('--inputsample', '-i', metavar='INPUT', type=str, dest="inputsample",
+   default="ZHlltt/", help='directory for input root files')
+  parser.add_argument('--outputfile', '-o', metavar='OUTPUT', type=str, dest="outputfile",
+   default="lltautauhistograms.root", help='outputfile for process')
   args = parser.parse_args()
 
   # call the main function

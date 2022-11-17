@@ -44,6 +44,7 @@ for var in varList:
     infile.Close()
     legName = sample[0]
 
+    stackedHisto.Add(histo)
     histo.Scale(1/histo.Integral())
 
     if histo.GetMaximum() > maximum:
@@ -53,7 +54,7 @@ for var in varList:
     histo.SetMarkerColor(sample[2])
     histo.SetLineColor(sample[2])
     histos.append(histo)
-    stackedHisto.Add(histo)
+
     legnames.append(legName)
 
   for i in range(0, len(histos)):
