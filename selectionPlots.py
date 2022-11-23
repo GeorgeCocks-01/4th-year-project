@@ -43,7 +43,7 @@ def findAllFilesInPath( pattern ,path ):
   checkPath( path, items )
   return files
 
-def fillHistograms(tau1, tauOrLep, Zlep1, Zlep2, met_p4, nJets, totalWeight, histograms):
+def fillHistograms(tau1, tauOrLep, Zlep1, Zlep2, met_p4, nJets, mmc, totalWeight, histograms):
   fillers = []
 
   fillers.append(tau1.Pt() + tauOrLep.Pt())
@@ -61,6 +61,7 @@ def fillHistograms(tau1, tauOrLep, Zlep1, Zlep2, met_p4, nJets, totalWeight, his
     fillers.append(Zlep2.DeltaPhi(Zlep1))
   fillers.append(tau1.DeltaPhi(tauOrLep))
   fillers.append((Zlep1 + Zlep2).DeltaPhi(tau1 + tauOrLep))
+  fillers.append(mmc)
 
   for i in range(0, len(histograms)): #fills histograms
     histograms[i].Fill(fillers[i], totalWeight)
@@ -86,25 +87,24 @@ def main(args):
   # define histograms
   diLepHistograms = [] #array for histograms of the two lepton cut
   diLepHistograms.append(ROOT.TH1D("2_lep_tau_pt_sum", "p_{T}^{#tau_sum};pT(GeV);Normalised Counts", 50, 0, 500))
-  diLepHistograms.append(ROOT.TH1D("2_lep_lepton_mass_sum", "M(ll);Mass(GeV);Normalised Counts", 50, 70, 115))
+  diLepHistograms.append(ROOT.TH1D("2_lep_Z_lepton_mass_sum", "M(ll);Mass(GeV);Normalised Counts", 50, 70, 115))
   diLepHistograms.append(ROOT.TH1D("2_lep_met_pt", "met.Pt();pT(GeV);Normalised Counts", 50, 0, 500))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_R_Z", "delta_R_Z;Delta R(Rad);Normalised Counts", 50, 0, 5))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_R_H", "delta_R_H;Delta R(Rad);Normalised Counts", 50, 0, 5))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_Eta_Z", "delta_Eta_Z;Delta Eta(Rad);Normalised Counts", 50, 0, 5))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_Eta_H", "delta_Eta_H;Delta Eta(Rad);Normalised Counts", 50, 0, 5))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_R_tau_l", "delta_R_tl;Delta R(Rad);Normalised Counts", 50, 0, 5))
+  diLepHistograms.append(ROOT.TH1D("2_lep_delta_R_ll", "delta_R_ll;Delta R(Rad);Normalised Counts", 50, 0, 5))
+  diLepHistograms.append(ROOT.TH1D("2_lep_delta_R_tt", "delta_R_tt;Delta R(Rad);Normalised Counts", 50, 0, 5))
+  diLepHistograms.append(ROOT.TH1D("2_lep_delta_Eta_ll", "delta_Eta_ll;Delta Eta(Rad);Normalised Counts", 50, 0, 5))
+  diLepHistograms.append(ROOT.TH1D("2_lep_delta_Eta_tt", "delta_Eta_tt;Delta Eta(Rad);Normalised Counts", 50, 0, 5))
+  diLepHistograms.append(ROOT.TH1D("2_lep_delta_R_tt_ll", "delta_R_ttll;Delta R(Rad);Normalised Counts", 50, 0, 5))
   diLepHistograms.append(ROOT.TH1D("2_lep_n_jets", "n_jets;n_jets;Normalised Counts", 10, 0, 10))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_phi_Z", "delta_phi_Z;Delta Phi(Rad);Normalised Counts", 50, -4, 4))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_phi_H", "delta_phi_H;Delta Phi(Rad);Normalised Counts", 50, -4, 4))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_phi_tau_l", "delta_eta_tl;Delta Phi(Rad);Normalised Counts", 50, -4, 4))
+  diLepHistograms.append(ROOT.TH1D("2_lep_delta_phi_ll", "delta_phi_ll;Delta Phi(Rad);Normalised Counts", 50, -4, 4))
+  diLepHistograms.append(ROOT.TH1D("2_lep_delta_phi_tt", "delta_phi_tt;Delta Phi(Rad);Normalised Counts", 50, -4, 4))
+  diLepHistograms.append(ROOT.TH1D("2_lep_delta_phi_ll_tt", "delta_eta_lltt;Delta Phi(Rad);Normalised Counts", 50, -4, 4))
+  diLepHistograms.append(ROOT.TH1D("2_lep_mmc_mass", "MMC_Mass;Mass(GeV);Normalised Counts", 50, 0, 800))
 
   triLepHistograms = [] #array for histograms of the three lepton cut
-  histNames = ["3_lep_tau_pt_sum", "3_lep_Z_lepton_mass_sum", "3_lep_met_pt",
-  "3_lep_delta_R_Z", "3_lep_delta_R_H", "3_lep_delta_Eta_Z", "3_lep_delta_Eta_H",
-  "3_lep_delta_R_tau_l", "3_lep_n_jets", "3_lep_delta_phi_Z", "3_lep_delta_phi_H", "3_lep_delta_phi_tau_l"]
 
   for i in range(0, len(diLepHistograms)): #generates histograms for 3 lepton cut by cloning those from the 2 lep cut
-    triLepHistograms.append(diLepHistograms[i].Clone(histNames[i]))
+    triName = "3" + diLepHistograms[i].GetName()[1:]
+    triLepHistograms.append(diLepHistograms[i].Clone(triName))
     diLepHistograms[i].Sumw2()
     triLepHistograms[i].Sumw2()
 
@@ -143,7 +143,8 @@ def main(args):
         and ((leptons_p4[0] + leptons_p4[1]).M() < 111) and (leptonsIDTight[0] == 1) and (leptonsIDTight[1] == 1)
         and ((lFlavour[0] == 1 and muIsoPass[0] == 1 and muIsoPass[1] == 1)
         or (lFlavour[0] == 2 and eIsoPass[0] == 1 and eIsoPass[1] == 1)) and (tauBdt[0] == 1) and (tauBdt[1] == 1)):
-        fillHistograms(taus_p4[0], taus_p4[1], leptons_p4[0], leptons_p4[1], met_p4.Pt(), nJets30, wTotal,
+        tau0tau1MMC = getattr(tree, "mmc_tau0_tau1_mmc_mlm_m")
+        fillHistograms(taus_p4[0], taus_p4[1], leptons_p4[0], leptons_p4[1], met_p4.Pt(), nJets30, tau0tau1MMC, wTotal,
           diLepHistograms)
         diLepYield += wTotal
 
@@ -168,8 +169,9 @@ def main(args):
           and (eIsoPass[(muIndex + 1)%3] == 1) and (eIsoPass[(muIndex - 1)%3] == 1)):
           #and (lFlavour[(muIndex + 1)%3] == lFlavour[(muIndex - 1)%3]) is implied
 
+          tau0lepMMC = getattr(tree, "mmc_tau0_lep" + str(muIndex) + "_mmc_mlm_m")
           fillHistograms(taus_p4[0], leptons_p4[muIndex], leptons_p4[(muIndex + 1)%3],
-            leptons_p4[(muIndex - 1)%3], met_p4.Pt(), nJets30, wTotal, triLepHistograms)
+            leptons_p4[(muIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, triLepHistograms)
           triLepYield += wTotal
 
         # Two muons, one electron
@@ -181,8 +183,9 @@ def main(args):
             and (muIsoPass[(eIndex + 1)%3] == 1) and (muIsoPass[(eIndex - 1)%3] == 1)):
           #and (lFlavour[(eIndex + 1)%3] == lFlavour[(eIndex - 1)%3]) is implied
 
+          tau0lepMMC = getattr(tree, "mmc_tau0_lep" + str(eIndex) + "_mmc_mlm_m")
           fillHistograms(taus_p4[0], leptons_p4[eIndex], leptons_p4[(eIndex + 1)%3],
-          leptons_p4[(eIndex - 1)%3], met_p4.Pt(), nJets30, wTotal, triLepHistograms)
+          leptons_p4[(eIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, triLepHistograms)
           triLepYield += wTotal
 
         # One positive charge, two negatives
@@ -200,15 +203,17 @@ def main(args):
           if ((zCandidate1 < zCandidate2) and ((lCharge[(posIndex - 1)%3] == -tauCharge[0]))
             and (leptons_p4[(posIndex - 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass1 > 81) and (zMass1 < 101)):
 
+            tau0lepMMC = getattr(tree, "mmc_tau0_lep" + str((posIndex - 1)%3) + "_mmc_mlm_m")
             fillHistograms(taus_p4[0], leptons_p4[(posIndex - 1)%3], leptons_p4[posIndex],
-              leptons_p4[(posIndex + 1)%3], met_p4.Pt(), nJets30, wTotal, triLepHistograms)
+              leptons_p4[(posIndex + 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, triLepHistograms)
             triLepYield += wTotal
 
           elif ((zCandidate1 > zCandidate2) and ((lCharge[(posIndex + 1)%3] == -tauCharge[0]))
             and (leptons_p4[(posIndex + 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass2 > 81) and (zMass2 < 101)):
 
+            tau0lepMMC = getattr(tree, "mmc_tau0_lep" + str((posIndex + 1)%3) + "_mmc_mlm_m")
             fillHistograms(taus_p4[0], leptons_p4[(posIndex + 1)%3], leptons_p4[posIndex],
-              leptons_p4[(posIndex - 1)%3], met_p4.Pt(), nJets30, wTotal, triLepHistograms)
+              leptons_p4[(posIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, triLepHistograms)
             triLepYield += wTotal
 
         # Two positive charges, one negative
@@ -226,15 +231,17 @@ def main(args):
           if ((zCandidate1 < zCandidate2) and ((lCharge[(negIndex - 1)%3] == -tauCharge[0]))
             and (leptons_p4[(negIndex - 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass1 > 81) and (zMass1 < 101)):
 
+            tau0lepMMC = getattr(tree, "mmc_tau0_lep" + str((negIndex - 1)%3) + "_mmc_mlm_m")
             fillHistograms(taus_p4[0], leptons_p4[(negIndex - 1)%3], leptons_p4[negIndex],
-              leptons_p4[(negIndex + 1)%3], met_p4.Pt(), nJets30, wTotal, triLepHistograms)
+              leptons_p4[(negIndex + 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, triLepHistograms)
             triLepYield += wTotal
 
           elif ((zCandidate1 > zCandidate2) and ((lCharge[(negIndex + 1)%3] == -tauCharge[0]))
             and (leptons_p4[(negIndex + 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass2 > 81) and (zMass2 < 101)):
 
+            tau0lepMMC = getattr(tree, "mmc_tau0_lep" + str((negIndex + 1)%3) + "_mmc_mlm_m")
             fillHistograms(taus_p4[0], leptons_p4[(negIndex + 1)%3], leptons_p4[negIndex],
-              leptons_p4[(negIndex - 1)%3], met_p4.Pt(), nJets30, wTotal, triLepHistograms)
+              leptons_p4[(negIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, triLepHistograms)
             triLepYield += wTotal
 
 
@@ -259,9 +266,9 @@ if __name__ == "__main__":
   # parse the CLI arguments
   parser = argparse.ArgumentParser(description='script to run over ntuple dataset')
   parser.add_argument('--inputsample', '-i', metavar='INPUT', type=str, dest="inputsample",
-   default="ZHlltt/", help='directory for input root files')
+    default="ZHlltt/", help='directory for input root files')
   parser.add_argument('--outputfile', '-o', metavar='OUTPUT', type=str, dest="outputfile",
-   default="lltautauhistograms.root", help='outputfile for process')
+    default="lltautauhistograms.root", help='outputfile for process')
   args = parser.parse_args()
 
   # call the main function
