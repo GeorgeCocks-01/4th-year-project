@@ -27,11 +27,11 @@ varList = ["tau_pt_sum", "Z_lepton_mass_sum", "met_pt", "delta_R_ll", "delta_R_t
 for i in range(2,4):
   cut = str(i) + "_lep_"
   for var in varList:
+    var = cut + var
     leg = TLegend(0.7,0.6,0.8,0.85)
     leg.SetBorderSize(0)
     leg.SetTextSize(0.03)
     leg.SetEntrySeparation(0.001)
-    var = cut + var
 
     counter = 0
     histos=[]
