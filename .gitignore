@@ -8,3 +8,4 @@ plots/
 rootData/
 stackPlots/
 zippedData/
+__pycache__/

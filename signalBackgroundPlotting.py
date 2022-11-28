@@ -1,6 +1,7 @@
 from ROOT import *
 import copy, os, re, sys
 import argparse
+from selectionPlots import findAllFilesInPath
 
 gROOT.LoadMacro('../atlasrootstyle/AtlasStyle.C')
 gROOT.LoadMacro('../atlasrootstyle/AtlasUtils.C')
@@ -11,16 +12,18 @@ canv = TCanvas('c','c',600,600)
 canv.cd()
 colorList = [kBlack,kRed,kBlue,kGreen,kViolet,kMagenta,kAzure,kOrange,kYellow,kMagenta+3,kCyan,kYellow+2]
 
+zJetsSamples = []
+zJetsSamples.extend(findAllFilesInPath("*Zee*.root", "outputRoot/"))
+zJetsSamples.extend(findAllFilesInPath("*Zmumu*.root", "outputRoot/"))
+zJetsSamples.extend(findAllFilesInPath("*Ztt*.root", "outputRoot/"))
+
 samples = (('llll', ('outputRoot/llll-weighted.root',), kBlack),
       ('other di-boson', ('outputRoot/ZqqZll-weighted.root',
         'outputRoot/lllv-weighted.root',
         'outputRoot/llvv-weighted.root',
         'outputRoot/WqqZll-weighted.root',
         'outputRoot/ttH-weighted.root'), kBlue),
-      ('Jets', ('outputRoot/Zee_MV0_70_BF-weighted.root',
-        'outputRoot/Zee_MV0_70_CFBV-weighted.root',
-        'outputRoot/Zee_MV0_70_CVBV-weighted.root',
-        'outputRoot/Zee_MV1000_E_CMS-weighted.root'), kGreen),
+      ('Jets', zJetsSamples, kGreen),
       ('signal', ('outputRoot/ZH-weighted.root', 'outputRoot/ggZH-weighted.root'), kRed))
 
 varList = ["tau_pt_sum", "Z_lepton_mass_sum", "met_pt", "delta_R_ll", "delta_R_tt",
@@ -59,8 +62,7 @@ for cutNum in range(2,4): # Loop over the different selection cuts
       histos[i].SetLineColor(sample[2])
 
       stackedHisto.Add(histos[i].Clone())
-      stackedHisto.GetXaxis().SetTitle(histos[i].GetXaxis().GetTitle()) # these don't work but I don't know why
-      stackedHisto.GetYaxis().SetTitle(histos[i].GetYaxis().GetTitle())
+
       histos[i].Scale(1./histos[i].Integral())
       legName = sample[0]
 
@@ -92,4 +94,6 @@ for cutNum in range(2,4): # Loop over the different selection cuts
     # stackedHisto.SetMaximum(maximum * 1.3)
     stackedHisto.Draw('hist')
     leg.Draw('SAME')
+    stackedHisto.GetXaxis().SetTitle(histos[i].GetXaxis().GetTitle())
+    stackedHisto.GetYaxis().SetTitle(histos[i].GetYaxis().GetTitle())
     canv.SaveAs('stackPlots/stack_' + var + '.pdf')

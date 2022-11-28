@@ -86,9 +86,9 @@ def main(args):
 
   # define histograms
   diLepHistograms = [] #array for histograms of the two lepton cut
-  diLepHistograms.append(ROOT.TH1D("2_lep_tau_pt_sum", "p_{T}^{#tau_sum};pT(GeV);Normalised Counts", 50, 0, 500))
+  diLepHistograms.append(ROOT.TH1D("2_lep_tau_pt_sum", "p_{T}^{#tau_sum};pT(GeV);Normalised Counts", 50, 50, 350))
   diLepHistograms.append(ROOT.TH1D("2_lep_Z_lepton_mass_sum", "M(ll);Mass(GeV);Normalised Counts", 50, 70, 115))
-  diLepHistograms.append(ROOT.TH1D("2_lep_met_pt", "met.Pt();pT(GeV);Normalised Counts", 50, 0, 500))
+  diLepHistograms.append(ROOT.TH1D("2_lep_met_pt", "met.Pt();pT(GeV);Normalised Counts", 50, 0, 350))
   diLepHistograms.append(ROOT.TH1D("2_lep_delta_R_ll", "delta_R_ll;Delta R(Rad);Normalised Counts", 50, 0, 5))
   diLepHistograms.append(ROOT.TH1D("2_lep_delta_R_tt", "delta_R_tt;Delta R(Rad);Normalised Counts", 50, 0, 5))
   diLepHistograms.append(ROOT.TH1D("2_lep_delta_Eta_ll", "delta_Eta_ll;Delta Eta(Rad);Normalised Counts", 50, 0, 5))
