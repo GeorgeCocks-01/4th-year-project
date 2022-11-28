@@ -32,6 +32,7 @@ varList = ["tau_pt_sum", "Z_lepton_mass_sum", "met_pt", "delta_R_ll", "delta_R_t
 
 for cutNum in range(2,4): # Loop over the different selection cuts
   cut = str(cutNum) + "_lep_"
+  cutYields = {samples[0][0]: None, samples[1][0]: None, samples[2][0]: None, samples[3][0]: None}
   for var in varList: # Loop over the variables
     var = cut + var
     leg = TLegend(0.7,0.6,0.8,0.85)
@@ -63,6 +64,10 @@ for cutNum in range(2,4): # Loop over the different selection cuts
 
       stackedHisto.Add(histos[i].Clone())
 
+      # print(var + ":" + (str)(histos[i].Integral(0, histos[i].GetNbinsX() + 1)))
+      if var == cut + "tau_pt_sum":
+        cutYields[sample[0]] = histos[i].Integral(0, histos[i].GetNbinsX() + 1)
+
       histos[i].Scale(1./histos[i].Integral())
       legName = sample[0]
 
@@ -80,7 +85,6 @@ for cutNum in range(2,4): # Loop over the different selection cuts
 
       leg.AddEntry(histos[i],legnames[i], 'l')
 
-
     leg.Draw('SAME')
 
     #myText(0.19,0.76,kBlack,'#sqrt{s} = 13 TeV, 140 fb^{-1}')
@@ -97,3 +101,5 @@ for cutNum in range(2,4): # Loop over the different selection cuts
     stackedHisto.GetXaxis().SetTitle(histos[i].GetXaxis().GetTitle())
     stackedHisto.GetYaxis().SetTitle(histos[i].GetYaxis().GetTitle())
     canv.SaveAs('stackPlots/stack_' + var + '.pdf')
+
+  print((str)(cut) + ":" + (str)(cutYields))
