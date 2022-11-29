@@ -14,8 +14,8 @@ nohup python selectionPlots.py -i Zee_MV70_140_BF -o Zee_MV70_140_BF-weighted.ro
 nohup python selectionPlots.py -i Zee_MV70_140_CFBV -o Zee_MV70_140_CFBV-weighted.root >> jetsOutput.txt &
 nohup python selectionPlots.py -i Zee_MV70_140_CVBV -o Zee_MV70_140_CVBV-weighted.root >> jetsOutput.txt &
 nohup python selectionPlots.py -i Zmumu_MV0_70_BF -o Zmumu_MV0_70_BF-weighted.root >> jetsOutput.txt &
-nohup python selectionPlots.py -i Zmumu_MV0_70_CVBV.D1_364100 -o Zmumu_MV0_70_CVBV-weighted.root >> jetsOutput.txt &
-nohup python selectionPlots.py -i Zmumu_MV0_70_CVBV.D1_364101 -o Zmumu_MV0_70_CVBV-weighted.root >> jetsOutput.txt &
+nohup python selectionPlots.py -i Zmumu_MV0_70_CFBV.D1 -o Zmumu_MV0_70_CFBV-weighted.root >> jetsOutput.txt &
+nohup python selectionPlots.py -i Zmumu_MV0_70_CVBV.D1 -o Zmumu_MV0_70_CVBV-weighted.root >> jetsOutput.txt &
 nohup python selectionPlots.py -i Zmumu_MV1000_E_CMS -o Zmumu_MV1000_E_CMS-weighted.root >> jetsOutput.txt &
 nohup python selectionPlots.py -i Zmumu_MV140_280_BF -o Zmumu_MV140_280_BF-weighted.root >> jetsOutput.txt &
 nohup python selectionPlots.py -i Zmumu_MV140_280_CFBV -o Zmumu_MV140_280_CFBV-weighted.root >> jetsOutput.txt &
@@ -25,8 +25,8 @@ nohup python selectionPlots.py -i Zmumu_MV280_500_CFBV -o Zmumu_MV280_500_CFBV-w
 nohup python selectionPlots.py -i Zmumu_MV280_500_CVBV -o Zmumu_MV280_500_CVBV-weighted.root >> jetsOutput.txt &
 nohup python selectionPlots.py -i Zmumu_MV500_1000 -o Zmumu_MV500_1000-weighted.root >> jetsOutput.txt &
 nohup python selectionPlots.py -i Zmumu_MV70_140_BF -o Zmumu_MV70_140_BF-weighted.root >> jetsOutput.txt &
-nohup python selectionPlots.py -i Zmumu_MV70_140_CFBV_364104 -o Zmumu_MV70_140_CFBV_364104-weighted.root >> jetsOutput.txt &
-nohup python selectionPlots.py -i Zmumu_MV70_140_CVBV_364103 -o Zmumu_MV70_140_CVBV_364103-weighted.root >> jetsOutput.txt &
+nohup python selectionPlots.py -i Zmumu_MV70_140_CFBV -o Zmumu_MV70_140_CFBV-weighted.root >> jetsOutput.txt &
+nohup python selectionPlots.py -i Zmumu_MV70_140_CVBV -o Zmumu_MV70_140_CVBV-weighted.root >> jetsOutput.txt &
 nohup python selectionPlots.py -i Ztt_MV0_70_l13l7 -o Ztt_MV0_70_l13l7-weighted.root >> jetsOutput.txt &
 nohup python selectionPlots.py -i Ztt_MV0_70_l15h20 -o Ztt_MV0_70_l15h20-weighted.root >> jetsOutput.txt &
 nohup python selectionPlots.py -i Ztt_MV1000_E_CMS -o Ztt_MV1000_E_CMS-weighted.root >> jetsOutput.txt &

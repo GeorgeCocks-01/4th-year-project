@@ -1,3 +1,4 @@
+from math import sqrt
 from ROOT import *
 import copy, os, re, sys
 import argparse
@@ -102,4 +103,7 @@ for cutNum in range(2,4): # Loop over the different selection cuts
     stackedHisto.GetYaxis().SetTitle(histos[i].GetYaxis().GetTitle())
     canv.SaveAs('stackPlots/stack_' + var + '.pdf')
 
-  print((str)(cut) + ":" + (str)(cutYields))
+  backgroundYield = cutYields["llll"] + cutYields["other di-boson"] + cutYields["Jets"]
+  print((str)(cut) + ": " + (str)(cutYields))
+  print("S/B: " + (str)(cutYields["signal"]/backgroundYield))
+  print("S/root(S+B): " + (str)(cutYields["signal"]/sqrt(backgroundYield)) + "\n")
