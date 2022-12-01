@@ -235,10 +235,14 @@ def main(args):
   print("3lep selection cut integral yield:", triLepHistograms["tauPtSum"].Integral(0,
     triLepHistograms["tauPtSum"].GetNbinsX() + 1))
 
-  if (args.outputfile[-5:] != ".root"): #adds .root to end of output file if not present
-    args.outputfile += ".root"
-  args.outputfile = "outputRoot/" + args.outputfile
-  outHistFile = ROOT.TFile.Open(args.outputfile, "RECREATE")
+  if (args.outputfile == None):
+    outputName = "outputRoot/" + args.inputsample[:-1] + "-weighted.root"
+  else:
+    if (args.outputfile[-5:] != ".root"): #adds .root to end of output file if not present
+      args.outputfile += ".root"
+    outputName = "outputRoot/" + args.outputfile
+
+  outHistFile = ROOT.TFile.Open(outputName, "RECREATE")
   outHistFile.cd()
   for key in diLepHistograms: #writes all histograms
     diLepHistograms[key].Write()
@@ -254,7 +258,7 @@ if __name__ == "__main__":
   parser.add_argument('--inputsample', '-i', metavar='INPUT', type=str, dest="inputsample",
     default="ZHlltt/", help='directory for input root files')
   parser.add_argument('--outputfile', '-o', metavar='OUTPUT', type=str, dest="outputfile",
-    default="lltautauhistograms.root", help='outputfile for process')
+    default=None, help='outputfile for process')
   args = parser.parse_args()
 
   # call the main function
