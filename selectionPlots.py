@@ -44,27 +44,27 @@ def findAllFilesInPath( pattern ,path ):
   return files
 
 def fillHistograms(tau1, tauOrLep, Zlep1, Zlep2, met_p4, nJets, mmc, totalWeight, histograms):
-  fillers = []
+  fillers = dict.fromkeys(histograms.keys())
 
-  fillers.append(tau1.Pt() + tauOrLep.Pt())
-  fillers.append((Zlep1 + Zlep2).M())
-  fillers.append(met_p4)
-  fillers.append(Zlep1.DeltaR(Zlep2))
-  fillers.append(tau1.DeltaR(tauOrLep))
-  fillers.append(math.fabs(Zlep1.Eta() - Zlep2.Eta()))
-  fillers.append(math.fabs(tau1.Eta() - tauOrLep.Eta()))
-  fillers.append((tau1 + tauOrLep).DeltaR(Zlep1 + Zlep2))
-  fillers.append(nJets)
+  fillers["tauPtSum"] = tau1.Pt() + tauOrLep.Pt()
+  fillers["zMassSum"] = (Zlep1 + Zlep2).M()
+  fillers["metPt"] = (met_p4)
+  fillers["deltaRll"] = (Zlep1.DeltaR(Zlep2))
+  fillers["deltaRtt"] = (tau1.DeltaR(tauOrLep))
+  fillers["deltaEtall"] = (math.fabs(Zlep1.Eta() - Zlep2.Eta()))
+  fillers["deltaEtatt"] = (math.fabs(tau1.Eta() - tauOrLep.Eta()))
+  fillers["deltaRttll"] = ((tau1 + tauOrLep).DeltaR(Zlep1 + Zlep2))
+  fillers["nJets"] = (nJets)
   if(Zlep1.Eta() > Zlep2.Eta()):
-    fillers.append(Zlep1.DeltaPhi(Zlep2))
+    fillers["deltaPhill"] = (Zlep1.DeltaPhi(Zlep2))
   else:
-    fillers.append(Zlep2.DeltaPhi(Zlep1))
-  fillers.append(tau1.DeltaPhi(tauOrLep))
-  fillers.append((Zlep1 + Zlep2).DeltaPhi(tau1 + tauOrLep))
-  fillers.append(mmc)
+    fillers["deltaPhill"] = (Zlep2.DeltaPhi(Zlep1))
+  fillers["deltaPhitt"] = (tau1.DeltaPhi(tauOrLep))
+  fillers["deltaPhilltt"] = ((Zlep1 + Zlep2).DeltaPhi(tau1 + tauOrLep))
+  fillers["mmc"] = (mmc)
 
-  for i in range(0, len(histograms)): #fills histograms
-    histograms[i].Fill(fillers[i], totalWeight)
+  for key in histograms: #fills histograms
+    histograms[key].Fill(fillers[key], totalWeight)
 
 def main(args):
   if (args.inputsample[-1] != "/"): #adds / to end of file path if not present
@@ -84,32 +84,29 @@ def main(args):
     file.Close()
   print(args.inputsample, ":", nFiles, "files")
 
-  # define histograms
-  diLepHistograms = [] #array for histograms of the two lepton cut
-  diLepHistograms.append(ROOT.TH1D("2_lep_tau_pt_sum", "p_{T}^{#tau_sum};pT(GeV);Normalised Counts", 50, 50, 350))
-  diLepHistograms.append(ROOT.TH1D("2_lep_Z_lepton_mass_sum", "M(ll);Mass(GeV);Normalised Counts", 50, 70, 115))
-  diLepHistograms.append(ROOT.TH1D("2_lep_met_pt", "met.Pt();pT(GeV);Normalised Counts", 50, 0, 350))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_R_ll", "delta_R_ll;Delta R(Rad);Normalised Counts", 50, 0, 5))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_R_tt", "delta_R_tt;Delta R(Rad);Normalised Counts", 50, 0, 5))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_Eta_ll", "delta_Eta_ll;Delta Eta(Rad);Normalised Counts", 50, 0, 5))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_Eta_tt", "delta_Eta_tt;Delta Eta(Rad);Normalised Counts", 50, 0, 5))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_R_tt_ll", "delta_R_ttll;Delta R(Rad);Normalised Counts", 50, 0, 5))
-  diLepHistograms.append(ROOT.TH1D("2_lep_n_jets", "n_jets;n_jets;Normalised Counts", 10, 0, 10))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_phi_ll", "delta_phi_ll;Delta Phi(Rad);Normalised Counts", 50, -4, 4))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_phi_tt", "delta_phi_tt;Delta Phi(Rad);Normalised Counts", 50, -4, 4))
-  diLepHistograms.append(ROOT.TH1D("2_lep_delta_phi_ll_tt", "delta_eta_lltt;Delta Phi(Rad);Normalised Counts", 50, -4, 4))
-  diLepHistograms.append(ROOT.TH1D("2_lep_mmc_mass", "MMC_Mass;Mass(GeV);Normalised Counts", 50, 0, 300))
+  # define histogram dictionaries
+  diLepHistograms = {
+    "tauPtSum": ROOT.TH1D("2_lep_tau_pt_sum", "p_{T}^{#tau_sum};pT(GeV);Normalised Counts", 50, 50, 350),
+    "zMassSum": ROOT.TH1D("2_lep_Z_lepton_mass_sum", "M(ll);Mass(GeV);Normalised Counts", 50, 70, 115),
+    "metPt": ROOT.TH1D("2_lep_met_pt", "met.Pt();pT(GeV);Normalised Counts", 50, 0, 350),
+    "deltaRll": ROOT.TH1D("2_lep_delta_R_ll", "delta_R_ll;Delta R(Rad);Normalised Counts", 50, 0, 5),
+    "deltaRtt": ROOT.TH1D("2_lep_delta_R_tt", "delta_R_tt;Delta R(Rad);Normalised Counts", 50, 0, 5),
+    "deltaEtall":ROOT.TH1D("2_lep_delta_Eta_ll", "delta_Eta_ll;Delta Eta(Rad);Normalised Counts", 50, 0, 5),
+    "deltaEtatt":ROOT.TH1D("2_lep_delta_Eta_tt", "delta_Eta_tt;Delta Eta(Rad);Normalised Counts", 50, 0, 5),
+    "deltaRttll": ROOT.TH1D("2_lep_delta_R_tt_ll", "delta_R_ttll;Delta R(Rad);Normalised Counts", 50, 0, 5),
+    "nJets": ROOT.TH1D("2_lep_n_jets", "n_jets;n_jets;Normalised Counts", 10, 0, 10),
+    "deltaPhill": ROOT.TH1D("2_lep_delta_Phi_ll", "delta_Phi_ll;Delta Phi(Rad);Normalised Counts", 50, -4, 4),
+    "deltaPhitt": ROOT.TH1D("2_lep_delta_Phi_tt", "delta_Phi_tt;Delta Phi(Rad);Normalised Counts", 50, -4, 4),
+    "deltaPhilltt": ROOT.TH1D("2_lep_delta_Phi_ll_tt", "delta_Phi_lltt;Delta Phi(Rad);Normalised Counts", 50, -4, 4),
+    "mmc": ROOT.TH1D("2_lep_mmc_mass", "MMC_mass;Mass(GeV);Normalised Counts", 50, 0, 300)
+  }
+  triLepHistograms = dict.fromkeys(diLepHistograms.keys()) # list for histograms of the three lepton cut
 
-  triLepHistograms = [] #array for histograms of the three lepton cut
-
-  for i in range(0, len(diLepHistograms)): #generates histograms for 3 lepton cut by cloning those from the 2 lep cut
-    triName = "3" + diLepHistograms[i].GetName()[1:]
-    triLepHistograms.append(diLepHistograms[i].Clone(triName))
-    diLepHistograms[i].Sumw2()
-    triLepHistograms[i].Sumw2()
-
-  zCandidate1 = 0.0
-  zCandidate2 = 0.0
+  # loop through dictionary diLepHistograms and copy histograms to triLepHistograms
+  for key in diLepHistograms:
+    triLepHistograms[key] = diLepHistograms[key].Clone("3" + diLepHistograms[key].GetName()[1:])
+    diLepHistograms[key].Sumw2()
+    triLepHistograms[key].Sumw2()
 
   #FILL HISTOGRAMS LOOP
   for i in range(0, tree.GetEntries()):
@@ -233,18 +230,19 @@ def main(args):
             fillHistograms(taus_p4[0], leptons_p4[(negIndex + 1)%3], leptons_p4[negIndex],
               leptons_p4[(negIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, triLepHistograms)
 
-  print("2lep selection cut integral yield:", diLepHistograms[0].Integral(0, diLepHistograms[0].GetNbinsX() + 1))
-  print("3lep selection cut integral yield:", triLepHistograms[0].Integral(0, triLepHistograms[0].GetNbinsX() + 1))
+  print("2lep selection cut integral yield:", diLepHistograms["tauPtSum"].Integral(0,
+    diLepHistograms["tauPtSum"].GetNbinsX() + 1))
+  print("3lep selection cut integral yield:", triLepHistograms["tauPtSum"].Integral(0,
+    triLepHistograms["tauPtSum"].GetNbinsX() + 1))
 
   if (args.outputfile[-5:] != ".root"): #adds .root to end of output file if not present
     args.outputfile += ".root"
   args.outputfile = "outputRoot/" + args.outputfile
   outHistFile = ROOT.TFile.Open(args.outputfile, "RECREATE")
   outHistFile.cd()
-
-  for i in range(0, len(diLepHistograms)): #writes all histograms
-    diLepHistograms[i].Write()
-    triLepHistograms[i].Write()
+  for key in diLepHistograms: #writes all histograms
+    diLepHistograms[key].Write()
+    triLepHistograms[key].Write()
 
   outHistFile.Close()
 
