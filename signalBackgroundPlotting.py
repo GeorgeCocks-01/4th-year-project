@@ -104,4 +104,4 @@ for cutNum in range(2,4): # Loop over the different selection cuts
   backgroundYield = cutYields["llll"] + cutYields["other di-boson"] + cutYields["Jets"]
   print((str)(cut) + ": " + (str)(cutYields))
   print("S/B: " + (str)(cutYields["signal"]/backgroundYield))
-  print("S/root(S+B): " + (str)(cutYields["signal"]/sqrt(backgroundYield)) + "\n")
+  print("S/sqrt(S+B): " + (str)(cutYields["signal"]/sqrt(backgroundYield)) + "\n")

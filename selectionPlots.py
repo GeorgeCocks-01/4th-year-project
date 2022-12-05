@@ -79,8 +79,15 @@ def main(args):
   for fileName in findAllFilesInPath(pattern, directory):
     nFiles += tree.Add(fileName)
     file = ROOT.TFile.Open(fileName)
-    h = file.Get("h_metadata")
-    sumAllMC += h.GetBinContent(8)
+    if args.inputsample[:-1] == "ZHlltt":
+      h = file.Get("h_metadata_theory_weights")
+      sumAllMC += h.GetBinContent(110)
+    elif args.inputsample[:-1] == "ggZH":
+      h = file.Get("h_metadata_theory_weights")
+      sumAllMC += h.GetBinContent(111)
+    else:
+      h = file.Get("h_metadata")
+      sumAllMC += h.GetBinContent(8)
     file.Close()
   print(args.inputsample, ":", nFiles, "files")
 
