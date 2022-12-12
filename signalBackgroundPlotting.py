@@ -27,7 +27,7 @@ samples = (('llll', ('outputRoot/llll-weighted.root', 'outputRoot/llll_lowMllPtC
         'outputRoot/WqqZll-weighted.root',
         'outputRoot/ttH-weighted.root'), kBlue),
       ('Jets', zJetsSamples, kGreen),
-      ('signal', ('outputRoot/ZH-weighted.root', 'outputRoot/ggZH-weighted.root'), kRed))
+      ('signal', ('outputRoot/ZHlltt-weighted.root', 'outputRoot/ggZH-weighted.root'), kRed))
 
 varList = ["tau_pt_sum", "Z_lepton_mass_sum", "met_pt", "delta_R_ll", "delta_R_tt",
 "delta_Eta_ll", "delta_Eta_tt", "delta_R_tt_ll", "n_jets", "delta_Phi_ll",
