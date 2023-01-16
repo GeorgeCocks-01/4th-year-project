@@ -33,7 +33,7 @@ varList = ["tau_pt_sum", "Z_lepton_mass_sum", "met_pt", "delta_R_ll", "delta_R_t
 "delta_Eta_ll", "delta_Eta_tt", "delta_R_tt_ll", "n_jets", "delta_Phi_ll",
 "delta_Phi_tt", "delta_Phi_ll_tt", "mmc_mass"]
 
-for cutNum in range(2,4): # Loop over the different selection cuts
+for cutNum in range(2,4): # Loop over the different selection cuts (2 and 3 lepton)
   cut = str(cutNum) + "_lep_"
   cutYields = {samples[0][0]: None, samples[1][0]: None, samples[2][0]: None, samples[3][0]: None}
   for var in varList: # Loop over the variables
@@ -100,8 +100,9 @@ for cutNum in range(2,4): # Loop over the different selection cuts
     stackedHisto.GetXaxis().SetTitle(histos[i].GetXaxis().GetTitle())
     stackedHisto.GetYaxis().SetTitle(histos[i].GetYaxis().GetTitle())
     canv.SaveAs('stackPlots/stack_' + var + '.pdf')
+    canv.Clear()
 
   backgroundYield = cutYields["llll"] + cutYields["other di-boson"] + cutYields["Jets"]
   print((str)(cut) + ": " + (str)(cutYields))
   print("S/B: " + (str)(cutYields["signal"]/backgroundYield))
-  print("S/sqrt(S+B): " + (str)(cutYields["signal"]/sqrt(backgroundYield)) + "\n")
+  print("S/sqrt(S+B): " + (str)(cutYields["signal"]/sqrt(cutYields["signal"] + backgroundYield)) + "\n")
