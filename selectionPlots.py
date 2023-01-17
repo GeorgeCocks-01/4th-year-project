@@ -115,6 +115,15 @@ def main(args):
     diLepHistograms[key].Sumw2()
     triLepHistograms[key].Sumw2()
 
+  # Create ntuple output file
+  outNtupleFile = ROOT.TFile.Open(args.outputntfile, "RECREATE")
+  newTree = ROOT.TTree("nominal", "nominal")
+
+  nTuples = dict.fromkeys(diLepHistograms.keys()) # list for nTuples from diLepHistograms
+  for i in nTuples:
+    nTuples[i] = array('f', [0])
+    newTree.Branch(i, nTuples[i], i + "/F")
+
   #FILL HISTOGRAMS LOOP
   for i in range(0, tree.GetEntries()):
     tree.GetEntry(i)
