@@ -102,6 +102,46 @@ for cutNum in range(2,4): # Loop over the different selection cuts (2 and 3 lept
     canv.SaveAs('stackPlots/stack_' + var + '.pdf')
     canv.Clear()
 
+    # SB ratio plots
+    var_sig1 = histos[3].Clone()
+    var_sig2 = histos[3].Clone()
+    total_background = histos[0].Clone()
+    total_background.Add(histos[1])
+    total_background.Add(histos[2])
+
+    for i in range(1, histos[3].GetNbinsX() + 1):
+      signalYield = histos[3].Integral(0, i)
+      backgroundYield = total_background.Integral(0, i)
+      try:
+        SoverSqrtSB = signalYield/sqrt(signalYield + backgroundYield)
+      except ZeroDivisionError:
+        SoverSqrtSB = 0
+      except ValueError:
+        SoverSqrtSB = 0
+      var_sig1.SetBinContent(i, SoverSqrtSB)
+
+      signalYield = histos[3].Integral(i, histos[3].GetNbinsX() + 1)
+      backgroundYield = total_background.Integral(i, histos[3].GetNbinsX() + 1)
+      try:
+        SoverSqrtSB = signalYield/sqrt(signalYield + backgroundYield)
+      except ZeroDivisionError:
+        SoverSqrtSB = 0
+      except ValueError:
+        SoverSqrtSB = 0
+      var_sig2.SetBinContent(i, SoverSqrtSB)
+
+    var_sig1.SetMaximum(var_sig1.GetMaximum() * 1.3)
+    var_sig1.SetLineWidth(3)
+    var_sig1.SetMarkerColor(kRed)
+    var_sig1.SetLineColor(kRed)
+    var_sig1.Draw('hist')
+    var_sig1.GetYaxis().SetTitle("S/sqrt(S+B)")
+    var_sig2.SetMarkerColor(kBlue)
+    var_sig2.SetLineColor(kBlue)
+    var_sig2.Draw('histSAME')
+    canv.SaveAs('SBplots/SB_' + var + '.pdf')
+    canv.Clear()
+
   backgroundYield = cutYields["llll"] + cutYields["other di-boson"] + cutYields["Jets"]
   print((str)(cut) + ": " + (str)(cutYields))
   print("S/B: " + (str)(cutYields["signal"]/backgroundYield))
