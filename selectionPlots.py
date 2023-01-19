@@ -2,6 +2,7 @@ import ROOT
 import copy, os, re, sys
 import argparse
 import math
+from array import array
 
 REALZMASS = 91.1876
 
@@ -43,7 +44,7 @@ def findAllFilesInPath( pattern ,path ):
   checkPath( path, items )
   return files
 
-def fillHistograms(tau1, tauOrLep, Zlep1, Zlep2, met_p4, nJets, mmc, totalWeight, histograms):
+def fillHistograms(tau1, tauOrLep, Zlep1, Zlep2, met_p4, nJets, mmc, totalWeight, histograms, nTuples, newTree):
   fillers = dict.fromkeys(histograms.keys())
 
   fillers["tauPtSum"] = tau1.Pt() + tauOrLep.Pt()
@@ -64,7 +65,12 @@ def fillHistograms(tau1, tauOrLep, Zlep1, Zlep2, met_p4, nJets, mmc, totalWeight
   fillers["mmc"] = (mmc)
 
   for key in histograms: #fills histograms
+    nTuples[key][0] = fillers[key] # fills nTuples with values
+    newTree.Fill() # fills new tree with nTuple array
     histograms[key].Fill(fillers[key], totalWeight)
+
+  nTuples["weight"][0] = totalWeight
+  newTree.Fill()
 
 def main(args):
   if (args.inputsample[-1] != "/"): #adds / to end of file path if not present
@@ -115,14 +121,25 @@ def main(args):
     diLepHistograms[key].Sumw2()
     triLepHistograms[key].Sumw2()
 
+  # if outputntfile is not specified, generate from input sample
+  if (args.outputntfile == None):
+    outputNtName = "outputNTuples/" + args.inputsample[:-1] + ".root"
+  else: # if outputntfile is specified, use that
+    if (args.outputntfile[-5:] != ".root"): #adds .root to end of output file if not present
+      args.outputntfile += ".root"
+    outputNtName = "outputNTuples/" + args.outputntfile
+
   # Create ntuple output file
-  outNtupleFile = ROOT.TFile.Open(args.outputntfile, "RECREATE")
+  outNtupleFile = ROOT.TFile.Open(outputNtName, "RECREATE")
   newTree = ROOT.TTree("nominal", "nominal")
 
   nTuples = dict.fromkeys(diLepHistograms.keys()) # list for nTuples from diLepHistograms
   for i in nTuples:
     nTuples[i] = array('f', [0])
     newTree.Branch(i, nTuples[i], i + "/F")
+  # Add weight branch
+  nTuples["weight"] = array('f', [0])
+  newTree.Branch("weight", nTuples["weight"], "weight/F")
 
   #FILL HISTOGRAMS LOOP
   for i in range(0, tree.GetEntries()):
@@ -155,7 +172,7 @@ def main(args):
         or (lFlavour[0] == 2 and eIsoPass[0] == 1 and eIsoPass[1] == 1)) and (tauBdt[0] == 1) and (tauBdt[1] == 1)):
         tau0tau1MMC = getattr(tree, "mmc_tau0_tau1_mmc_mlm_m")
         fillHistograms(taus_p4[0], taus_p4[1], leptons_p4[0], leptons_p4[1], met_p4.Pt(), nJets30, tau0tau1MMC, wTotal,
-          diLepHistograms)
+          diLepHistograms, nTuples, newTree)
 
       # selection cut for 3 lepton final state
       elif ((len(leptons_p4) == 3) and len(taus_p4) == 1 and (rnnID[0] == 1)
@@ -179,7 +196,7 @@ def main(args):
 
           tau0lepMMC = getattr(tree, "mmc_tau0_lep" + str(muIndex) + "_mmc_mlm_m")
           fillHistograms(taus_p4[0], leptons_p4[muIndex], leptons_p4[(muIndex + 1)%3],
-            leptons_p4[(muIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, triLepHistograms)
+            leptons_p4[(muIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, triLepHistograms, nTuples, newTree)
 
         # Two muons, one electron
         elif ((flavList.count(2) == 1) and (flavList.count(1) == 2) and (lCharge[eIndex] == -tauCharge[0])
@@ -192,7 +209,7 @@ def main(args):
 
           tau0lepMMC = getattr(tree, "mmc_tau0_lep" + str(eIndex) + "_mmc_mlm_m")
           fillHistograms(taus_p4[0], leptons_p4[eIndex], leptons_p4[(eIndex + 1)%3],
-          leptons_p4[(eIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, triLepHistograms)
+          leptons_p4[(eIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, triLepHistograms, nTuples, newTree)
 
         # One positive charge, two negatives
         elif ((chargeList.count(+1) == 1) and (chargeList.count(-1) == 2)
@@ -211,14 +228,16 @@ def main(args):
 
             tau0lepMMC = getattr(tree, "mmc_tau0_lep" + str((posIndex - 1)%3) + "_mmc_mlm_m")
             fillHistograms(taus_p4[0], leptons_p4[(posIndex - 1)%3], leptons_p4[posIndex],
-              leptons_p4[(posIndex + 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, triLepHistograms)
+              leptons_p4[(posIndex + 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, triLepHistograms,
+                         nTuples, newTree)
 
           elif ((zCandidate1 > zCandidate2) and ((lCharge[(posIndex + 1)%3] == -tauCharge[0]))
             and (leptons_p4[(posIndex + 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass2 > 81) and (zMass2 < 101)):
 
             tau0lepMMC = getattr(tree, "mmc_tau0_lep" + str((posIndex + 1)%3) + "_mmc_mlm_m")
             fillHistograms(taus_p4[0], leptons_p4[(posIndex + 1)%3], leptons_p4[posIndex],
-              leptons_p4[(posIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, triLepHistograms)
+              leptons_p4[(posIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, triLepHistograms,
+                          nTuples, newTree)
 
         # Two positive charges, one negative
         elif ((chargeList.count(-1) == 1) and (chargeList.count(+1) == 2)
@@ -237,20 +256,28 @@ def main(args):
 
             tau0lepMMC = getattr(tree, "mmc_tau0_lep" + str((negIndex - 1)%3) + "_mmc_mlm_m")
             fillHistograms(taus_p4[0], leptons_p4[(negIndex - 1)%3], leptons_p4[negIndex],
-              leptons_p4[(negIndex + 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, triLepHistograms)
+              leptons_p4[(negIndex + 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, triLepHistograms,
+                          nTuples, newTree)
 
           elif ((zCandidate1 > zCandidate2) and ((lCharge[(negIndex + 1)%3] == -tauCharge[0]))
             and (leptons_p4[(negIndex + 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass2 > 81) and (zMass2 < 101)):
 
             tau0lepMMC = getattr(tree, "mmc_tau0_lep" + str((negIndex + 1)%3) + "_mmc_mlm_m")
             fillHistograms(taus_p4[0], leptons_p4[(negIndex + 1)%3], leptons_p4[negIndex],
-              leptons_p4[(negIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, triLepHistograms)
+              leptons_p4[(negIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, triLepHistograms,
+                          nTuples, newTree)
 
   print("2lep selection cut integral yield:", diLepHistograms["tauPtSum"].Integral(0,
     diLepHistograms["tauPtSum"].GetNbinsX() + 1))
   print("3lep selection cut integral yield:", triLepHistograms["tauPtSum"].Integral(0,
     triLepHistograms["tauPtSum"].GetNbinsX() + 1))
 
+  # Write Ntuples to file
+  newTree.Write()
+  outNtupleFile.Close()
+  del newTree
+
+  # Generates output file name from input file name if not specified
   if (args.outputfile == None):
     outputName = "outputRoot/" + args.inputsample[:-1] + "-weighted.root"
   else:
@@ -275,6 +302,8 @@ if __name__ == "__main__":
     default="ZHlltt/", help='directory for input root files')
   parser.add_argument('--outputfile', '-o', metavar='OUTPUT', type=str, dest="outputfile",
     default=None, help='outputfile for process')
+  parser.add_argument('--ntuplefile', '-n', metavar='NTUPLEOUT', type=str, dest="outputntfile",
+    default=None, help='outputfile for ntuple')
   args = parser.parse_args()
 
   # call the main function
