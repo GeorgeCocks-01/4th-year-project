@@ -64,13 +64,13 @@ def fillHistograms(tau1, tauOrLep, Zlep1, Zlep2, met_p4, nJets, mmc, totalWeight
   fillers["deltaPhilltt"] = ((Zlep1 + Zlep2).DeltaPhi(tau1 + tauOrLep))
   fillers["mmc"] = (mmc)
 
-  for key in histograms: #fills histograms
+  for key in histograms:
     nTuples[key][0] = fillers[key] # fills nTuples with values
-    newTree.Fill() # fills new tree with nTuple array
-    histograms[key].Fill(fillers[key], totalWeight)
+    histograms[key].Fill(fillers[key], totalWeight) #fills histograms
 
   nTuples["weight"][0] = totalWeight
   newTree.Fill()
+
 
 def main(args):
   if (args.inputsample[-1] != "/"): #adds / to end of file path if not present
@@ -132,10 +132,9 @@ def main(args):
     outputNtName = args.outputntfile
 
   # Create ntuple output file
-  outNtupleFile3Lep = ROOT.TFile.Open(("outputNTuples/" + "2lep_" + outputNtName), "RECREATE")
-  outNtupleFile2Lep = ROOT.TFile.Open(("outputNTuples/" + "3lep_" + outputNtName), "RECREATE")
-  newTree2Lep = ROOT.TTree("nominal", "nominal")
-  newTree3Lep = ROOT.TTree("nominal", "nominal")
+  outNtupleFile = ROOT.TFile.Open(("outputNTuples/" + outputNtName), "RECREATE")
+  newTree2Lep = ROOT.TTree("nominal2lep", "nominal2lep")
+  newTree3Lep = ROOT.TTree("nominal3lep", "nominal3lep")
 
   nTuples2Lep = dict.fromkeys(diLepHistograms.keys()) # list for nTuples from diLepHistograms
   nTuples3Lep = dict.fromkeys(diLepHistograms.keys()) # list for nTuples from triLepHistograms
@@ -285,12 +284,9 @@ def main(args):
 
 
   # Write Ntuples to files
-  newTree3Lep.Write()
-  outNtupleFile3Lep.Close()
-
   newTree2Lep.Write()
-  outNtupleFile2Lep.Close()
-
+  newTree3Lep.Write()
+  outNtupleFile.Close()
   del newTree2Lep
   del newTree3Lep
 
