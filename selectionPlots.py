@@ -185,7 +185,8 @@ def main(args):
         and ((leptons_p4[0] + leptons_p4[1]).M() < 111) and (leptonsIDTight[0] == 1) and (leptonsIDTight[1] == 1)
         and ((lFlavour[0] == 1 and muIsoPass[0] == 1 and muIsoPass[1] == 1)
         or (lFlavour[0] == 2 and eIsoPass[0] == 1 and eIsoPass[1] == 1)) and (tauBdt[0] == 1) and (tauBdt[1] == 1)
-        and (taus_p4[0].DeltaR(taus_p4[1]) < 3.1) and deltaPhill > -3.2 and deltaPhill < 2.4):
+        and (taus_p4[0].DeltaR(taus_p4[1]) < 3.1) and deltaPhill > -3.2 and deltaPhill < 2.4
+        and leptons_p4[0].DeltaR(leptons_p4[1]) < 3):
         tau0tau1MMC = getattr(tree, "mmc_tau0_tau1_mmc_mlm_m")
         fillHistograms(taus_p4[0], taus_p4[1], leptons_p4[0], leptons_p4[1], met_p4.Pt(), nJets30, tau0tau1MMC, wTotal,
           diLepHistograms, nTuples2Lep, newTree2Lep)
@@ -208,7 +209,8 @@ def main(args):
           and ((leptons_p4[(muIndex + 1)%3] + leptons_p4[(muIndex - 1)%3]).M() > 81)
           and ((leptons_p4[(muIndex + 1)%3] + leptons_p4[(muIndex - 1)%3]).M() < 101) and (muIsoPass[muIndex] == 1)
           and (eIsoPass[(muIndex + 1)%3] == 1) and (eIsoPass[(muIndex - 1)%3] == 1)
-          and (taus_p4[0].DeltaR(leptons_p4[muIndex]) < 3.1)):
+          and (taus_p4[0].DeltaR(leptons_p4[muIndex]) < 3.1)
+          and leptons_p4[muIndex + 1].DeltaR(leptons_p4[muIndex - 1]) < 3):
           #and (lFlavour[(muIndex + 1)%3] == lFlavour[(muIndex - 1)%3]) is implied
 
           if (leptons_p4[(muIndex + 1)%3].Eta() > leptons_p4[(muIndex - 1)%3].Eta()):
@@ -229,7 +231,8 @@ def main(args):
             and ((leptons_p4[(eIndex + 1)%3] + leptons_p4[(eIndex - 1)%3]).M() > 81)
             and ((leptons_p4[(eIndex + 1)%3] + leptons_p4[(eIndex - 1)%3]).M() < 101) and (eIsoPass[eIndex] == 1)
             and (muIsoPass[(eIndex + 1)%3] == 1) and (muIsoPass[(eIndex - 1)%3] == 1)
-            and (taus_p4[0].DeltaR(leptons_p4[eIndex]) < 3.1)):
+            and (taus_p4[0].DeltaR(leptons_p4[eIndex]) < 3.1)
+            and leptons_p4[eIndex + 1].DeltaR(leptons_p4[eIndex - 1]) < 3):
           #and (lFlavour[(eIndex + 1)%3] == lFlavour[(eIndex - 1)%3]) is implied
 
           if (leptons_p4[(eIndex + 1)%3].Eta() > leptons_p4[(eIndex - 1)%3].Eta()):
@@ -257,7 +260,8 @@ def main(args):
 
           if ((zCandidate1 < zCandidate2) and ((lCharge[(posIndex - 1)%3] == -tauCharge[0]))
             and (leptons_p4[(posIndex - 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass1 > 81) and (zMass1 < 101)
-            and (taus_p4[0].DeltaR(leptons_p4[(posIndex - 1)%3]) < 3.1) ):
+            and (taus_p4[0].DeltaR(leptons_p4[(posIndex - 1)%3]) < 3.1)
+            and (leptons_p4[posIndex].DeltaR(leptons_p4[(posIndex + 1)%3]) < 3)):
 
             if (leptons_p4[posIndex] > leptons_p4[(posIndex + 1)%3]):
               deltaPhill = (leptons_p4[posIndex].DeltaPhi(leptons_p4[(posIndex + 1)%3]))
@@ -272,7 +276,8 @@ def main(args):
 
           elif ((zCandidate1 > zCandidate2) and ((lCharge[(posIndex + 1)%3] == -tauCharge[0]))
             and (leptons_p4[(posIndex + 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass2 > 81) and (zMass2 < 101)
-            and (taus_p4[0].DeltaR(leptons_p4[(posIndex + 1)%3]) < 3.1)):
+            and (taus_p4[0].DeltaR(leptons_p4[(posIndex + 1)%3]) < 3.1)
+            and (leptons_p4[posIndex].DeltaR(leptons_p4[(posIndex - 1)%3]) < 3)):
 
             if (leptons_p4[posIndex] > leptons_p4[(posIndex - 1)%3]):
               deltaPhill = (leptons_p4[posIndex].DeltaPhi(leptons_p4[(posIndex - 1)%3]))
@@ -299,7 +304,8 @@ def main(args):
 
           if ((zCandidate1 < zCandidate2) and ((lCharge[(negIndex - 1)%3] == -tauCharge[0]))
             and (leptons_p4[(negIndex - 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass1 > 81) and (zMass1 < 101)
-            and (taus_p4[0].DeltaR(leptons_p4[(negIndex - 1)%3]) < 3.1)):
+            and (taus_p4[0].DeltaR(leptons_p4[(negIndex - 1)%3]) < 3.1)
+            and (leptons_p4[negIndex].DeltaR(leptons_p4[(negIndex + 1)%3]) < 3)):
 
             if (leptons_p4[negIndex] > leptons_p4[(negIndex + 1)%3]):
               deltaPhill = (leptons_p4[negIndex].DeltaPhi(leptons_p4[(negIndex + 1)%3]))
@@ -314,7 +320,8 @@ def main(args):
 
           elif ((zCandidate1 > zCandidate2) and ((lCharge[(negIndex + 1)%3] == -tauCharge[0]))
             and (leptons_p4[(negIndex + 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass2 > 81) and (zMass2 < 101)
-            and (taus_p4[0].DeltaR(leptons_p4[(negIndex + 1)%3]) < 3.1)):
+            and (taus_p4[0].DeltaR(leptons_p4[(negIndex + 1)%3]) < 3.1)
+            and (leptons_p4[negIndex].DeltaR(leptons_p4[(negIndex - 1)%3]) < 3)):
 
             if (leptons_p4[negIndex] > leptons_p4[(negIndex - 1)%3]):
               deltaPhill = (leptons_p4[negIndex].DeltaPhi(leptons_p4[(negIndex - 1)%3]))
