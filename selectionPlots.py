@@ -201,7 +201,7 @@ def main(args):
           and ((leptons_p4[(muIndex + 1)%3] + leptons_p4[(muIndex - 1)%3]).M() > 81)
           and ((leptons_p4[(muIndex + 1)%3] + leptons_p4[(muIndex - 1)%3]).M() < 101) and (muIsoPass[muIndex] == 1)
           and (eIsoPass[(muIndex + 1)%3] == 1) and (eIsoPass[(muIndex - 1)%3] == 1)
-          and (taus_p4[0].DeltaR(leptons_p4[muIndex]) > 3.1)):
+          and (taus_p4[0].DeltaR(leptons_p4[muIndex]) < 3.1)):
           #and (lFlavour[(muIndex + 1)%3] == lFlavour[(muIndex - 1)%3]) is implied
 
           tau0lepMMC = getattr(tree, "mmc_tau0_lep" + str(muIndex) + "_mmc_mlm_m")
@@ -216,7 +216,7 @@ def main(args):
             and ((leptons_p4[(eIndex + 1)%3] + leptons_p4[(eIndex - 1)%3]).M() > 81)
             and ((leptons_p4[(eIndex + 1)%3] + leptons_p4[(eIndex - 1)%3]).M() < 101) and (eIsoPass[eIndex] == 1)
             and (muIsoPass[(eIndex + 1)%3] == 1) and (muIsoPass[(eIndex - 1)%3] == 1)
-            and (taus_p4[0].DeltaR(leptons_p4[eIndex]) > 3.1)):
+            and (taus_p4[0].DeltaR(leptons_p4[eIndex]) < 3.1)):
           #and (lFlavour[(eIndex + 1)%3] == lFlavour[(eIndex - 1)%3]) is implied
 
           tau0lepMMC = getattr(tree, "mmc_tau0_lep" + str(eIndex) + "_mmc_mlm_m")
@@ -238,7 +238,7 @@ def main(args):
 
           if ((zCandidate1 < zCandidate2) and ((lCharge[(posIndex - 1)%3] == -tauCharge[0]))
             and (leptons_p4[(posIndex - 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass1 > 81) and (zMass1 < 101)
-            and (taus_p4[0].DeltaR(leptons_p4[(posIndex - 1)%3]) > 3.1)):
+            and (taus_p4[0].DeltaR(leptons_p4[(posIndex - 1)%3]) < 3.1)):
 
             tau0lepMMC = getattr(tree, "mmc_tau0_lep" + str((posIndex - 1)%3) + "_mmc_mlm_m")
             fillHistograms(taus_p4[0], leptons_p4[(posIndex - 1)%3], leptons_p4[posIndex],
@@ -247,7 +247,7 @@ def main(args):
 
           elif ((zCandidate1 > zCandidate2) and ((lCharge[(posIndex + 1)%3] == -tauCharge[0]))
             and (leptons_p4[(posIndex + 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass2 > 81) and (zMass2 < 101)
-            and (taus_p4[0].DeltaR(leptons_p4[(posIndex + 1)%3]) > 3.1)):
+            and (taus_p4[0].DeltaR(leptons_p4[(posIndex + 1)%3]) < 3.1)):
 
             tau0lepMMC = getattr(tree, "mmc_tau0_lep" + str((posIndex + 1)%3) + "_mmc_mlm_m")
             fillHistograms(taus_p4[0], leptons_p4[(posIndex + 1)%3], leptons_p4[posIndex],
@@ -268,7 +268,7 @@ def main(args):
 
           if ((zCandidate1 < zCandidate2) and ((lCharge[(negIndex - 1)%3] == -tauCharge[0]))
             and (leptons_p4[(negIndex - 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass1 > 81) and (zMass1 < 101)
-            and (taus_p4[0].DeltaR(leptons_p4[(negIndex - 1)%3]) > 3.1)):
+            and (taus_p4[0].DeltaR(leptons_p4[(negIndex - 1)%3]) < 3.1)):
 
             tau0lepMMC = getattr(tree, "mmc_tau0_lep" + str((negIndex - 1)%3) + "_mmc_mlm_m")
             fillHistograms(taus_p4[0], leptons_p4[(negIndex - 1)%3], leptons_p4[negIndex],
@@ -277,7 +277,7 @@ def main(args):
 
           elif ((zCandidate1 > zCandidate2) and ((lCharge[(negIndex + 1)%3] == -tauCharge[0]))
             and (leptons_p4[(negIndex + 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass2 > 81) and (zMass2 < 101)
-            and (taus_p4[0].DeltaR(leptons_p4[(negIndex + 1)%3]) > 3.1)):
+            and (taus_p4[0].DeltaR(leptons_p4[(negIndex + 1)%3]) < 3.1)):
 
             tau0lepMMC = getattr(tree, "mmc_tau0_lep" + str((negIndex + 1)%3) + "_mmc_mlm_m")
             fillHistograms(taus_p4[0], leptons_p4[(negIndex + 1)%3], leptons_p4[negIndex],
