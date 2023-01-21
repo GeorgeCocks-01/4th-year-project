@@ -188,7 +188,8 @@ def main(args):
         and (taus_p4[0].DeltaR(taus_p4[1]) < 3.1) and deltaPhill > -3.2 and deltaPhill < 2.4
         and (leptons_p4[0].DeltaR(leptons_p4[1]) < 3)
         and ((taus_p4[0] + taus_p4[1]).DeltaR(leptons_p4[0] + leptons_p4[1]) < 3.9)
-        and (math.fabs(taus_p4[0].Eta() - taus_p4[1].Eta()) < 1.9)):
+        and (math.fabs(taus_p4[0].Eta() - taus_p4[1].Eta()) < 1.9)
+        and (math.fabs(leptons_p4[0].Eta() - leptons_p4[1].Eta()) < 3.5)): # different value for 2 lepton cut
         tau0tau1MMC = getattr(tree, "mmc_tau0_tau1_mmc_mlm_m")
         fillHistograms(taus_p4[0], taus_p4[1], leptons_p4[0], leptons_p4[1], met_p4.Pt(), nJets30, tau0tau1MMC, wTotal,
           diLepHistograms, nTuples2Lep, newTree2Lep)
@@ -214,7 +215,8 @@ def main(args):
           and (taus_p4[0].DeltaR(leptons_p4[muIndex]) < 3.1)
           and (leptons_p4[muIndex + 1].DeltaR(leptons_p4[muIndex - 1]) < 3)
           and ((taus_p4[0] + leptons_p4[muIndex]).DeltaR(leptons_p4[muIndex + 1] + leptons_p4[muIndex - 1]) < 3.9)
-          and (math.fabs(taus_p4[0].Eta() - leptons_p4[muIndex].Eta()) < 1.9)):
+          and (math.fabs(taus_p4[0].Eta() - leptons_p4[muIndex].Eta()) < 1.9)
+          and (math.fabs(leptons_p4[muIndex + 1].Eta() - leptons_p4[muIndex - 1].Eta()) < 2.7)):
           #and (lFlavour[(muIndex + 1)%3] == lFlavour[(muIndex - 1)%3]) is implied
 
           if (leptons_p4[(muIndex + 1)%3].Eta() > leptons_p4[(muIndex - 1)%3].Eta()):
@@ -238,7 +240,8 @@ def main(args):
             and (taus_p4[0].DeltaR(leptons_p4[eIndex]) < 3.1)
             and (leptons_p4[eIndex + 1].DeltaR(leptons_p4[eIndex - 1]) < 3)
             and ((taus_p4[0] + leptons_p4[eIndex]).DeltaR(leptons_p4[eIndex + 1] + leptons_p4[eIndex - 1]) < 3.9)
-            and (math.fabs(taus_p4[0].Eta() - leptons_p4[eIndex].Eta()) < 1.9)):
+            and (math.fabs(taus_p4[0].Eta() - leptons_p4[eIndex].Eta()) < 1.9)
+            and (math.fabs(leptons_p4[eIndex + 1].Eta() - leptons_p4[eIndex - 1].Eta()) < 2.7)):
           #and (lFlavour[(eIndex + 1)%3] == lFlavour[(eIndex - 1)%3]) is implied
 
           if (leptons_p4[(eIndex + 1)%3].Eta() > leptons_p4[(eIndex - 1)%3].Eta()):
@@ -270,7 +273,8 @@ def main(args):
             and (leptons_p4[posIndex].DeltaR(leptons_p4[(posIndex + 1)%3]) < 3)
             and ((taus_p4[0] + leptons_p4[(posIndex - 1)%3]).DeltaR(leptons_p4[posIndex] +
             leptons_p4[(posIndex + 1)%3]) < 3.9)
-            and (math.fabs(taus_p4[0].Eta() - leptons_p4[(posIndex - 1)%3].Eta()) < 1.9)):
+            and (math.fabs(taus_p4[0].Eta() - leptons_p4[(posIndex - 1)%3].Eta()) < 1.9)
+            and (math.fabs(leptons_p4[posIndex].Eta() - leptons_p4[(posIndex + 1)%3].Eta()) < 2.7)):
 
             if (leptons_p4[posIndex] > leptons_p4[(posIndex + 1)%3]):
               deltaPhill = (leptons_p4[posIndex].DeltaPhi(leptons_p4[(posIndex + 1)%3]))
@@ -289,7 +293,8 @@ def main(args):
             and (leptons_p4[posIndex].DeltaR(leptons_p4[(posIndex - 1)%3]) < 3)
             and ((taus_p4[0] + leptons_p4[(posIndex + 1)%3]).DeltaR(leptons_p4[posIndex] +
             leptons_p4[(posIndex - 1)%3]) < 3.9)
-            and (math.fabs(taus_p4[0].Eta() - leptons_p4[(posIndex + 1)%3].Eta()) < 1.9)):
+            and (math.fabs(taus_p4[0].Eta() - leptons_p4[(posIndex + 1)%3].Eta()) < 1.9)
+            and (math.fabs(leptons_p4[posIndex].Eta() - leptons_p4[(posIndex - 1)%3].Eta()) < 2.7)):
 
             if (leptons_p4[posIndex] > leptons_p4[(posIndex - 1)%3]):
               deltaPhill = (leptons_p4[posIndex].DeltaPhi(leptons_p4[(posIndex - 1)%3]))
@@ -320,7 +325,8 @@ def main(args):
             and (leptons_p4[negIndex].DeltaR(leptons_p4[(negIndex + 1)%3]) < 3)
             and ((taus_p4[0] + leptons_p4[(negIndex - 1)%3]).DeltaR(leptons_p4[negIndex] +
             leptons_p4[(negIndex + 1)%3]) < 3.9)
-            and (math.fabs(taus_p4[0].Eta() - leptons_p4[(negIndex - 1)%3].Eta()) < 1.9)):
+            and (math.fabs(taus_p4[0].Eta() - leptons_p4[(negIndex - 1)%3].Eta()) < 1.9)
+            and (math.fabs(leptons_p4[negIndex].Eta() - leptons_p4[(negIndex + 1)%3].Eta()) < 2.7)):
 
             if (leptons_p4[negIndex] > leptons_p4[(negIndex + 1)%3]):
               deltaPhill = (leptons_p4[negIndex].DeltaPhi(leptons_p4[(negIndex + 1)%3]))
@@ -339,7 +345,8 @@ def main(args):
             and (leptons_p4[negIndex].DeltaR(leptons_p4[(negIndex - 1)%3]) < 3)
             and ((taus_p4[0] + leptons_p4[(negIndex + 1)%3]).DeltaR(leptons_p4[negIndex] +
             leptons_p4[(negIndex - 1)%3]) < 3.9)
-            and (math.fabs(taus_p4[0].Eta() - leptons_p4[(negIndex + 1)%3].Eta()) < 1.9)):
+            and (math.fabs(taus_p4[0].Eta() - leptons_p4[(negIndex + 1)%3].Eta()) < 1.9)
+            and (math.fabs(leptons_p4[negIndex].Eta() - leptons_p4[(negIndex - 1)%3].Eta()) < 2.7)):
 
             if (leptons_p4[negIndex] > leptons_p4[(negIndex - 1)%3]):
               deltaPhill = (leptons_p4[negIndex].DeltaPhi(leptons_p4[(negIndex - 1)%3]))
