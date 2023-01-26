@@ -23,14 +23,14 @@ for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 l
 
   for sample in nTupleSamples: # Loop over the samples
     tree = uproot.open(sample + ":nominal" + cut)
-    tree.show()
+    # tree.show()
 
     # Properties
-    XTemp = tree.arrays(["tauPtSum", "zMassSum", "metPt", "deltaRll", "deltaRtt", "deltaEtall", "deltaEtatt", "nJets",
+    XDF = tree.arrays(["tauPtSum", "zMassSum", "metPt", "deltaRll", "deltaRtt", "deltaEtall", "deltaEtatt", "nJets",
              "deltaPhill", "deltaPhitt", "deltaPhilltt", "mmc"], library = "pd")
 
-    weight = tree.arrays(["weight"], library = "pd")
-
+    XTemp = XDF.iloc[:, :].values
+    weight = tree.arrays(["weight"], library = "np")["weight"]
 
     # 1 for signal, 0 for background
     yTemp = np.zeros(len(XTemp)) if nTupleSamples[sample] == 0 else np.ones(len(XTemp))
@@ -56,3 +56,7 @@ for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 l
   model.add(Dense(6, activation = "relu")) # Hidden layer with 6 nodes
   model.add(Dense(2, activation = "softmax")) # 2 output nodes for 2 classes
   model.compile(loss = "categorical_crossentropy", optimizer = "adam", metrics = ["accuracy"]) # Compile the model
+
+  # Train the model
+  history = model.fit(X_train, y_train, validation_data = (X_test,y_test), epochs=100, batch_size=64)
+
