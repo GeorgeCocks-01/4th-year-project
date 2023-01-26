@@ -5,6 +5,27 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import train_test_split
 from keras.models import Sequential
 from keras.layers import Dense
+from selectionPlots import findAllFilesInPath
+
+zJetsSamples = []
+zJetsSamples.extend(findAllFilesInPath("*Zee*.root", "outputRoot/"))
+zJetsSamples.extend(findAllFilesInPath("*Zmumu*.root", "outputRoot/"))
+zJetsSamples.extend(findAllFilesInPath("*Ztt*.root", "outputRoot/"))
+
+nTupleSamples = ("ggZH", "ZHlltt", "llll", "lllv", "WqqZll", "ZqqZll", "ttH", "llvv")
+
+nTupleSamples = {
+  "ggZH": 1,
+  "ZHlltt": 1,
+  "llll": 0,
+  "lllv": 0,
+  "WqqZll": 0,
+  "ZqqZll": 0,
+  "ttH": 0,
+  "llvv": 0,
+  "ZJets": 0
+}
+
 
 # CHANGE TO SUMMED UP FILE
 zhTree2lep = uproot.open("outputNTuples/ZHlltt.root:nominal2lep")
