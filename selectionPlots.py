@@ -182,8 +182,7 @@ def main(args):
         and (taus_p4[0].DeltaR(taus_p4[1]) < 3.1) and (leptons_p4[0].DeltaR(leptons_p4[1]) < 3)
         and ((taus_p4[0] + taus_p4[1]).DeltaR(leptons_p4[0] + leptons_p4[1]) < 3.9)
         and (math.fabs(taus_p4[0].Eta() - taus_p4[1].Eta()) < 1.9)
-        and (math.fabs(leptons_p4[0].Eta() - leptons_p4[1].Eta()) < 3.5) # different value for 2 lepton cut
-        and (taus_p4[0].DeltaPhi(taus_p4[1]) > -3.1) and (taus_p4[0].DeltaPhi(taus_p4[1]) < 3.1)):
+        and (math.fabs(leptons_p4[0].Eta() - leptons_p4[1].Eta()) < 3.5)): # different value for 2 lepton cut
 
         # define deltaPhill for selection cut
         if (leptons_p4[0].Eta() > leptons_p4[1].Eta()):
