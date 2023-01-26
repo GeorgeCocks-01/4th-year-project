@@ -10,7 +10,8 @@ from keras.layers import Dense
 zhTree2lep = uproot.open("outputNTuples/ZHlltt.root:nominal2lep")
 zhTree2lep.show()
 
-X = zhTree2lep.arrays(["tauPtSum", "zMassSum", "metPt", "deltaRll", "deltaRtt", "deltaEtall", "deltaEtatt", "nJets", "deltaPhill", "deltaPhitt", "deltaPhilltt", "mmc"], library = "np")
+X = zhTree2lep.arrays(["tauPtSum", "zMassSum", "metPt", "deltaRll", "deltaRtt", "deltaEtall", "deltaEtatt", "nJets",
+                       "deltaPhill", "deltaPhitt", "deltaPhilltt", "mmc"], library = "np")
 # print(properties)
 
 zhWeight2lep = zhTree2lep.arrays(["weight"], library = "np") # weight for each event
