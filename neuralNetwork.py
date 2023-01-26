@@ -7,48 +7,52 @@ from keras.models import Sequential
 from keras.layers import Dense
 from selectionPlots import findAllFilesInPath
 
-zJetsSamples = []
-zJetsSamples.extend(findAllFilesInPath("*Zee*.root", "outputRoot/"))
-zJetsSamples.extend(findAllFilesInPath("*Zmumu*.root", "outputRoot/"))
-zJetsSamples.extend(findAllFilesInPath("*Ztt*.root", "outputRoot/"))
+# Get the samples from the outputNTuples folder, store them in a dictionary with 1 for signal and 0 for background
+sampleNames = findAllFilesInPath("*.root", "outputNTuples/")
+nTupleSamples = dict.fromkeys(sampleNames, 0)
+nTupleSamples["ZHlltt"] = 1
+nTupleSamples["ggZH"] = 1
 
-nTupleSamples = ("ggZH", "ZHlltt", "llll", "lllv", "WqqZll", "ZqqZll", "ttH", "llvv")
+# Tuple of variables to get from each file
+variables = ["tauPtSum", "zMassSum", "metPt", "deltaRll", "deltaRtt", "deltaEtall", "deltaEtatt", "nJets",
+             "deltaPhill", "deltaPhitt", "deltaPhilltt", "mmc"]
 
-nTupleSamples = {
-  "ggZH": 1,
-  "ZHlltt": 1,
-  "llll": 0,
-  "lllv": 0,
-  "WqqZll": 0,
-  "ZqqZll": 0,
-  "ttH": 0,
-  "llvv": 0,
-  "ZJets": 0
-}
+for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 lepton)
+  X = np.array([])
+  y = np.array([])
+
+  for sample in nTupleSamples: # Loop over the samples
+    tree = uproot.open(sample + ":nominal" + cut)
+    tree.show()
+
+    # Properties
+    XTemp = tree.arrays(["tauPtSum", "zMassSum", "metPt", "deltaRll", "deltaRtt", "deltaEtall", "deltaEtatt", "nJets",
+             "deltaPhill", "deltaPhitt", "deltaPhilltt", "mmc"], library = "pd")
+
+    weight = tree.arrays(["weight"], library = "pd")
 
 
-# CHANGE TO SUMMED UP FILE
-zhTree2lep = uproot.open("outputNTuples/ZHlltt.root:nominal2lep")
-zhTree2lep.show()
+    # 1 for signal, 0 for background
+    yTemp = np.zeros(len(XTemp)) if nTupleSamples[sample] == 0 else np.ones(len(XTemp))
 
-X = zhTree2lep.arrays(["tauPtSum", "zMassSum", "metPt", "deltaRll", "deltaRtt", "deltaEtall", "deltaEtatt", "nJets",
-                       "deltaPhill", "deltaPhitt", "deltaPhilltt", "mmc"], library = "np")
-# print(properties)
+    # Concatenate the arrays
+    X = np.concatenate((X, XTemp))
+    y = np.concatenate((y, yTemp))
 
-zhWeight2lep = zhTree2lep.arrays(["weight"], library = "np") # weight for each event
-y = np.ones(len(X)) # 1 for signal, 0 for background
+  # Scale the data
+  sc = StandardScaler()
+  X = sc.fit_transform(X)
 
-sc = StandardScaler()
-X = sc.fit_transform(X) # scale the data
-ohe = OneHotEncoder()
-y = ohe.fit_transform(y).toarray() # hot encoding labels
+  # One hot encode the labels
+  ohe = OneHotEncoder()
+  y = ohe.fit_transform(y).toarray()
 
-# Split the data into training and testing sets
-X_train,X_test,y_train,y_test = train_test_split(X,y,test_size = 0.1)
+  # Split the data into training and testing sets
+  X_train,X_test,y_train,y_test = train_test_split(X,y,test_size = 0.1)
 
-# Create the model
-model = Sequential()
-model.add(Dense(10, input_dim = 12, activation = "relu")) # Hidden layer with 10 nodes
-model.add(Dense(6, activation = "relu")) # Hidden layer with 6 nodes
-model.add(Dense(2, activation = "softmax")) # 2 output nodes for 2 classes
-model.compile(loss = "categorical_crossentropy", optimizer = "adam", metrics = ["accuracy"]) # Compile the model
+  # Create the model
+  model = Sequential()
+  model.add(Dense(10, input_dim = 12, activation = "relu")) # Hidden layer with 10 nodes
+  model.add(Dense(6, activation = "relu")) # Hidden layer with 6 nodes
+  model.add(Dense(2, activation = "softmax")) # 2 output nodes for 2 classes
+  model.compile(loss = "categorical_crossentropy", optimizer = "adam", metrics = ["accuracy"]) # Compile the model
