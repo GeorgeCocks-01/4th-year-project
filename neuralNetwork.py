@@ -1,13 +1,16 @@
 import uproot
 import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+from selectionPlots import findAllFilesInPath
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from keras.models import Sequential
 from keras.layers import Dense
-from selectionPlots import findAllFilesInPath
-import matplotlib.pyplot as plt
+
+matplotlib.use("SVG")
 
 # Get the samples from the outputNTuples folder, store them in a dictionary with 1 for signal and 0 for background
 sampleNames = findAllFilesInPath("*.root", "outputNTuples/")
@@ -59,7 +62,7 @@ for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 l
   model.compile(loss = "categorical_crossentropy", optimizer = "adam", metrics = ["accuracy"]) # Compile the model
 
   # Train the model
-  history = model.fit(X_train, y_train, validation_data = (X_test, y_test), epochs=50, batch_size=64)
+  modelFit = model.fit(X_train, y_train, validation_data = (X_test, y_test), epochs=50, batch_size=64)
 
   # Predict the labels
   y_pred = model.predict(X_test)
@@ -72,8 +75,9 @@ for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 l
   print("Accuracy is:", accuracy*100, "% on the test set.")
 
   # Plot the loss and accuracy
-  plt.plot(history.history["loss"])
-  plt.plot(history.history["val_loss"])
+  plt.figure(figsize=(10, 10))
+  plt.plot(modelFit.history["loss"])
+  plt.plot(modelFit.history["val_loss"])
   plt.title("Model loss")
   plt.ylabel("Loss")
   plt.xlabel("Epoch")
@@ -81,8 +85,9 @@ for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 l
   plt.savefig("nnLoss_" + cut + ".png")
   plt.clf()
 
-  plt.plot(history.history["accuracy"])
-  plt.plot(history.history["val_accuracy"])
+  plt.figure(figsize=(10, 10))
+  plt.plot(modelFit.history["accuracy"])
+  plt.plot(modelFit.history["val_accuracy"])
   plt.title("Model accuracy")
   plt.ylabel("Accuracy")
   plt.xlabel("Epoch")

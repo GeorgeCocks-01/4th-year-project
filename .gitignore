@@ -16,3 +16,4 @@ imgPlots/
 SBplots/
 outputNTuples/
 *.csv
+*.png
