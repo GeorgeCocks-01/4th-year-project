@@ -52,12 +52,13 @@ for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 l
   y = ohe.fit_transform(y.reshape(-1,1)).toarray()
 
   # Split the data into training and testing sets
-  X_train,X_test,y_train,y_test = train_test_split(X, y, test_size = 0.2)
+  X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2)
 
   # Create the model
   model = Sequential()
-  model.add(Dense(10, input_dim = 12, activation = "relu")) # Hidden layer with 10 nodes
-  model.add(Dense(6, activation = "relu")) # Hidden layer with 6 nodes
+  model.add(Dense(20, input_dim = 12, activation = "relu")) # Hidden layer with 10 nodes
+  model.add(Dense(15, activation = "relu")) # Hidden layer with 6 nodes
+  model.add(Dense(10, activation = "relu")) # Hidden layer with 4 nodes
   model.add(Dense(2, activation = "softmax")) # 2 output nodes for 2 classes
   model.compile(loss = "categorical_crossentropy", optimizer = "adam", metrics = ["accuracy"]) # Compile the model
 
@@ -67,7 +68,6 @@ for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 l
   # Predict the labels
   y_pred = model.predict(X_test)
   pred = list(np.argmax(y_pred, axis = 1))
-
   test = list(np.argmax(y_test, axis = 1)) # Inverse one-hot-encoding the labels
 
   # Calculate the accuracy
@@ -75,20 +75,20 @@ for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 l
   print("Accuracy is:", accuracy*100, "% on the test set.")
 
   # Plot the loss and accuracy
-  plt.figure(figsize=(10, 10))
+  plt.figure(figsize=(8, 6))
   plt.plot(modelFit.history["loss"])
   plt.plot(modelFit.history["val_loss"])
-  plt.title("Model loss")
+  plt.title(cut + " Model loss")
   plt.ylabel("Loss")
   plt.xlabel("Epoch")
   plt.legend(['Train', 'Test'], loc = 'upper left')
   plt.savefig("nnLoss_" + cut + ".png")
   plt.clf()
 
-  plt.figure(figsize=(10, 10))
+  plt.figure(figsize=(8, 6))
   plt.plot(modelFit.history["accuracy"])
   plt.plot(modelFit.history["val_accuracy"])
-  plt.title("Model accuracy")
+  plt.title(cut + " Model accuracy")
   plt.ylabel("Accuracy")
   plt.xlabel("Epoch")
   plt.legend(['Train', 'Test'], loc = 'upper left')
