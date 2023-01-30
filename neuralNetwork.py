@@ -59,8 +59,8 @@ for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 l
   model.add(Dense(20, input_dim = 12, activation = "relu")) # Hidden layer with 10 nodes
   model.add(Dense(15, activation = "relu")) # Hidden layer with 6 nodes
   model.add(Dense(10, activation = "relu")) # Hidden layer with 4 nodes
-  model.add(Dense(2, activation = "softmax")) # 2 output nodes for 2 classes
-  model.compile(loss = "categorical_crossentropy", optimizer = "adam", metrics = ["accuracy"]) # Compile the model
+  model.add(Dense(2, activation = "sigmoid")) # 2 output nodes for 2 classes
+  model.compile(loss = "binary_crossentropy", optimizer = "adam", metrics = ["accuracy"]) # Compile the model
 
   # Train the model
   modelFit = model.fit(X_train, y_train, validation_data = (X_test, y_test), epochs=50, batch_size=64)
