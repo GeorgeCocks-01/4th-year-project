@@ -53,7 +53,7 @@ for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 l
 
   # Create the model
   model = Sequential()
-  model.add(Dense(15, input_dim = 12, activation = "relu")) # Hidden layer
+  model.add(Dense(15, input_dim = 13, activation = "relu")) # Hidden layer
   model.add(Dense(12, activation = "relu")) # Hidden layer
   model.add(Dense(8, activation = "relu")) # Hidden layer
   model.add(Dense(2, activation = "sigmoid")) # 2 output nodes for 2 classes
