@@ -10,17 +10,16 @@ from sklearn.metrics import accuracy_score
 from keras.models import Sequential
 from keras.layers import Dense
 
-matplotlib.use("SVG")
+matplotlib.use("SVG") # Use SVG for matplotlib
 
 # Get the samples from the outputNTuples folder, store them in a dictionary with 1 for signal and 0 for background
-sampleNames = findAllFilesInPath("*.root", "outputNTuples/")
+sampleNames = findAllFilesInPath("*.root", "nTupleGroups/")
 nTupleSamples = dict.fromkeys(sampleNames, 0)
-nTupleSamples["outputNTuples/ZHlltt.root"] = 1
-nTupleSamples["outputNTuples/ggZH.root"] = 1
+nTupleSamples["nTupleGroups/signalGroup.root"] = 1
 
 # Tuple of variables to get from each file
-variables = ["tauPtSum", "zMassSum", "metPt", "deltaRll", "deltaRtt", "deltaEtall", "deltaEtatt", "nJets",
-             "deltaPhill", "deltaPhitt", "deltaPhilltt", "mmc"]
+variables = ["tauPtSum", "zMassSum", "metPt", "deltaRll", "deltaRtt", "deltaRttll", "deltaEtall", "deltaEtatt",
+             "nJets", "deltaPhill", "deltaPhitt", "deltaPhilltt", "mmc"]
 
 for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 lepton)
   X = np.array([])
@@ -29,9 +28,7 @@ for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 l
   for sample in nTupleSamples: # Loop over the samples
 
     with uproot.open(sample + ":nominal" + cut) as tree:
-      # Properties
-      XTemp = tree.arrays(["tauPtSum", "zMassSum", "metPt", "deltaRll", "deltaRtt", "deltaEtall", "deltaEtatt", "nJets",
-        "deltaPhill", "deltaPhitt", "deltaPhilltt", "mmc"], library = "pd")
+      XTemp = tree.arrays(variables, library = "pd")
       weight = tree["weight"].array(library = "np")
 
     XTemp = XTemp.iloc[:, :].values
@@ -82,7 +79,7 @@ for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 l
   plt.ylabel("Loss")
   plt.xlabel("Epoch")
   plt.legend(['Train', 'Test'], loc = 'upper left')
-  plt.savefig("nnLoss_" + cut + ".png")
+  plt.savefig("nnPlots/nnLoss" + cut + ".png")
   plt.clf()
 
   plt.figure(figsize=(8, 6))
@@ -92,5 +89,5 @@ for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 l
   plt.ylabel("Accuracy")
   plt.xlabel("Epoch")
   plt.legend(['Train', 'Test'], loc = 'upper left')
-  plt.savefig("nnAccuracy_" + cut + ".png")
+  plt.savefig("nnPlots/nnAccuracy" + cut + ".png")
   plt.clf()

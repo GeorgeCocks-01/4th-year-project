@@ -17,3 +17,5 @@ SBplots/
 outputNTuples/
 *.csv
 *.png
+nTupleGroups/
+nnPlots/
