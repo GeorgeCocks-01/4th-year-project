@@ -33,6 +33,9 @@ varList = ["tau_pt_sum", "Z_lepton_mass_sum", "met_pt", "delta_R_ll", "delta_R_t
 "delta_Eta_ll", "delta_Eta_tt", "delta_R_tt_ll", "n_jets", "delta_Phi_ll",
 "delta_Phi_tt", "delta_Phi_ll_tt", "mmc_mass"]
 
+# Clear plottingYields.txt
+open("plottingYields.txt", "w").close()
+
 for cut in ["2_lep_", "3_lep_"]: # Loop over the different selection cuts (2 and 3 lepton)
   cutYields = {samples[0][0]: None, samples[1][0]: None, samples[2][0]: None, samples[3][0]: None}
   for var in varList: # Loop over the variables
@@ -141,7 +144,14 @@ for cut in ["2_lep_", "3_lep_"]: # Loop over the different selection cuts (2 and
     canv.SaveAs('SBplots/SB_' + var + '.pdf')
     canv.Clear()
 
+  # Write the yields to a file
+  f = open("plottingYields.txt", "a")
   backgroundYield = cutYields["llll"] + cutYields["other di-boson"] + cutYields["Jets"]
+  f.write((str)(cut) + ": " + (str)(cutYields) + "\n")
+  f.write("S/B: " + (str)(cutYields["signal"]/backgroundYield) + "\n")
+  f.write("S/sqrt(S+B): " + (str)(cutYields["signal"]/sqrt(cutYields["signal"] + backgroundYield)) + "\n\n")
+  f.close()
+  # Print the yields
   print((str)(cut) + ": " + (str)(cutYields))
   print("S/B: " + (str)(cutYields["signal"]/backgroundYield))
   print("S/sqrt(S+B): " + (str)(cutYields["signal"]/sqrt(cutYields["signal"] + backgroundYield)) + "\n")
