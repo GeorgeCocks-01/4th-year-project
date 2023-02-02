@@ -19,3 +19,4 @@ outputNTuples/
 *.png
 nTupleGroups/
 nnPlots/
+hyperTuning/
