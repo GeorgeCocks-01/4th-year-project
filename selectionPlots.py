@@ -44,8 +44,9 @@ def findAllFilesInPath( pattern ,path ):
   checkPath( path, items )
   return files
 
-def fillHistograms(tau1, tauOrLep, Zlep1, Zlep2, met_p4, nJets, mmc, totalWeight, histograms, nTuples, newTree):
-  fillers = dict.fromkeys(histograms.keys())
+def fillHistograms(tau1, tauOrLep, Zlep1, Zlep2, met_p4, nJets, mmc, totalWeight, nTuples, newTree, histograms = None):
+  fillers = dict.fromkeys(nTuples.keys())
+  del fillers["weight"]
 
   fillers["tauPtSum"] = tau1.Pt() + tauOrLep.Pt()
   fillers["zMassSum"] = (Zlep1 + Zlep2).M()
@@ -64,13 +65,16 @@ def fillHistograms(tau1, tauOrLep, Zlep1, Zlep2, met_p4, nJets, mmc, totalWeight
   fillers["deltaPhilltt"] = ((Zlep1 + Zlep2).DeltaPhi(tau1 + tauOrLep))
   fillers["mmc"] = (mmc)
 
-  for key in histograms:
-    nTuples[key][0] = fillers[key] # fills nTuples with values
-    histograms[key].Fill(fillers[key], totalWeight) #fills histograms
+  if histograms is not None:
+    for key in fillers:
+      nTuples[key][0] = fillers[key] # fills nTuples with values
+      histograms[key].Fill(fillers[key], totalWeight) #fills histograms
+  else:
+    for key in fillers:
+      nTuples[key][0] = fillers[key]
 
   nTuples["weight"][0] = totalWeight
   newTree.Fill()
-
 
 def main(args):
   if (args.inputsample[-1] != "/"): #adds / to end of file path if not present
@@ -178,22 +182,25 @@ def main(args):
         and (taus_p4[0].Pt() + taus_p4[1].Pt() > 75) and ((leptons_p4[0] + leptons_p4[1]).M() > 71)
         and ((leptons_p4[0] + leptons_p4[1]).M() < 111) and (leptonsIDTight[0] == 1) and (leptonsIDTight[1] == 1)
         and ((lFlavour[0] == 1 and muIsoPass[0] == 1 and muIsoPass[1] == 1)
-        or (lFlavour[0] == 2 and eIsoPass[0] == 1 and eIsoPass[1] == 1)) and (tauBdt[0] == 1) and (tauBdt[1] == 1)
-        and (taus_p4[0].DeltaR(taus_p4[1]) < 3.1) and (leptons_p4[0].DeltaR(leptons_p4[1]) < 3)
-        and ((taus_p4[0] + taus_p4[1]).DeltaR(leptons_p4[0] + leptons_p4[1]) < 3.9)
-        and (math.fabs(taus_p4[0].Eta() - taus_p4[1].Eta()) < 1.9)
-        and (math.fabs(leptons_p4[0].Eta() - leptons_p4[1].Eta()) < 3.5)): # different value for 2 lepton cut
-
-        # define deltaPhill for selection cut
-        if (leptons_p4[0].Eta() > leptons_p4[1].Eta()):
-          deltaPhill = (leptons_p4[0].DeltaPhi(leptons_p4[1]))
-        else:
-          deltaPhill = (leptons_p4[1].DeltaPhi(leptons_p4[0]))
-
+        or (lFlavour[0] == 2 and eIsoPass[0] == 1 and eIsoPass[1] == 1)) and (tauBdt[0] == 1) and (tauBdt[1] == 1)):
         tau0tau1MMC = getattr(tree, "mmc_tau0_tau1_mmc_mlm_m")
-        if (deltaPhill > -3.2 and deltaPhill < 2.4 and tau0tau1MMC > 90 and tau0tau1MMC < 190):
-          fillHistograms(taus_p4[0], taus_p4[1], leptons_p4[0], leptons_p4[1], met_p4.Pt(), nJets30, tau0tau1MMC, wTotal,
-            diLepHistograms, nTuples2Lep, newTree2Lep)
+        # if fill nTuples or not
+        if ((taus_p4[0].DeltaR(taus_p4[1]) < 3.1) and (leptons_p4[0].DeltaR(leptons_p4[1]) < 3)
+          and ((taus_p4[0] + taus_p4[1]).DeltaR(leptons_p4[0] + leptons_p4[1]) < 3.9)
+          and (math.fabs(taus_p4[0].Eta() - taus_p4[1].Eta()) < 1.9)
+          and (math.fabs(leptons_p4[0].Eta() - leptons_p4[1].Eta()) < 3.5)): # different value for 2 lepton cut
+          # define deltaPhill for selection cut
+          if (leptons_p4[0].Eta() > leptons_p4[1].Eta()):
+            deltaPhill = (leptons_p4[0].DeltaPhi(leptons_p4[1]))
+          else:
+            deltaPhill = (leptons_p4[1].DeltaPhi(leptons_p4[0]))
+
+          if (deltaPhill > -3.2 and deltaPhill < 2.4 and tau0tau1MMC > 90 and tau0tau1MMC < 190):
+            fillHistograms(taus_p4[0], taus_p4[1], leptons_p4[0], leptons_p4[1], met_p4.Pt(), nJets30, tau0tau1MMC,
+            wTotal, nTuples2Lep, newTree2Lep, diLepHistograms)
+        else:
+          fillHistograms(taus_p4[0], taus_p4[1], leptons_p4[0], leptons_p4[1], met_p4.Pt(), nJets30, tau0tau1MMC,
+          wTotal, nTuples2Lep, newTree2Lep)
 
       #### SELECTION CUT for 3 lepton final state ####
       elif ((len(leptons_p4) == 3) and len(taus_p4) == 1 and (rnnID[0] == 1)
@@ -212,51 +219,61 @@ def main(args):
           and (lCharge[(muIndex + 1)%3] == -lCharge[(muIndex - 1)%3])
           and ((leptons_p4[(muIndex + 1)%3] + leptons_p4[(muIndex - 1)%3]).M() > 81)
           and ((leptons_p4[(muIndex + 1)%3] + leptons_p4[(muIndex - 1)%3]).M() < 101) and (muIsoPass[muIndex] == 1)
-          and (eIsoPass[(muIndex + 1)%3] == 1) and (eIsoPass[(muIndex - 1)%3] == 1)
-          and (taus_p4[0].DeltaR(leptons_p4[muIndex]) < 3.1)
-          and (leptons_p4[(muIndex + 1)%3].DeltaR(leptons_p4[(muIndex - 1)%3]) < 3)
-          and ((taus_p4[0] + leptons_p4[muIndex]).DeltaR(leptons_p4[(muIndex + 1)%3]
-          + leptons_p4[(muIndex - 1)%3]) < 3.9)
-          and (math.fabs(taus_p4[0].Eta() - leptons_p4[muIndex].Eta()) < 1.9)
-          and (math.fabs(leptons_p4[(muIndex + 1)%3].Eta() - leptons_p4[(muIndex - 1)%3].Eta()) < 2.7)):
-          #and (lFlavour[(muIndex + 1)%3] == lFlavour[(muIndex - 1)%3]) is implied
-
-          if (leptons_p4[(muIndex + 1)%3].Eta() > leptons_p4[(muIndex - 1)%3].Eta()):
-            deltaPhill = (leptons_p4[(muIndex + 1)%3].DeltaPhi(leptons_p4[(muIndex - 1)%3]))
-          else:
-            deltaPhill = (leptons_p4[(muIndex - 1)%3].DeltaPhi(leptons_p4[(muIndex + 1)%3]))
-
+          and (eIsoPass[(muIndex + 1)%3] == 1) and (eIsoPass[(muIndex - 1)%3] == 1)):
           tau0lepMMC = getattr(tree, "mmc_tau0_lep" + str(muIndex) + "_mmc_mlm_m")
-          if (deltaPhill > -3.2 and deltaPhill < 2.4 and tau0lepMMC > 90 and tau0lepMMC < 190):
+          # if fill nTuples or not
+          if ((taus_p4[0].DeltaR(leptons_p4[muIndex]) < 3.1)
+            and (leptons_p4[(muIndex + 1)%3].DeltaR(leptons_p4[(muIndex - 1)%3]) < 3)
+            and ((taus_p4[0] + leptons_p4[muIndex]).DeltaR(leptons_p4[(muIndex + 1)%3]
+            + leptons_p4[(muIndex - 1)%3]) < 3.9)
+            and (math.fabs(taus_p4[0].Eta() - leptons_p4[muIndex].Eta()) < 1.9)
+            and (math.fabs(leptons_p4[(muIndex + 1)%3].Eta() - leptons_p4[(muIndex - 1)%3].Eta()) < 2.7)):
+            #and (lFlavour[(muIndex + 1)%3] == lFlavour[(muIndex - 1)%3]) is implied
+
+            if (leptons_p4[(muIndex + 1)%3].Eta() > leptons_p4[(muIndex - 1)%3].Eta()):
+              deltaPhill = (leptons_p4[(muIndex + 1)%3].DeltaPhi(leptons_p4[(muIndex - 1)%3]))
+            else:
+              deltaPhill = (leptons_p4[(muIndex - 1)%3].DeltaPhi(leptons_p4[(muIndex + 1)%3]))
+
+            if (deltaPhill > -3.2 and deltaPhill < 2.4 and tau0lepMMC > 90 and tau0lepMMC < 190):
+              fillHistograms(taus_p4[0], leptons_p4[muIndex], leptons_p4[(muIndex + 1)%3],
+                            leptons_p4[(muIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal,
+                            nTuples3Lep, newTree3Lep, triLepHistograms)
+          else:
             fillHistograms(taus_p4[0], leptons_p4[muIndex], leptons_p4[(muIndex + 1)%3],
-                          leptons_p4[(muIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, triLepHistograms,
+                          leptons_p4[(muIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal,
                           nTuples3Lep, newTree3Lep)
 
         # Two muons, one electron
         elif ((flavList.count(2) == 1) and (flavList.count(1) == 2) and (lCharge[eIndex] == -tauCharge[0])
-            and (leptons_p4[eIndex].Pt() + taus_p4[0].Pt() > 60)
-            and (lCharge[(eIndex + 1)%3] == -lCharge[(eIndex - 1)%3])
-            and ((leptons_p4[(eIndex + 1)%3] + leptons_p4[(eIndex - 1)%3]).M() > 81)
-            and ((leptons_p4[(eIndex + 1)%3] + leptons_p4[(eIndex - 1)%3]).M() < 101) and (eIsoPass[eIndex] == 1)
-            and (muIsoPass[(eIndex + 1)%3] == 1) and (muIsoPass[(eIndex - 1)%3] == 1)
-            and (taus_p4[0].DeltaR(leptons_p4[eIndex]) < 3.1)
+          and (leptons_p4[eIndex].Pt() + taus_p4[0].Pt() > 60)
+          and (lCharge[(eIndex + 1)%3] == -lCharge[(eIndex - 1)%3])
+          and ((leptons_p4[(eIndex + 1)%3] + leptons_p4[(eIndex - 1)%3]).M() > 81)
+          and ((leptons_p4[(eIndex + 1)%3] + leptons_p4[(eIndex - 1)%3]).M() < 101) and (eIsoPass[eIndex] == 1)
+          and (muIsoPass[(eIndex + 1)%3] == 1) and (muIsoPass[(eIndex - 1)%3] == 1)):
+          tau0lepMMC = getattr(tree, "mmc_tau0_lep" + str(eIndex) + "_mmc_mlm_m")
+          # if fill nTuples or not
+          if ((taus_p4[0].DeltaR(leptons_p4[eIndex]) < 3.1)
             and (leptons_p4[(eIndex + 1)%3].DeltaR(leptons_p4[(eIndex - 1)%3]) < 3)
             and ((taus_p4[0] + leptons_p4[eIndex]).DeltaR(leptons_p4[(eIndex + 1)%3]
             + leptons_p4[(eIndex - 1)%3]) < 3.9)
             and (math.fabs(taus_p4[0].Eta() - leptons_p4[eIndex].Eta()) < 1.9)
             and (math.fabs(leptons_p4[(eIndex + 1)%3].Eta() - leptons_p4[(eIndex - 1)%3].Eta()) < 2.7)):
-          #and (lFlavour[(eIndex + 1)%3] == lFlavour[(eIndex - 1)%3]) is implied
+            #and (lFlavour[(eIndex + 1)%3] == lFlavour[(eIndex - 1)%3]) is implied
 
-          if (leptons_p4[(eIndex + 1)%3].Eta() > leptons_p4[(eIndex - 1)%3].Eta()):
-            deltaPhill = (leptons_p4[(eIndex + 1)%3].DeltaPhi(leptons_p4[(eIndex - 1)%3]))
+            if (leptons_p4[(eIndex + 1)%3].Eta() > leptons_p4[(eIndex - 1)%3].Eta()):
+              deltaPhill = (leptons_p4[(eIndex + 1)%3].DeltaPhi(leptons_p4[(eIndex - 1)%3]))
+            else:
+              deltaPhill = (leptons_p4[(eIndex - 1)%3].DeltaPhi(leptons_p4[(eIndex + 1)%3]))
+
+            if (deltaPhill > -3.2 and deltaPhill < 2.4 and tau0lepMMC > 90 and tau0lepMMC < 190):
+              fillHistograms(taus_p4[0], leptons_p4[eIndex], leptons_p4[(eIndex + 1)%3],
+                            leptons_p4[(eIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal,
+                            nTuples3Lep, newTree3Lep, triLepHistograms)
           else:
-            deltaPhill = (leptons_p4[(eIndex - 1)%3].DeltaPhi(leptons_p4[(eIndex + 1)%3]))
-
-          tau0lepMMC = getattr(tree, "mmc_tau0_lep" + str(eIndex) + "_mmc_mlm_m")
-          if (deltaPhill > -3.2 and deltaPhill < 2.4 and tau0lepMMC > 90 and tau0lepMMC < 190):
             fillHistograms(taus_p4[0], leptons_p4[eIndex], leptons_p4[(eIndex + 1)%3],
-                          leptons_p4[(eIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, triLepHistograms,
-                          nTuples3Lep, newTree3Lep)
+                            leptons_p4[(eIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal,
+                            nTuples3Lep, newTree3Lep)
 
         # One positive charge, two negatives
         elif ((chargeList.count(+1) == 1) and (chargeList.count(-1) == 2)
@@ -271,44 +288,54 @@ def main(args):
           zCandidate2 = math.fabs(zMass2 - REALZMASS)
 
           if ((zCandidate1 < zCandidate2) and ((lCharge[(posIndex - 1)%3] == -tauCharge[0]))
-            and (leptons_p4[(posIndex - 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass1 > 81) and (zMass1 < 101)
-            and (taus_p4[0].DeltaR(leptons_p4[(posIndex - 1)%3]) < 3.1)
-            and (leptons_p4[posIndex].DeltaR(leptons_p4[(posIndex + 1)%3]) < 3)
-            and ((taus_p4[0] + leptons_p4[(posIndex - 1)%3]).DeltaR(leptons_p4[posIndex]
-            + leptons_p4[(posIndex + 1)%3]) < 3.9)
-            and (math.fabs(taus_p4[0].Eta() - leptons_p4[(posIndex - 1)%3].Eta()) < 1.9)
-            and (math.fabs(leptons_p4[posIndex].Eta() - leptons_p4[(posIndex + 1)%3].Eta()) < 2.7)):
-
-            if (leptons_p4[posIndex].Eta() > leptons_p4[(posIndex + 1)%3].Eta()):
-              deltaPhill = (leptons_p4[posIndex].DeltaPhi(leptons_p4[(posIndex + 1)%3]))
-            else:
-              deltaPhill = (leptons_p4[(posIndex + 1)%3].DeltaPhi(leptons_p4[posIndex]))
-
+            and (leptons_p4[(posIndex - 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass1 > 81) and (zMass1 < 101)):
             tau0lepMMC = getattr(tree, "mmc_tau0_lep" + str((posIndex - 1)%3) + "_mmc_mlm_m")
-            if (deltaPhill > -3.2 and deltaPhill < 2.4 and tau0lepMMC > 90 and tau0lepMMC < 190):
+            # if fill nTuples or not
+            if ((taus_p4[0].DeltaR(leptons_p4[(posIndex - 1)%3]) < 3.1)
+              and (leptons_p4[posIndex].DeltaR(leptons_p4[(posIndex + 1)%3]) < 3)
+              and ((taus_p4[0] + leptons_p4[(posIndex - 1)%3]).DeltaR(leptons_p4[posIndex]
+              + leptons_p4[(posIndex + 1)%3]) < 3.9)
+              and (math.fabs(taus_p4[0].Eta() - leptons_p4[(posIndex - 1)%3].Eta()) < 1.9)
+              and (math.fabs(leptons_p4[posIndex].Eta() - leptons_p4[(posIndex + 1)%3].Eta()) < 2.7)):
+
+              if (leptons_p4[posIndex].Eta() > leptons_p4[(posIndex + 1)%3].Eta()):
+                deltaPhill = (leptons_p4[posIndex].DeltaPhi(leptons_p4[(posIndex + 1)%3]))
+              else:
+                deltaPhill = (leptons_p4[(posIndex + 1)%3].DeltaPhi(leptons_p4[posIndex]))
+
+              if (deltaPhill > -3.2 and deltaPhill < 2.4 and tau0lepMMC > 90 and tau0lepMMC < 190):
+                fillHistograms(taus_p4[0], leptons_p4[(posIndex - 1)%3], leptons_p4[posIndex],
+                              leptons_p4[(posIndex + 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal,
+                              nTuples3Lep, newTree3Lep, triLepHistograms)
+            else:
               fillHistograms(taus_p4[0], leptons_p4[(posIndex - 1)%3], leptons_p4[posIndex],
-                            leptons_p4[(posIndex + 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, triLepHistograms,
-                            nTuples3Lep, newTree3Lep)
+                              leptons_p4[(posIndex + 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal,
+                              nTuples3Lep, newTree3Lep)
 
           elif ((zCandidate1 > zCandidate2) and ((lCharge[(posIndex + 1)%3] == -tauCharge[0]))
-            and (leptons_p4[(posIndex + 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass2 > 81) and (zMass2 < 101)
-            and (taus_p4[0].DeltaR(leptons_p4[(posIndex + 1)%3]) < 3.1)
-            and (leptons_p4[posIndex].DeltaR(leptons_p4[(posIndex - 1)%3]) < 3)
-            and ((taus_p4[0] + leptons_p4[(posIndex + 1)%3]).DeltaR(leptons_p4[posIndex]
-            + leptons_p4[(posIndex - 1)%3]) < 3.9)
-            and (math.fabs(taus_p4[0].Eta() - leptons_p4[(posIndex + 1)%3].Eta()) < 1.9)
-            and (math.fabs(leptons_p4[posIndex].Eta() - leptons_p4[(posIndex - 1)%3].Eta()) < 2.7)):
-
-            if (leptons_p4[posIndex].Eta() > leptons_p4[(posIndex - 1)%3].Eta()):
-              deltaPhill = (leptons_p4[posIndex].DeltaPhi(leptons_p4[(posIndex - 1)%3]))
-            else:
-              deltaPhill = (leptons_p4[(posIndex - 1)%3].DeltaPhi(leptons_p4[posIndex]))
-
+            and (leptons_p4[(posIndex + 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass2 > 81) and (zMass2 < 101)):
             tau0lepMMC = getattr(tree, "mmc_tau0_lep" + str((posIndex + 1)%3) + "_mmc_mlm_m")
-            if (deltaPhill > -3.2 and deltaPhill < 2.4 and tau0lepMMC > 90 and tau0lepMMC < 190):
+            # if fill nTuples or not
+            if ((taus_p4[0].DeltaR(leptons_p4[(posIndex + 1)%3]) < 3.1)
+              and (leptons_p4[posIndex].DeltaR(leptons_p4[(posIndex - 1)%3]) < 3)
+              and ((taus_p4[0] + leptons_p4[(posIndex + 1)%3]).DeltaR(leptons_p4[posIndex]
+              + leptons_p4[(posIndex - 1)%3]) < 3.9)
+              and (math.fabs(taus_p4[0].Eta() - leptons_p4[(posIndex + 1)%3].Eta()) < 1.9)
+              and (math.fabs(leptons_p4[posIndex].Eta() - leptons_p4[(posIndex - 1)%3].Eta()) < 2.7)):
+
+              if (leptons_p4[posIndex].Eta() > leptons_p4[(posIndex - 1)%3].Eta()):
+                deltaPhill = (leptons_p4[posIndex].DeltaPhi(leptons_p4[(posIndex - 1)%3]))
+              else:
+                deltaPhill = (leptons_p4[(posIndex - 1)%3].DeltaPhi(leptons_p4[posIndex]))
+
+              if (deltaPhill > -3.2 and deltaPhill < 2.4 and tau0lepMMC > 90 and tau0lepMMC < 190):
+                fillHistograms(taus_p4[0], leptons_p4[(posIndex + 1)%3], leptons_p4[posIndex],
+                              leptons_p4[(posIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal,
+                              nTuples3Lep, newTree3Lep, triLepHistograms)
+            else:
               fillHistograms(taus_p4[0], leptons_p4[(posIndex + 1)%3], leptons_p4[posIndex],
-                            leptons_p4[(posIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, triLepHistograms,
-                            nTuples3Lep, newTree3Lep)
+                              leptons_p4[(posIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal,
+                              nTuples3Lep, newTree3Lep)
 
         # Two positive charges, one negative
         elif ((chargeList.count(-1) == 1) and (chargeList.count(+1) == 2)
@@ -323,44 +350,54 @@ def main(args):
           zCandidate2 = math.fabs(zMass2 - REALZMASS)
 
           if ((zCandidate1 < zCandidate2) and ((lCharge[(negIndex - 1)%3] == -tauCharge[0]))
-            and (leptons_p4[(negIndex - 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass1 > 81) and (zMass1 < 101)
-            and (taus_p4[0].DeltaR(leptons_p4[(negIndex - 1)%3]) < 3.1)
-            and (leptons_p4[negIndex].DeltaR(leptons_p4[(negIndex + 1)%3]) < 3)
-            and ((taus_p4[0] + leptons_p4[(negIndex - 1)%3]).DeltaR(leptons_p4[negIndex]
-            + leptons_p4[(negIndex + 1)%3]) < 3.9)
-            and (math.fabs(taus_p4[0].Eta() - leptons_p4[(negIndex - 1)%3].Eta()) < 1.9)
-            and (math.fabs(leptons_p4[negIndex].Eta() - leptons_p4[(negIndex + 1)%3].Eta()) < 2.7)):
-
-            if (leptons_p4[negIndex].Eta() > leptons_p4[(negIndex + 1)%3].Eta()):
-              deltaPhill = (leptons_p4[negIndex].DeltaPhi(leptons_p4[(negIndex + 1)%3]))
-            else:
-              deltaPhill = (leptons_p4[(negIndex + 1)%3].DeltaPhi(leptons_p4[negIndex]))
-
+            and (leptons_p4[(negIndex - 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass1 > 81) and (zMass1 < 101)):
             tau0lepMMC = getattr(tree, "mmc_tau0_lep" + str((negIndex - 1)%3) + "_mmc_mlm_m")
-            if (deltaPhill > -3.2 and deltaPhill < 2.4 and tau0lepMMC > 90 and tau0lepMMC < 190):
+            # if fill nTuples or not
+            if ((taus_p4[0].DeltaR(leptons_p4[(negIndex - 1)%3]) < 3.1)
+              and (leptons_p4[negIndex].DeltaR(leptons_p4[(negIndex + 1)%3]) < 3)
+              and ((taus_p4[0] + leptons_p4[(negIndex - 1)%3]).DeltaR(leptons_p4[negIndex]
+              + leptons_p4[(negIndex + 1)%3]) < 3.9)
+              and (math.fabs(taus_p4[0].Eta() - leptons_p4[(negIndex - 1)%3].Eta()) < 1.9)
+              and (math.fabs(leptons_p4[negIndex].Eta() - leptons_p4[(negIndex + 1)%3].Eta()) < 2.7)):
+
+              if (leptons_p4[negIndex].Eta() > leptons_p4[(negIndex + 1)%3].Eta()):
+                deltaPhill = (leptons_p4[negIndex].DeltaPhi(leptons_p4[(negIndex + 1)%3]))
+              else:
+                deltaPhill = (leptons_p4[(negIndex + 1)%3].DeltaPhi(leptons_p4[negIndex]))
+
+              if (deltaPhill > -3.2 and deltaPhill < 2.4 and tau0lepMMC > 90 and tau0lepMMC < 190):
+                fillHistograms(taus_p4[0], leptons_p4[(negIndex - 1)%3], leptons_p4[negIndex],
+                              leptons_p4[(negIndex + 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal,
+                              nTuples3Lep, newTree3Lep, triLepHistograms)
+            else:
               fillHistograms(taus_p4[0], leptons_p4[(negIndex - 1)%3], leptons_p4[negIndex],
-                            leptons_p4[(negIndex + 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, triLepHistograms,
-                            nTuples3Lep, newTree3Lep)
+                              leptons_p4[(negIndex + 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal,
+                              nTuples3Lep, newTree3Lep)
 
           elif ((zCandidate1 > zCandidate2) and ((lCharge[(negIndex + 1)%3] == -tauCharge[0]))
-            and (leptons_p4[(negIndex + 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass2 > 81) and (zMass2 < 101)
-            and (taus_p4[0].DeltaR(leptons_p4[(negIndex + 1)%3]) < 3.1)
-            and (leptons_p4[negIndex].DeltaR(leptons_p4[(negIndex - 1)%3]) < 3)
-            and ((taus_p4[0] + leptons_p4[(negIndex + 1)%3]).DeltaR(leptons_p4[negIndex]
-            + leptons_p4[(negIndex - 1)%3]) < 3.9)
-            and (math.fabs(taus_p4[0].Eta() - leptons_p4[(negIndex + 1)%3].Eta()) < 1.9)
-            and (math.fabs(leptons_p4[negIndex].Eta() - leptons_p4[(negIndex - 1)%3].Eta()) < 2.7)):
-
-            if (leptons_p4[negIndex].Eta() > leptons_p4[(negIndex - 1)%3].Eta()):
-              deltaPhill = (leptons_p4[negIndex].DeltaPhi(leptons_p4[(negIndex - 1)%3]))
-            else:
-              deltaPhill = (leptons_p4[(negIndex - 1)%3].DeltaPhi(leptons_p4[negIndex]))
-
+            and (leptons_p4[(negIndex + 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass2 > 81) and (zMass2 < 101)):
             tau0lepMMC = getattr(tree, "mmc_tau0_lep" + str((negIndex + 1)%3) + "_mmc_mlm_m")
-            if (deltaPhill > -3.2 and deltaPhill < 2.4 and tau0lepMMC > 90 and tau0lepMMC < 190):
+            # if fill nTuples or not
+            if ((taus_p4[0].DeltaR(leptons_p4[(negIndex + 1)%3]) < 3.1)
+              and (leptons_p4[negIndex].DeltaR(leptons_p4[(negIndex - 1)%3]) < 3)
+              and ((taus_p4[0] + leptons_p4[(negIndex + 1)%3]).DeltaR(leptons_p4[negIndex]
+              + leptons_p4[(negIndex - 1)%3]) < 3.9)
+              and (math.fabs(taus_p4[0].Eta() - leptons_p4[(negIndex + 1)%3].Eta()) < 1.9)
+              and (math.fabs(leptons_p4[negIndex].Eta() - leptons_p4[(negIndex - 1)%3].Eta()) < 2.7)):
+
+              if (leptons_p4[negIndex].Eta() > leptons_p4[(negIndex - 1)%3].Eta()):
+                deltaPhill = (leptons_p4[negIndex].DeltaPhi(leptons_p4[(negIndex - 1)%3]))
+              else:
+                deltaPhill = (leptons_p4[(negIndex - 1)%3].DeltaPhi(leptons_p4[negIndex]))
+
+              if (deltaPhill > -3.2 and deltaPhill < 2.4 and tau0lepMMC > 90 and tau0lepMMC < 190):
+                fillHistograms(taus_p4[0], leptons_p4[(negIndex + 1)%3], leptons_p4[negIndex],
+                              leptons_p4[(negIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal,
+                              nTuples3Lep, newTree3Lep, triLepHistograms)
+            else:
               fillHistograms(taus_p4[0], leptons_p4[(negIndex + 1)%3], leptons_p4[negIndex],
-                            leptons_p4[(negIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, triLepHistograms,
-                            nTuples3Lep, newTree3Lep)
+                              leptons_p4[(negIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal,
+                              nTuples3Lep, newTree3Lep)
 
   print("2lep selection cut integral yield:", diLepHistograms["tauPtSum"].Integral(0,
     diLepHistograms["tauPtSum"].GetNbinsX() + 1))
