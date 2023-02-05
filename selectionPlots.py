@@ -76,12 +76,10 @@ def fillHistograms(tau1, tauOrLep, Zlep1, Zlep2, met_p4, nJets, mmc, totalWeight
 def variableCutsIf(tau1, tauOrLep, Zlep1, Zlep2, mmc, etallValue):
   deltaPhill = getDeltaPhill(Zlep1, Zlep2)
 
-  if ((tau1.DeltaR(tauOrLep) < 3.1) and (Zlep1.DeltaR(Zlep2) < 3) and ((tau1 + tauOrLep).DeltaR(Zlep1 + Zlep2)) < 3.9
+  return ((tau1.DeltaR(tauOrLep) < 3.1) and (Zlep1.DeltaR(Zlep2) < 3) and ((tau1 + tauOrLep).DeltaR(Zlep1 + Zlep2)) < 3.9
     and (math.fabs(tau1.Eta() - tauOrLep.Eta()) < 1.9) and (math.fabs(Zlep1.Eta() - Zlep2.Eta()) < etallValue)
-    and (deltaPhill > -3.2) and (deltaPhill < 2.4) and (mmc > 90) and (mmc < 190)):
-    return True
-  else:
-    return False
+    and (deltaPhill > -3.2) and (deltaPhill < 2.4) and (mmc > 90) and (mmc < 190))
+
 
 def getDeltaPhill(Zlep1, Zlep2):
   if (Zlep1.Eta() > Zlep2.Eta()):
