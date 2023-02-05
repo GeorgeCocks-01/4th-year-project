@@ -57,10 +57,7 @@ def fillHistograms(tau1, tauOrLep, Zlep1, Zlep2, met_p4, nJets, mmc, totalWeight
   fillers["deltaEtatt"] = (math.fabs(tau1.Eta() - tauOrLep.Eta()))
   fillers["deltaRttll"] = ((tau1 + tauOrLep).DeltaR(Zlep1 + Zlep2))
   fillers["nJets"] = (nJets)
-  if (Zlep1.Eta() > Zlep2.Eta()):
-    fillers["deltaPhill"] = (Zlep1.DeltaPhi(Zlep2))
-  else:
-    fillers["deltaPhill"] = (Zlep2.DeltaPhi(Zlep1))
+  fillers["deltaPhill"] = getDeltaPhill(Zlep1, Zlep2)
   fillers["deltaPhitt"] = (tau1.DeltaPhi(tauOrLep))
   fillers["deltaPhilltt"] = ((Zlep1 + Zlep2).DeltaPhi(tau1 + tauOrLep))
   fillers["mmc"] = (mmc)
@@ -76,13 +73,21 @@ def fillHistograms(tau1, tauOrLep, Zlep1, Zlep2, met_p4, nJets, mmc, totalWeight
   nTuples["weight"][0] = totalWeight
   newTree.Fill()
 
-def variableCutsIf(tau1, tauOrLep, Zlep1, Zlep2, mmc, deltaPhill, etallValue):
+def variableCutsIf(tau1, tauOrLep, Zlep1, Zlep2, mmc, etallValue):
+  deltaPhill = getDeltaPhill(Zlep1, Zlep2)
+
   if ((tau1.DeltaR(tauOrLep) < 3.1) and (Zlep1.DeltaR(Zlep2) < 3) and ((tau1 + tauOrLep).DeltaR(Zlep1 + Zlep2)) < 3.9
     and (math.fabs(tau1.Eta() - tauOrLep.Eta()) < 1.9) and (math.fabs(Zlep1.Eta() - Zlep2.Eta()) < etallValue)
     and (deltaPhill > -3.2) and (deltaPhill < 2.4) and (mmc > 90) and (mmc < 190)):
     return True
   else:
     return False
+
+def getDeltaPhill(Zlep1, Zlep2):
+  if (Zlep1.Eta() > Zlep2.Eta()):
+    return (Zlep1.DeltaPhi(Zlep2))
+  else:
+    return (Zlep2.DeltaPhi(Zlep1))
 
 def main(args):
   if (args.inputsample[-1] != "/"): #adds / to end of file path if not present
@@ -193,13 +198,9 @@ def main(args):
         or (lFlavour[0] == 2 and eIsoPass[0] == 1 and eIsoPass[1] == 1)) and (tauBdt[0] == 1) and (tauBdt[1] == 1)):
 
         tau0tau1MMC = getattr(tree, "mmc_tau0_tau1_mmc_mlm_m")
-        if (leptons_p4[0].Eta() > leptons_p4[1].Eta()):
-          deltaPhill = (leptons_p4[0].DeltaPhi(leptons_p4[1]))
-        else:
-          deltaPhill = (leptons_p4[1].DeltaPhi(leptons_p4[0]))
 
         # if fill nTuples or not
-        if variableCutsIf(taus_p4[0], taus_p4[1], leptons_p4[0], leptons_p4[1], tau0tau1MMC, deltaPhill, 3.5):
+        if variableCutsIf(taus_p4[0], taus_p4[1], leptons_p4[0], leptons_p4[1], tau0tau1MMC, 3.5):
           fillHistograms(taus_p4[0], taus_p4[1], leptons_p4[0], leptons_p4[1], met_p4.Pt(), nJets30, tau0tau1MMC,
             wTotal, nTuples2Lep, newTree2Lep, diLepHistograms)
         else:
@@ -226,14 +227,10 @@ def main(args):
           and (eIsoPass[(muIndex + 1)%3] == 1) and (eIsoPass[(muIndex - 1)%3] == 1)):
 
           tau0lepMMC = getattr(tree, "mmc_tau0_lep" + str(muIndex) + "_mmc_mlm_m")
-          if (leptons_p4[(muIndex + 1)%3].Eta() > leptons_p4[(muIndex - 1)%3].Eta()):
-            deltaPhill = (leptons_p4[(muIndex + 1)%3].DeltaPhi(leptons_p4[(muIndex - 1)%3]))
-          else:
-            deltaPhill = (leptons_p4[(muIndex - 1)%3].DeltaPhi(leptons_p4[(muIndex + 1)%3]))
 
           # if fill nTuples or not
           if variableCutsIf(taus_p4[0], leptons_p4[muIndex], leptons_p4[(muIndex + 1)%3], leptons_p4[(muIndex - 1)%3],
-            tau0lepMMC, deltaPhill, 2.7):
+            tau0lepMMC, 2.7):
             fillHistograms(taus_p4[0], leptons_p4[muIndex], leptons_p4[(muIndex + 1)%3], leptons_p4[(muIndex - 1)%3],
               met_p4.Pt(), nJets30, tau0lepMMC, wTotal, nTuples3Lep, newTree3Lep, triLepHistograms)
           else:
@@ -249,14 +246,10 @@ def main(args):
           and (muIsoPass[(eIndex + 1)%3] == 1) and (muIsoPass[(eIndex - 1)%3] == 1)):
 
           tau0lepMMC = getattr(tree, "mmc_tau0_lep" + str(eIndex) + "_mmc_mlm_m")
-          if (leptons_p4[(eIndex + 1)%3].Eta() > leptons_p4[(eIndex - 1)%3].Eta()):
-            deltaPhill = (leptons_p4[(eIndex + 1)%3].DeltaPhi(leptons_p4[(eIndex - 1)%3]))
-          else:
-            deltaPhill = (leptons_p4[(eIndex - 1)%3].DeltaPhi(leptons_p4[(eIndex + 1)%3]))
 
           # if fill nTuples or not
           if variableCutsIf(taus_p4[0], leptons_p4[eIndex], leptons_p4[(eIndex + 1)%3], leptons_p4[(eIndex - 1)%3],
-            tau0lepMMC, deltaPhill, 2.7):
+            tau0lepMMC, 2.7):
             fillHistograms(taus_p4[0], leptons_p4[eIndex], leptons_p4[(eIndex + 1)%3], leptons_p4[(eIndex - 1)%3],
               met_p4.Pt(), nJets30, tau0lepMMC, wTotal, nTuples3Lep, newTree3Lep, triLepHistograms)
           else:
@@ -279,14 +272,10 @@ def main(args):
             and (leptons_p4[(posIndex - 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass1 > 81) and (zMass1 < 101)):
 
             tau0lepMMC = getattr(tree, "mmc_tau0_lep" + str((posIndex - 1)%3) + "_mmc_mlm_m")
-            if (leptons_p4[posIndex].Eta() > leptons_p4[(posIndex + 1)%3].Eta()):
-              deltaPhill = (leptons_p4[posIndex].DeltaPhi(leptons_p4[(posIndex + 1)%3]))
-            else:
-              deltaPhill = (leptons_p4[(posIndex + 1)%3].DeltaPhi(leptons_p4[posIndex]))
 
             # if fill nTuples or not
             if variableCutsIf(taus_p4[0], leptons_p4[(posIndex - 1)%3], leptons_p4[posIndex],
-              leptons_p4[(posIndex + 1)%3], tau0lepMMC, deltaPhill, 2.7):
+              leptons_p4[(posIndex + 1)%3], tau0lepMMC, 2.7):
               fillHistograms(taus_p4[0], leptons_p4[(posIndex - 1)%3], leptons_p4[posIndex],
                 leptons_p4[(posIndex + 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, nTuples3Lep, newTree3Lep,
                 triLepHistograms)
@@ -298,14 +287,10 @@ def main(args):
             and (leptons_p4[(posIndex + 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass2 > 81) and (zMass2 < 101)):
 
             tau0lepMMC = getattr(tree, "mmc_tau0_lep" + str((posIndex + 1)%3) + "_mmc_mlm_m")
-            if (leptons_p4[posIndex].Eta() > leptons_p4[(posIndex - 1)%3].Eta()):
-              deltaPhill = (leptons_p4[posIndex].DeltaPhi(leptons_p4[(posIndex - 1)%3]))
-            else:
-              deltaPhill = (leptons_p4[(posIndex - 1)%3].DeltaPhi(leptons_p4[posIndex]))
 
             # if fill nTuples or not
             if variableCutsIf(taus_p4[0], leptons_p4[(posIndex + 1)%3], leptons_p4[posIndex],
-              leptons_p4[(posIndex - 1)%3], tau0lepMMC, deltaPhill, 2.7):
+              leptons_p4[(posIndex - 1)%3], tau0lepMMC, 2.7):
               fillHistograms(taus_p4[0], leptons_p4[(posIndex + 1)%3], leptons_p4[posIndex],
                 leptons_p4[(posIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, nTuples3Lep, newTree3Lep,
                 triLepHistograms)
@@ -329,47 +314,36 @@ def main(args):
             and (leptons_p4[(negIndex - 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass1 > 81) and (zMass1 < 101)):
 
             tau0lepMMC = getattr(tree, "mmc_tau0_lep" + str((negIndex - 1)%3) + "_mmc_mlm_m")
-            if (leptons_p4[negIndex].Eta() > leptons_p4[(negIndex + 1)%3].Eta()):
-              deltaPhill = (leptons_p4[negIndex].DeltaPhi(leptons_p4[(negIndex + 1)%3]))
-            else:
-              deltaPhill = (leptons_p4[(negIndex + 1)%3].DeltaPhi(leptons_p4[negIndex]))
 
             # if fill nTuples or not
             if variableCutsIf(taus_p4[0], leptons_p4[(negIndex - 1)%3], leptons_p4[negIndex],
-              leptons_p4[(negIndex + 1)%3], tau0lepMMC, deltaPhill, 2.7):
+              leptons_p4[(negIndex + 1)%3], tau0lepMMC, 2.7):
               fillHistograms(taus_p4[0], leptons_p4[(negIndex - 1)%3], leptons_p4[negIndex],
-                            leptons_p4[(negIndex + 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal,
-                            nTuples3Lep, newTree3Lep, triLepHistograms)
+                leptons_p4[(negIndex + 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, nTuples3Lep, newTree3Lep,
+                triLepHistograms)
             else:
               fillHistograms(taus_p4[0], leptons_p4[(negIndex - 1)%3], leptons_p4[negIndex],
-                              leptons_p4[(negIndex + 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal,
-                              nTuples3Lep, newTree3Lep)
+                leptons_p4[(negIndex + 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, nTuples3Lep, newTree3Lep)
 
           elif ((zCandidate1 > zCandidate2) and ((lCharge[(negIndex + 1)%3] == -tauCharge[0]))
             and (leptons_p4[(negIndex + 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass2 > 81) and (zMass2 < 101)):
 
             tau0lepMMC = getattr(tree, "mmc_tau0_lep" + str((negIndex + 1)%3) + "_mmc_mlm_m")
-            if (leptons_p4[negIndex].Eta() > leptons_p4[(negIndex - 1)%3].Eta()):
-              deltaPhill = (leptons_p4[negIndex].DeltaPhi(leptons_p4[(negIndex - 1)%3]))
-            else:
-              deltaPhill = (leptons_p4[(negIndex - 1)%3].DeltaPhi(leptons_p4[negIndex]))
 
             # if fill nTuples or not
             if variableCutsIf(taus_p4[0], leptons_p4[(negIndex + 1)%3], leptons_p4[negIndex],
-              leptons_p4[(negIndex - 1)%3], tau0lepMMC, deltaPhill, 2.7):
+              leptons_p4[(negIndex - 1)%3], tau0lepMMC, 2.7):
               fillHistograms(taus_p4[0], leptons_p4[(negIndex + 1)%3], leptons_p4[negIndex],
-                            leptons_p4[(negIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal,
-                            nTuples3Lep, newTree3Lep, triLepHistograms)
+                leptons_p4[(negIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, nTuples3Lep, newTree3Lep,
+                triLepHistograms)
             else:
               fillHistograms(taus_p4[0], leptons_p4[(negIndex + 1)%3], leptons_p4[negIndex],
-                              leptons_p4[(negIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal,
-                              nTuples3Lep, newTree3Lep)
+                leptons_p4[(negIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, nTuples3Lep, newTree3Lep)
 
   print("2lep selection cut integral yield:", diLepHistograms["tauPtSum"].Integral(0,
     diLepHistograms["tauPtSum"].GetNbinsX() + 1))
   print("3lep selection cut integral yield:", triLepHistograms["tauPtSum"].Integral(0,
     triLepHistograms["tauPtSum"].GetNbinsX() + 1))
-
 
   # Write Ntuples to files
   newTree2Lep.Write()
@@ -377,7 +351,6 @@ def main(args):
   outNtupleFile.Close()
   del newTree2Lep
   del newTree3Lep
-
 
   # Generates output file name from input file name if not specified
   if (args.outputfile == None):
