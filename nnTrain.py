@@ -24,7 +24,7 @@ variables = ["tauPtSum", "zMassSum", "metPt", "deltaRll", "deltaRtt", "deltaRttl
 
 for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 lepton)
   X = np.array([])
-  y = np.array([])
+  yOld = np.array([])
 
   for sample in nTupleSamples: # Loop over the samples
 
@@ -39,7 +39,7 @@ for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 l
 
     # Concatenate the arrays
     X = np.concatenate((X, XTemp)) if X.size else XTemp
-    y = np.concatenate((y, yTemp)) if y.size else yTemp
+    yOld = np.concatenate((yOld, yTemp)) if yOld.size else yTemp
 
   # Scale the data
   sc = StandardScaler()
@@ -47,7 +47,7 @@ for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 l
 
   # One-hot-encode the labels
   ohe = OneHotEncoder()
-  y = ohe.fit_transform(y.reshape(-1,1)).toarray()
+  y = ohe.fit_transform(yOld.reshape(-1,1)).toarray()
 
   # Split the data into training and testing sets
   X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2)
@@ -69,8 +69,8 @@ for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 l
 
   # Predict the labels
   y_pred = model.predict(X_test)
-  pred = list(np.argmax(y_pred, axis = 1))
-  test = list(np.argmax(y_test, axis = 1)) # Inverse one-hot-encoding the labels
+  pred = np.argmax(y_pred, axis = 1)
+  test = np.argmax(y_test, axis = 1) # Inverse one-hot-encoding the labels
 
   # Calculate the accuracy
   accuracy = accuracy_score(test, pred)
@@ -95,4 +95,30 @@ for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 l
   plt.xlabel("Epoch")
   plt.legend(['Train', 'Test'], loc = 'upper left')
   plt.savefig("nnPlots/nnAccuracy" + cut + ".png")
+  plt.clf()
+
+  signalPredictionTest = y_pred[y_test == 1]
+  backgroundPredictionTest = y_pred[y_test == 0]
+
+  plt.figure(figsize=(8, 6))
+  plt.hist(signalPredictionTest, bins = 50, range = (0, 1), label = "Signal", alpha = 0.5)
+  plt.hist(backgroundPredictionTest, bins = 50, range = (0, 1), label = "Background", alpha = 0.5)
+  plt.title(cut + " Prediction")
+  plt.ylabel("Number of events")
+  plt.xlabel("Prediction")
+  plt.legend(loc = 'upper left')
+  plt.savefig("nnPlots/nnTest" + cut + ".png")
+  plt.clf()
+
+  signalPredictionTrain = model.predict(X_train)[y_train == 1]
+  backgroundPredictionTrain = model.predict(X_train)[y_train == 0]
+
+  plt.figure(figsize=(8, 6))
+  plt.hist(signalPredictionTrain, bins = 50, range = (0, 1), label = "Signal", alpha = 0.5)
+  plt.hist(backgroundPredictionTrain, bins = 50, range = (0, 1), label = "Background", alpha = 0.5)
+  plt.title(cut + " Prediction")
+  plt.ylabel("Number of events")
+  plt.xlabel("Prediction")
+  plt.legend(loc = 'upper left')
+  plt.savefig("nnPlots/nnTrain" + cut + ".png")
   plt.clf()

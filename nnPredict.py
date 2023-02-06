@@ -50,7 +50,7 @@ for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 l
 
   # Predict the labels
   y_pred = model.predict(X)
-  y_pred = list(np.argmax(y_pred, axis = 1))
+  y_pred = np.argmax(y_pred, axis = 1)
 
   # Get the accuracy
   print("Accuracy for " + cut + " cut: " + str(accuracy_score(y, y_pred)))
