@@ -21,3 +21,4 @@ nTupleGroups/
 nnPlots/
 hyperTuning/
 nnModels/
+*.h5
