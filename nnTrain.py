@@ -9,6 +9,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from keras.models import Sequential
 from keras.layers import Dense
+from keras.models import load_model
 
 matplotlib.use("SVG") # Use SVG for matplotlib
 
@@ -56,12 +57,15 @@ for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 l
   model.add(Dense(15, input_dim = 13, activation = "relu")) # Hidden layer
   model.add(Dense(11, activation = "relu")) # Hidden layer
   model.add(Dense(8, activation = "relu")) # Hidden layer
-  model.add(Dense(2, activation = "sigmoid")) # 2 output nodes for 2 classes
+  model.add(Dense(2, activation = "sigmoid")) # Only need one output node for binary classification
   model.compile(loss = "binary_crossentropy", optimizer = "adam", metrics = ["accuracy"]) # Compile the model
   # adam uses a learning rate of 0.001 by default
 
   # Train the model
   modelFit = model.fit(X_train, y_train, validation_data = (X_test, y_test), epochs=50, batch_size=64)
+
+  # Save the model
+  model.save("nnModels/nnModel" + cut + ".h5")
 
   # Predict the labels
   y_pred = model.predict(X_test)

@@ -80,12 +80,12 @@ def variableCutsIf(tau1, tauOrLep, Zlep1, Zlep2, mmc, etallValue):
     and (math.fabs(tau1.Eta() - tauOrLep.Eta()) < 1.9) and (math.fabs(Zlep1.Eta() - Zlep2.Eta()) < etallValue)
     and (deltaPhill > -3.2) and (deltaPhill < 2.4) and (mmc > 90) and (mmc < 190))
 
-
 def getDeltaPhill(Zlep1, Zlep2):
   if (Zlep1.Eta() > Zlep2.Eta()):
     return (Zlep1.DeltaPhi(Zlep2))
   else:
     return (Zlep2.DeltaPhi(Zlep1))
+
 
 def main(args):
   if (args.inputsample[-1] != "/"): #adds / to end of file path if not present
