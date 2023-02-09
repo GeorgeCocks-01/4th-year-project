@@ -1,7 +1,5 @@
 from math import sqrt
 from ROOT import *
-import copy, os, re, sys
-import argparse
 from selectionPlots import findAllFilesInPath
 
 gROOT.LoadMacro('../atlasrootstyle/AtlasStyle.C')
