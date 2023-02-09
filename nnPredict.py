@@ -4,11 +4,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 from selectionPlots import findAllFilesInPath
 from sklearn.preprocessing import StandardScaler
-from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
-from keras.models import Sequential
-from keras.layers import Dense
 from keras.models import load_model
 
 matplotlib.use("SVG") # Use SVG for matplotlib
@@ -50,7 +47,7 @@ for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 l
 
   # Predict the labels
   y_pred = model.predict(X)
-  y_pred = np.argmax(y_pred, axis = 1)
+  y_pred = np.rint(y_pred).astype(int)
 
   # Get the accuracy
   print("Accuracy for " + cut + " cut: " + str(accuracy_score(y, y_pred)))
