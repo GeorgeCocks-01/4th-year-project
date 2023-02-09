@@ -4,12 +4,12 @@ import matplotlib
 import matplotlib.pyplot as plt
 from selectionPlots import findAllFilesInPath
 from sklearn.preprocessing import StandardScaler
-from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import roc_curve
+from sklearn.metrics import auc
 from keras.models import Sequential
 from keras.layers import Dense
-from keras.models import load_model
 
 matplotlib.use("SVG") # Use SVG for matplotlib
 
@@ -24,7 +24,7 @@ variables = ["tauPtSum", "zMassSum", "metPt", "deltaRll", "deltaRtt", "deltaRttl
 
 for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 lepton)
   X = np.array([])
-  yOld = np.array([])
+  y = np.array([])
 
   for sample in nTupleSamples: # Loop over the samples
 
@@ -39,15 +39,11 @@ for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 l
 
     # Concatenate the arrays
     X = np.concatenate((X, XTemp)) if X.size else XTemp
-    yOld = np.concatenate((yOld, yTemp)) if yOld.size else yTemp
+    y = np.concatenate((y, yTemp)) if y.size else yTemp
 
   # Scale the data
   sc = StandardScaler()
   X = sc.fit_transform(X)
-
-  # One-hot-encode the labels
-  ohe = OneHotEncoder()
-  y = ohe.fit_transform(yOld.reshape(-1,1)).toarray()
 
   # Split the data into training and testing sets
   X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2)
@@ -57,7 +53,7 @@ for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 l
   model.add(Dense(15, input_dim = 13, activation = "relu")) # Hidden layer
   model.add(Dense(11, activation = "relu")) # Hidden layer
   model.add(Dense(8, activation = "relu")) # Hidden layer
-  model.add(Dense(2, activation = "sigmoid")) # Only need one output node for binary classification
+  model.add(Dense(1, activation = "sigmoid")) # Only need one output node for binary classification
   model.compile(loss = "binary_crossentropy", optimizer = "adam", metrics = ["accuracy"]) # Compile the model
   # adam uses a learning rate of 0.001 by default
 
@@ -69,11 +65,24 @@ for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 l
 
   # Predict the labels
   y_pred = model.predict(X_test)
-  pred = np.argmax(y_pred, axis = 1)
-  test = np.argmax(y_test, axis = 1) # Inverse one-hot-encoding the labels
+  pred = np.rint(y_pred).astype(int)
+
+  fpr, tpr, thresholds = roc_curve(y_test, y_pred) # Calculate the ROC curve
+  rocArea = auc(fpr, tpr) # Calculate the area under the ROC curve
+
+  # Plot the ROC curve
+  plt.figure(figsize=(8, 6))
+  plt.plot([0, 1], [0, 1], linestyle = "--", color = "black")
+  plt.plot(fpr, tpr)
+  plt.title(cut + " ROC curve")
+  plt.ylabel("True positive rate")
+  plt.xlabel("False positive rate")
+  plt.legend(["Baseline", "ROC curve (area = %0.3f)" % rocArea], loc = 'lower right')
+  plt.savefig("nnPlots/nnROC" + cut + ".png")
+  plt.clf()
 
   # Calculate the accuracy
-  accuracy = accuracy_score(test, pred)
+  accuracy = accuracy_score(y_test, pred)
   print("Accuracy is:", accuracy*100, "% on the test set.")
 
   # Plot the loss and accuracy
