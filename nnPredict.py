@@ -1,12 +1,13 @@
 import argparse
 import numpy as np
-from selectionPlots import findAllFilesInPath
-from sklearn.metrics import accuracy_score
 from keras.models import load_model
-from nnTrain import getSplitData, plotter
+from selectionPlots import findAllFilesInPath
+from nnTrain import getSplitData
+from sklearn.metrics import accuracy_score
+from plotting import predictionsROCPlotter, shapPlotter
 
 def main(args):
-  # Get the samples from the outputNTuples folder, store them in a dictionary with 1 for signal and 0 for background
+# Get the samples from the outputNTuples folder, store them in a dictionary with 1 for signal and 0 for background
   sampleNames = findAllFilesInPath("*.root", "nTupleGroups/")
   nTupleSamples = dict.fromkeys(sampleNames, 0)
   nTupleSamples["nTupleGroups/signalGroup.root"] = 1
@@ -20,8 +21,8 @@ def main(args):
     X_train, X_test, y_train, y_test = getSplitData(nTupleSamples, variables, cut, 0)
 
     # Load the model
-    if args.input:
-      model = load_model("nnModels/" + args.input + ".h5")
+    if args.inputModel:
+      model = load_model("nnModels/" + args.inputModel + ".h5")
     else:
       model = load_model("nnModels/nnModel" + cut + ".h5")
 
@@ -33,12 +34,18 @@ def main(args):
     print("Accuracy for " + cut + " cut: " + str(accuracy_score(y_test, y_pred)))
 
     # Plot graphs
-    plotter(model, pred, y_test, y_train, X_train, cut)
+    predictionsROCPlotter(model, pred, y_test, y_train, X_train, cut)
+
+    if args.shap:
+      # Plot the SHAP values
+      shapPlotter(model, X_train, variables, cut)
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(description = "Predict and plot graphs using an imported neural network")
-  parser.add_argument("-i", "--input", metavar = "INPUT", type = str, default = None,
+  parser.add_argument("-i", "--input", type = str, dest = "inputModel", default = None,
     help = "Input file name of the neural network model.")
+  parser.add_argument("-s", "--SHAP", action = "store_true", dest = "shap", default = None,
+    help = "Whether to plot the SHAP values or not.")
   args = parser.parse_args()
 
   main(args)
