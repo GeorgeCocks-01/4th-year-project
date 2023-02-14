@@ -7,7 +7,7 @@ from sklearn.metrics import accuracy_score
 from plotting import predictionsROCPlotter, shapPlotter
 
 def main(args):
-# Get the samples from the outputNTuples folder, store them in a dictionary with 1 for signal and 0 for background
+  # Get the samples from the outputNTuples folder, store them in a dictionary with 1 for signal and 0 for background
   sampleNames = findAllFilesInPath("*.root", "nTupleGroups/")
   nTupleSamples = dict.fromkeys(sampleNames, 0)
   nTupleSamples["nTupleGroups/signalGroup.root"] = 1
