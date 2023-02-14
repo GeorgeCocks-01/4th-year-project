@@ -1,6 +1,7 @@
 import uproot
 import argparse
 import numpy as np
+from keras.optimizers import Adam
 from keras.layers import Dense
 from keras.models import Sequential
 from sklearn.preprocessing import StandardScaler
@@ -53,12 +54,12 @@ def main(args):
 
     # Create the model
     model = Sequential()
-    model.add(Dense(15, input_dim = 13, activation = "relu")) # Hidden layer
-    model.add(Dense(11, activation = "relu")) # Hidden layer
-    model.add(Dense(8, activation = "relu")) # Hidden layer
+    model.add(Dense(24, input_dim = 13, activation = "relu")) # Hidden layer
+    model.add(Dense(14, activation = "relu")) # Hidden layer
+    model.add(Dense(14, activation = "relu")) # Hidden layer
     model.add(Dense(1, activation = "sigmoid")) # Only need one output node for binary classification
-    model.compile(loss = "binary_crossentropy", optimizer = "adam", metrics = ["accuracy"]) # Compile the model
-    # adam uses a learning rate of 0.001 by default
+    opt = Adam(lr = 0.0081) # adam uses a learning rate of 0.001 by default
+    model.compile(loss = "binary_crossentropy", optimizer = opt, metrics = ["accuracy"]) # Compile the model
 
     # Train the model
     modelFit = model.fit(X_train, y_train, validation_data = (X_test, y_test), epochs=50, batch_size=64)
