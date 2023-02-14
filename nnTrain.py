@@ -54,11 +54,12 @@ def main(args):
 
     # Create the model
     model = Sequential()
-    model.add(Dense(24, input_dim = 13, activation = "relu")) # Hidden layer
-    model.add(Dense(14, activation = "relu")) # Hidden layer
-    model.add(Dense(14, activation = "relu")) # Hidden layer
+    model.add(Dense(22, input_dim = 13, activation = "relu")) # Hidden layer
+    model.add(Dense(24, activation = "relu")) # Hidden layer
+    model.add(Dense(18, activation = "relu")) # Hidden layer
+    model.add(Dense(18, activation = "relu")) # Hidden layer
     model.add(Dense(1, activation = "sigmoid")) # Only need one output node for binary classification
-    opt = Adam(lr = 0.0081) # adam uses a learning rate of 0.001 by default
+    opt = Adam(lr = 0.001643) # adam uses a learning rate of 0.001 by default
     model.compile(loss = "binary_crossentropy", optimizer = opt, metrics = ["accuracy"]) # Compile the model
 
     # Train the model
