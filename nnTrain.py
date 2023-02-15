@@ -59,7 +59,7 @@ def main(args):
     model.add(Dense(18, activation = "relu")) # Hidden layer
     model.add(Dense(18, activation = "relu")) # Hidden layer
     model.add(Dense(1, activation = "sigmoid")) # Only need one output node for binary classification
-    opt = Adam(lr = 0.001643) # adam uses a learning rate of 0.001 by default
+    opt = Adam(learning_rate = 0.001643) # adam uses a learning rate of 0.001 by default
     model.compile(loss = "binary_crossentropy", optimizer = opt, metrics = ["accuracy"]) # Compile the model
 
     # Train the model
@@ -69,7 +69,7 @@ def main(args):
     if args.outputfile:
       model.save("nnModels/" + args.outputfile + ".h5")
     else:
-      model.save("nnModels/nnModel" + cut + ".h5")
+      model.save("nnModels/trained" + cut + ".h5")
 
     # Predict the labels
     pred = model.predict(X_test)
