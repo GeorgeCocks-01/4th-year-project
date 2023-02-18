@@ -22,9 +22,11 @@ def main(args):
 
     # Load the model
     if args.inputModel:
-      model = load_model("nnModels/" + args.inputModel + ".h5")
+      model = load_model("nnModels/" + args.inputModel + cut + ".h5")
     else:
       model = load_model("nnModels/nnModel" + cut + ".h5")
+
+    print(model.summary())
 
     # Predict the labels
     pred = model.predict(X_test)
@@ -43,7 +45,7 @@ def main(args):
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(description = "Predict and plot graphs using an imported neural network")
   parser.add_argument("-i", "--input", type = str, dest = "inputModel", default = None,
-    help = "Input file name of the neural network model.")
+    help = "Input file name of the neural network model (without 2/3lep).")
   parser.add_argument("-s", "--SHAP", action = "store_true", dest = "shap", default = None,
     help = "Whether to plot the SHAP values or not.")
   args = parser.parse_args()
