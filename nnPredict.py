@@ -2,8 +2,8 @@ import argparse
 import numpy as np
 from keras.models import load_model
 from selectionPlots import findAllFilesInPath
-from nnTrain import getSplitData
 from sklearn.metrics import accuracy_score
+from nnTrain import getSplitData
 from plotting import predictionsROCPlotter, shapPlotter
 
 def main(args):

@@ -38,7 +38,6 @@ def getSplitData(nTupleSamples, variables, cut, seed):
 
   return X_train, X_test, y_train, y_test
 
-
 def main(args):
   # Get the samples from the outputNTuples folder, store them in a dictionary with 1 for signal and 0 for background
   sampleNames = findAllFilesInPath("*.root", "nTupleGroups/")
@@ -47,7 +46,7 @@ def main(args):
 
   # Tuple of variables to get from each file
   variables = ("tauPtSum", "zMassSum", "metPt", "deltaRll", "deltaRtt", "deltaRttll", "deltaEtall", "deltaEtatt",
-              "nJets", "deltaPhill", "deltaPhitt", "deltaPhilltt", "mmc")
+               "nJets", "deltaPhill", "deltaPhitt", "deltaPhilltt", "mmc")
 
   for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 lepton)
 
@@ -67,7 +66,8 @@ def main(args):
     stop_early = EarlyStopping(monitor = "val_loss", patience = 5, restore_best_weights = True, verbose = 1)
 
     # Train the model
-    modelFit = model.fit(X_train, y_train, validation_data = (X_test, y_test), epochs=50, batch_size=64, callbacks=[stop_early])
+    modelFit = model.fit(X_train, y_train, validation_data = (X_test, y_test), epochs=50, batch_size=64,
+                         callbacks=[stop_early])
 
     # Save the model
     if args.outputfile:
@@ -85,7 +85,7 @@ def main(args):
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(description = "Train a neural network on the nTuples.")
   parser.add_argument("-o", "--output", metavar = "OUTPUT", type = str, dest = "outputfile", default = None,
-    help = "Ouptut file name for the model to be saved into.")
+                      help = "Ouptut file name for the model to be saved into.")
   args = parser.parse_args()
 
   main(args)
