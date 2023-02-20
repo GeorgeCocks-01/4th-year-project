@@ -4,6 +4,7 @@ import numpy as np
 from keras.optimizers import Adam
 from keras.layers import Dense
 from keras.models import Sequential
+from keras.callbacks import EarlyStopping
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from selectionPlots import findAllFilesInPath
@@ -54,16 +55,19 @@ def main(args):
 
     # Create the model
     model = Sequential()
-    model.add(Dense(22, input_dim = 13, activation = "relu")) # Hidden layer
-    model.add(Dense(24, activation = "relu")) # Hidden layer
+    model.add(Dense(30, input_dim = 13, activation = "relu")) # Hidden layer
     model.add(Dense(18, activation = "relu")) # Hidden layer
-    model.add(Dense(18, activation = "relu")) # Hidden layer
+    model.add(Dense(16, activation = "relu")) # Hidden layer
+    # model.add(Dense(18, activation = "relu")) # Hidden layer
     model.add(Dense(1, activation = "sigmoid")) # Only need one output node for binary classification
-    opt = Adam(learning_rate = 0.001643) # adam uses a learning rate of 0.001 by default
-    model.compile(loss = "binary_crossentropy", optimizer = opt, metrics = ["accuracy"]) # Compile the model
+    # opt = Adam(learning_rate = 0.001643) # adam uses a learning rate of 0.001 by default
+    model.compile(loss = "binary_crossentropy", optimizer = "adam", metrics = ["accuracy"]) # Compile the model
+
+    # Create an early stopping callback
+    stop_early = EarlyStopping(monitor = "val_loss", patience = 5, restore_best_weights = True, verbose = 1)
 
     # Train the model
-    modelFit = model.fit(X_train, y_train, validation_data = (X_test, y_test), epochs=50, batch_size=64)
+    modelFit = model.fit(X_train, y_train, validation_data = (X_test, y_test), epochs=50, batch_size=64, callbacks=[stop_early])
 
     # Save the model
     if args.outputfile:

@@ -24,9 +24,10 @@ def main(args):
     if args.inputModel:
       model = load_model("nnModels/" + args.inputModel + cut + ".h5")
     else:
-      model = load_model("nnModels/nnModel" + cut + ".h5")
+      model = load_model("nnModels/trained" + cut + ".h5")
 
-    print(model.summary())
+    if args.verbose:
+      print(model.summary())
 
     # Predict the labels
     pred = model.predict(X_test)
@@ -48,6 +49,8 @@ if __name__ == "__main__":
     help = "Input file name of the neural network model (without 2/3lep).")
   parser.add_argument("-s", "--SHAP", action = "store_true", dest = "shap", default = None,
     help = "Whether to plot the SHAP values or not.")
+  parser.add_argument("-v", "--verbose", action = "store_true", dest = "verbose", default = None,
+    help = "Whether to print out the model summary or not.")
   args = parser.parse_args()
 
   main(args)
