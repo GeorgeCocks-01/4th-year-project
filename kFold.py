@@ -20,6 +20,7 @@ def main(args):
 
   for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 lepton)
 
+    ### GET THE DATA ###
     X = np.array([])
     y = np.array([])
 
@@ -41,6 +42,7 @@ def main(args):
     # Scale the data
     sc = StandardScaler()
     X = sc.fit_transform(X)
+    ### ###
 
     model = load_model("nnModels/" + cut + "Model.h5")
 
@@ -56,13 +58,19 @@ def main(args):
       X_train, X_test = X[train], X[test]
       y_train, y_test = y[train], y[test]
 
-      # Fit the model
-      modelFit = model.fit(X_train, y_train, batch_size = 32, epochs = 100, callbacks = [stop_early])
+      # Fit the model. UNSURE IF THIS WILL KEEP THE WEIGHTS FROM THE PREVIOUS TRAINING
+      model.fit(X_train, y_train, batch_size = 32, epochs = 100, callbacks = [stop_early])
 
       # Get the predictions
       pred = model.predict(X_test)
       # Get the accuracy
       print("Accuracy for fold" + i + ": " + str(accuracy_score(y_test, pred)))
+
+      # Save the model
+      if args.outputfile:
+        model.save("kFoldModels/" + args.outputfile + cut + i + ".h5")
+      else:
+        model.save("kFOldModels/" + cut + "Model" + i + ".h5")
 
       i += 1
 
