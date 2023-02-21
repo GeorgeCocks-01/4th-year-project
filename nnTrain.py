@@ -11,38 +11,38 @@ from selectionPlots import findAllFilesInPath
 from plotting import predictionsROCPlotter, trainingPlotter
 
 def getSplitData(nTupleSamples, variables, cut, seed):
-  X = np.array([])
+  x = np.array([])
   y = np.array([])
 
   for sample in nTupleSamples: # Loop over the samples
 
     with uproot.open(sample + ":nominal" + cut) as tree:
-      XTemp = tree.arrays(variables, library = "pd")
+      x_temp = tree.arrays(variables, library = "pd")
       weight = tree["weight"].array(library = "np")
 
-    XTemp = XTemp.iloc[:, :].values
+    x_temp = x_temp.iloc[:, :].values
 
     # 1 for signal, 0 for background
-    yTemp = np.zeros(len(XTemp)) if nTupleSamples[sample] == 0 else np.ones(len(XTemp))
+    yTemp = np.zeros(len(x_temp)) if nTupleSamples[sample] == 0 else np.ones(len(x_temp))
 
     # Concatenate the arrays
-    X = np.concatenate((X, XTemp)) if X.size else XTemp
+    x = np.concatenate((x, x_temp)) if x.size else x_temp
     y = np.concatenate((y, yTemp)) if y.size else yTemp
 
   # Scale the data
   sc = StandardScaler()
-  X = sc.fit_transform(X)
+  x = sc.fit_transform(x)
 
   # Split the data into training and testing sets. random_state is the seed for the random number generator
-  X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = seed)
+  x_train, x_test, y_train, y_test = train_test_split(x, y, test_size = 0.2, random_state = seed)
 
-  return X_train, X_test, y_train, y_test
+  return x_train, x_test, y_train, y_test
 
 def main(args):
   # Get the samples from the outputNTuples folder, store them in a dictionary with 1 for signal and 0 for background
   sampleNames = findAllFilesInPath("*.root", "nTupleGroups/")
-  nTupleSamples = dict.fromkeys(sampleNames, 0)
-  nTupleSamples["nTupleGroups/signalGroup.root"] = 1
+  n_tuple_samples = dict.fromkeys(sampleNames, 0)
+  n_tuple_samples["nTupleGroups/signalGroup.root"] = 1
 
   # Tuple of variables to get from each file
   variables = ("tauPtSum", "zMassSum", "metPt", "deltaRll", "deltaRtt", "deltaRttll", "deltaEtall", "deltaEtatt",
@@ -50,7 +50,7 @@ def main(args):
 
   for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 lepton)
 
-    X_train, X_test, y_train, y_test = getSplitData(nTupleSamples, variables, cut, 0)
+    x_train, x_test, y_train, y_test = getSplitData(n_tuple_samples, variables, cut, 0)
 
     # Create the model
     model = Sequential()
@@ -66,7 +66,7 @@ def main(args):
     stop_early = EarlyStopping(monitor = "val_loss", patience = 5, restore_best_weights = True, verbose = 1)
 
     # Train the model
-    modelFit = model.fit(X_train, y_train, validation_data = (X_test, y_test), epochs=50, batch_size=64,
+    model_fit = model.fit(x_train, y_train, validation_data = (x_test, y_test), epochs=50, batch_size=64,
                          callbacks=[stop_early])
 
     # Save the model
@@ -76,11 +76,11 @@ def main(args):
       model.save("nnModels/trained" + cut + ".h5")
 
     # Predict the labels
-    pred = model.predict(X_test)
+    pred = model.predict(x_test)
 
     # Plot graphs
-    trainingPlotter(modelFit, cut)
-    predictionsROCPlotter(model, pred, y_test, y_train, X_train, cut)
+    trainingPlotter(model_fit, cut)
+    predictionsROCPlotter(model, pred, y_test, y_train, x_train, cut)
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(description = "Train a neural network on the nTuples.")

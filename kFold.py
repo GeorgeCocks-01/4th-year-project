@@ -19,9 +19,13 @@ def main(args):
               "nJets", "deltaPhill", "deltaPhitt", "deltaPhilltt", "mmc")
 
   for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 lepton)
+    if cut == "2lep":
+      batch = 64
+    else:
+      batch = 128
 
     ### GET THE DATA ###
-    X = np.array([])
+    x = np.array([])
     y = np.array([])
 
     for sample in nTupleSamples: # Loop over the samples
@@ -36,33 +40,34 @@ def main(args):
       yTemp = np.zeros(len(XTemp)) if nTupleSamples[sample] == 0 else np.ones(len(XTemp))
 
       # Concatenate the arrays
-      X = np.concatenate((X, XTemp)) if X.size else XTemp
+      x = np.concatenate((x, XTemp)) if x.size else XTemp
       y = np.concatenate((y, yTemp)) if y.size else yTemp
 
     # Scale the data
     sc = StandardScaler()
-    X = sc.fit_transform(X)
+    x = sc.fit_transform(x)
     ### ###
-
-    model = load_model("nnModels/" + cut + "Model.h5")
 
     # Create an early stopping callback
     stop_early = EarlyStopping(monitor = "val_loss", patience = 5, restore_best_weights = True, verbose = 1)
 
     # Create a kFold object
-    kFold = KFold(n_splits = 5, shuffle = True, random_state = 0)
+    kf = KFold(n_splits = 5, shuffle = True, random_state = 0)
 
     i = 1
     # Loop over the kFold splits
-    for train, test in kFold.split(X):
-      X_train, X_test = X[train], X[test]
+    for train, test in kf.split(x):
+
+      model = load_model("nnModels/architechture" + cut + ".h5")
+
+      x_train, x_test = x[train], x[test]
       y_train, y_test = y[train], y[test]
 
       # Fit the model. UNSURE IF THIS WILL KEEP THE WEIGHTS FROM THE PREVIOUS TRAINING
-      model.fit(X_train, y_train, batch_size = 32, epochs = 100, callbacks = [stop_early])
+      model.fit(x_train, y_train, batch_size = batch, epochs = 100, callbacks = [stop_early])
 
       # Get the predictions
-      pred = model.predict(X_test)
+      pred = model.predict(x_test)
       # Get the accuracy
       print("Accuracy for fold" + i + ": " + str(accuracy_score(y_test, pred)))
 

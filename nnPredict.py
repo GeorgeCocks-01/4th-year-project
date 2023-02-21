@@ -18,7 +18,7 @@ def main(args):
 
   for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 lepton)
 
-    X_train, X_test, y_train, y_test = getSplitData(nTupleSamples, variables, cut, 0)
+    x_train, x_test, y_train, y_test = getSplitData(nTupleSamples, variables, cut, 0)
 
     # Load the model
     if args.inputModel:
@@ -30,18 +30,18 @@ def main(args):
       print(model.summary())
 
     # Predict the labels
-    pred = model.predict(X_test)
+    pred = model.predict(x_test)
     y_pred = np.rint(pred).astype(int)
 
     # Get the accuracy
     print("Accuracy for " + cut + " cut: " + str(accuracy_score(y_test, y_pred)))
 
     # Plot graphs
-    predictionsROCPlotter(model, pred, y_test, y_train, X_train, cut)
+    predictionsROCPlotter(model, pred, y_test, y_train, x_train, cut)
 
     if args.shap:
       # Plot the SHAP values
-      shapPlotter(model, X_train, variables, cut)
+      shapPlotter(model, x_train, variables, cut)
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(description = "Predict and plot graphs using an imported neural network")
