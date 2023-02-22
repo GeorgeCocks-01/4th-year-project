@@ -7,6 +7,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import KFold
 from sklearn.preprocessing import StandardScaler
 from selectionPlots import findAllFilesInPath
+from plotting import predictionsROCPlotter
 
 def main(args):
   # Get the samples from the outputNTuples folder, store them in a dictionary with 1 for signal and 0 for background
@@ -19,10 +20,7 @@ def main(args):
               "nJets", "deltaPhill", "deltaPhitt", "deltaPhilltt", "mmc")
 
   for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 lepton)
-    if cut == "2lep":
-      batch = 64
-    else:
-      batch = 128
+    batch = 64 if cut == "2lep" else 128
 
     ### GET THE DATA ###
     x = np.array([])
@@ -63,7 +61,7 @@ def main(args):
       x_train, x_test = x[train], x[test]
       y_train, y_test = y[train], y[test]
 
-      # Fit the model. UNSURE IF THIS WILL KEEP THE WEIGHTS FROM THE PREVIOUS TRAINING
+      # Fit the model
       model.fit(x_train, y_train, batch_size = batch, epochs = 100, callbacks = [stop_early])
 
       # Get the predictions
@@ -75,7 +73,10 @@ def main(args):
       if args.outputfile:
         model.save("kFoldModels/" + args.outputfile + cut + i + ".h5")
       else:
-        model.save("kFOldModels/" + cut + "Model" + i + ".h5")
+        model.save("kFoldModels/" + cut + "Model" + i + ".h5")
+
+      # Plot the ROC curve
+      predictionsROCPlotter(model, pred, y_test, y_train, x_train, cut, "kFoldModels/" + cut + i + ".png")
 
       i += 1
 

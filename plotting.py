@@ -5,10 +5,10 @@ from sklearn.metrics import roc_curve, auc
 
 matplotlib.use("SVG") # Use SVG for matplotlib
 
-def predictionsROCPlotter(model, pred, y_test, y_train, X_train, cut):
+def predictionsROCPlotter(model, pred, y_test, y_train, X_train, cut, filename = None):
   ### Plots Predictions and ROC curve ###
   fpr, tpr, thresholds = roc_curve(y_test, pred) # Calculate the ROC curve
-  rocArea = auc(fpr, tpr) # Calculate the area under the ROC curve
+  rocArea = auc(fpr, tpr) # Calculate the area under the ROC curv
 
   # Plot the ROC curve
   plt.figure(figsize = (8, 6))
@@ -18,7 +18,10 @@ def predictionsROCPlotter(model, pred, y_test, y_train, X_train, cut):
   plt.ylabel("True positive rate")
   plt.xlabel("False positive rate")
   plt.legend(["Baseline", "ROC curve (area = %0.3f)" % rocArea], loc = 'lower right')
-  plt.savefig("nnPlots/roc" + cut + ".png")
+  if not filename:
+    plt.savefig("nnPlots/roc" + cut + ".png")
+  else:
+    plt.savefig(filename.split("/")[0] + "/roc" + filename.split("/")[1])
   plt.clf()
 
   signalPredictionTest = pred[y_test == 1]
@@ -36,7 +39,10 @@ def predictionsROCPlotter(model, pred, y_test, y_train, X_train, cut):
   plt.ylabel("Number of events")
   plt.xlabel("Prediction")
   plt.legend(loc = 'upper center', ncol = 2)
-  plt.savefig("nnPlots/predictions" + cut + ".png")
+  if not filename:
+    plt.savefig("nnPlots/predictions" + cut + ".png")
+  else:
+    plt.savefig(filename)
   plt.clf()
 
 def trainingPlotter(modelFit, cut):
