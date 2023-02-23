@@ -10,7 +10,17 @@ from sklearn.model_selection import train_test_split
 from selectionPlots import findAllFilesInPath
 from plotting import predictionsROCPlotter, trainingPlotter
 
-def getSplitData(nTupleSamples, variables, cut, seed):
+def getSplitData(cut, seed):
+
+  # Get the samples from the outputNTuples folder, store them in a dictionary with 1 for signal and 0 for background
+  sampleNames = findAllFilesInPath("*.root", "nTupleGroups/")
+  nTupleSamples = dict.fromkeys(sampleNames, 0)
+  nTupleSamples["nTupleGroups/signalGroup.root"] = 1
+
+  # Tuple of variables to get from each file
+  variables = ("tauPtSum", "zMassSum", "metPt", "deltaRll", "deltaRtt", "deltaRttll", "deltaEtall", "deltaEtatt",
+              "nJets", "deltaPhill", "deltaPhitt", "deltaPhilltt", "mmc")
+
   x = np.array([])
   y = np.array([])
 
@@ -39,18 +49,9 @@ def getSplitData(nTupleSamples, variables, cut, seed):
   return x_train, x_test, y_train, y_test
 
 def main(args):
-  # Get the samples from the outputNTuples folder, store them in a dictionary with 1 for signal and 0 for background
-  sampleNames = findAllFilesInPath("*.root", "nTupleGroups/")
-  n_tuple_samples = dict.fromkeys(sampleNames, 0)
-  n_tuple_samples["nTupleGroups/signalGroup.root"] = 1
-
-  # Tuple of variables to get from each file
-  variables = ("tauPtSum", "zMassSum", "metPt", "deltaRll", "deltaRtt", "deltaRttll", "deltaEtall", "deltaEtatt",
-               "nJets", "deltaPhill", "deltaPhitt", "deltaPhilltt", "mmc")
-
   for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 lepton)
 
-    x_train, x_test, y_train, y_test = getSplitData(n_tuple_samples, variables, cut, 0)
+    x_train, x_test, y_train, y_test = getSplitData(cut, 0)
 
     # Create the model
     model = Sequential()
