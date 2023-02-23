@@ -31,7 +31,7 @@ def main(args):
 
     if args.shap:
       # Plot the SHAP values
-      shapPlotter(model, x_train, variables, cut)
+      shapPlotter(model, x_train, cut)
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(description = "Predict and plot graphs using an imported neural network")

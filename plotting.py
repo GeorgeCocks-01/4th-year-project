@@ -58,9 +58,14 @@ def trainingPlotter(modelFit, cut):
     plt.savefig("nnPlots/" + i + cut + ".png")
     plt.clf()
 
-def shapPlotter(model, X_train, features, cut):
+def shapPlotter(model, X_train, cut):
   ### Plots the SHAP values ###
-  explainer = shap.Explainer(model, X_train, feature_names = features)
+
+  # Tuple of variables to get from each file
+  variables = ("tauPtSum", "zMassSum", "metPt", "deltaRll", "deltaRtt", "deltaRttll", "deltaEtall", "deltaEtatt",
+              "nJets", "deltaPhill", "deltaPhitt", "deltaPhilltt", "mmc")
+
+  explainer = shap.Explainer(model, X_train, feature_names = variables)
   shap_values = explainer(X_train)
 
   shap.plots.bar(shap_values, show = False)
