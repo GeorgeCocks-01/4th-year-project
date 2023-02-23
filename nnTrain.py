@@ -11,7 +11,6 @@ from selectionPlots import findAllFilesInPath
 from plotting import predictionsROCPlotter, trainingPlotter
 
 def getSplitData(cut, seed):
-
   # Get the samples from the outputNTuples folder, store them in a dictionary with 1 for signal and 0 for background
   sampleNames = findAllFilesInPath("*.root", "nTupleGroups/")
   nTupleSamples = dict.fromkeys(sampleNames, 0)
@@ -19,7 +18,7 @@ def getSplitData(cut, seed):
 
   # Tuple of variables to get from each file
   variables = ("tauPtSum", "zMassSum", "metPt", "deltaRll", "deltaRtt", "deltaRttll", "deltaEtall", "deltaEtatt",
-              "nJets", "deltaPhill", "deltaPhitt", "deltaPhilltt", "mmc")
+               "nJets", "deltaPhill", "deltaPhitt", "deltaPhilltt", "mmc")
 
   x = np.array([])
   y = np.array([])
@@ -33,11 +32,11 @@ def getSplitData(cut, seed):
     x_temp = x_temp.iloc[:, :].values
 
     # 1 for signal, 0 for background
-    yTemp = np.zeros(len(x_temp)) if nTupleSamples[sample] == 0 else np.ones(len(x_temp))
+    y_temp = np.zeros(len(x_temp)) if nTupleSamples[sample] == 0 else np.ones(len(x_temp))
 
     # Concatenate the arrays
     x = np.concatenate((x, x_temp)) if x.size else x_temp
-    y = np.concatenate((y, yTemp)) if y.size else yTemp
+    y = np.concatenate((y, y_temp)) if y.size else y_temp
 
   # Scale the data
   sc = StandardScaler()

@@ -44,10 +44,9 @@ def findAllFilesInPath(pattern, path):
   checkPath( path, items )
   return files
 
-def fillHistograms(tau1, tauOrLep, Zlep1, Zlep2, met_p4, nJets, mmc, totalWeight, nTuples, newTree, eventNumber, histograms = None):
+def fillHistograms(tau1, tauOrLep, Zlep1, Zlep2, met_p4, nJets, mmc, totalWeight, nTuples, newTree, histograms = None):
   fillers = dict.fromkeys(nTuples.keys())
   del fillers["weight"]
-  del fillers["eventNumber"]
 
   fillers["tauPtSum"] = tau1.Pt() + tauOrLep.Pt()
   fillers["zMassSum"] = (Zlep1 + Zlep2).M()
@@ -72,15 +71,16 @@ def fillHistograms(tau1, tauOrLep, Zlep1, Zlep2, met_p4, nJets, mmc, totalWeight
       nTuples[key][0] = fillers[key]
 
   nTuples["weight"][0] = totalWeight
-  nTuples["eventNumber"][0] = eventNumber
   newTree.Fill()
 
 def variableCutsIf(tau1, tauOrLep, Zlep1, Zlep2, mmc, etallValue):
   deltaPhill = getDeltaPhill(Zlep1, Zlep2)
 
-  return ((tau1.DeltaR(tauOrLep) < 3.1) and (Zlep1.DeltaR(Zlep2) < 3) and ((tau1 + tauOrLep).DeltaR(Zlep1 + Zlep2)) < 3.9
-    and (math.fabs(tau1.Eta() - tauOrLep.Eta()) < 1.9) and (math.fabs(Zlep1.Eta() - Zlep2.Eta()) < etallValue)
-    and (deltaPhill > -3.2) and (deltaPhill < 2.4) and (mmc > 90) and (mmc < 190))
+  return ((tau1.DeltaR(tauOrLep) < 3.1) and (Zlep1.DeltaR(Zlep2) < 3)
+          and ((tau1 + tauOrLep).DeltaR(Zlep1 + Zlep2) < 3.9)
+          and (math.fabs(tau1.Eta() - tauOrLep.Eta()) < 1.9)
+          and (math.fabs(Zlep1.Eta() - Zlep2.Eta()) < etallValue) and (deltaPhill > -3.2)
+          and (deltaPhill < 2.4) and (mmc > 90) and (mmc < 190))
 
 def getDeltaPhill(Zlep1, Zlep2):
   if (Zlep1.Eta() > Zlep2.Eta()):
@@ -159,17 +159,10 @@ def main(args):
     nTuples3Lep[i] = array('f', [0])
     newTree2Lep.Branch(i, nTuples2Lep[i], i + "/F")
     newTree3Lep.Branch(i, nTuples3Lep[i], i + "/F")
-
   nTuples2Lep["weight"] = array('f', [0]) # Add weight branch
   newTree2Lep.Branch("weight", nTuples2Lep["weight"], "weight/F")
-  nTuples2Lep["eventNumber"] = array('f', [0]) # Add event number branch
-  newTree2Lep.Branch("eventNumber", nTuples2Lep["eventNumber"], "eventNumber/F")
-
   nTuples3Lep["weight"] = array('f', [0]) # Add weight branch
   newTree3Lep.Branch("weight", nTuples3Lep["weight"], "weight/F")
-  nTuples3Lep["eventNumber"] = array('f', [0]) # Add event number branch
-  newTree3Lep.Branch("eventNumber", nTuples3Lep["eventNumber"], "eventNumber/F")
-
 
   #FILL HISTOGRAMS LOOP
   for i in range(0, tree.GetEntries()):
@@ -190,7 +183,6 @@ def main(args):
     tauBdt = getattr(tree, "taus_ele_bdt_loose_retuned")
     eIsoPass = getattr(tree, "leptons_iso_FCLoose")
     muIsoPass = getattr(tree, "leptons_iso_TightTrackOnly_FixedRad")
-    eventNumber = getattr(tree, "event_number")
 
     if len(taus_p4) > 0: # checks if there is a tau
       if len(leptons_p4) == 3: flavList = [lFlavour[0], lFlavour[1], lFlavour[2]] # list of lepton flavours
@@ -208,10 +200,10 @@ def main(args):
         # if fill nTuples or not
         if variableCutsIf(taus_p4[0], taus_p4[1], leptons_p4[0], leptons_p4[1], tau0tau1MMC, 3.5):
           fillHistograms(taus_p4[0], taus_p4[1], leptons_p4[0], leptons_p4[1], met_p4.Pt(), nJets30, tau0tau1MMC,
-            wTotal, nTuples2Lep, newTree2Lep, eventNumber, diLepHistograms)
+            wTotal, nTuples2Lep, newTree2Lep, diLepHistograms)
         else:
           fillHistograms(taus_p4[0], taus_p4[1], leptons_p4[0], leptons_p4[1], met_p4.Pt(), nJets30, tau0tau1MMC,
-            wTotal, nTuples2Lep, newTree2Lep, eventNumber)
+            wTotal, nTuples2Lep, newTree2Lep)
 
       #### SELECTION CUT for 3 lepton final state ####
       elif ((len(leptons_p4) == 3) and len(taus_p4) == 1 and (rnnID[0] == 1)
@@ -238,10 +230,10 @@ def main(args):
           if variableCutsIf(taus_p4[0], leptons_p4[muIndex], leptons_p4[(muIndex + 1)%3], leptons_p4[(muIndex - 1)%3],
             tau0lepMMC, 2.7):
             fillHistograms(taus_p4[0], leptons_p4[muIndex], leptons_p4[(muIndex + 1)%3], leptons_p4[(muIndex - 1)%3],
-              met_p4.Pt(), nJets30, tau0lepMMC, wTotal, nTuples3Lep, newTree3Lep, eventNumber, triLepHistograms)
+              met_p4.Pt(), nJets30, tau0lepMMC, wTotal, nTuples3Lep, newTree3Lep, triLepHistograms)
           else:
             fillHistograms(taus_p4[0], leptons_p4[muIndex], leptons_p4[(muIndex + 1)%3], leptons_p4[(muIndex - 1)%3],
-              met_p4.Pt(), nJets30, tau0lepMMC, wTotal, nTuples3Lep, newTree3Lep, eventNumber)
+              met_p4.Pt(), nJets30, tau0lepMMC, wTotal, nTuples3Lep, newTree3Lep)
 
         # Two muons, one electron
         elif ((flavList.count(2) == 1) and (flavList.count(1) == 2) and (lCharge[eIndex] == -tauCharge[0])
@@ -257,10 +249,10 @@ def main(args):
           if variableCutsIf(taus_p4[0], leptons_p4[eIndex], leptons_p4[(eIndex + 1)%3], leptons_p4[(eIndex - 1)%3],
             tau0lepMMC, 2.7):
             fillHistograms(taus_p4[0], leptons_p4[eIndex], leptons_p4[(eIndex + 1)%3], leptons_p4[(eIndex - 1)%3],
-              met_p4.Pt(), nJets30, tau0lepMMC, wTotal, nTuples3Lep, newTree3Lep, eventNumber, triLepHistograms)
+              met_p4.Pt(), nJets30, tau0lepMMC, wTotal, nTuples3Lep, newTree3Lep, triLepHistograms)
           else:
             fillHistograms(taus_p4[0], leptons_p4[eIndex], leptons_p4[(eIndex + 1)%3], leptons_p4[(eIndex - 1)%3],
-              met_p4.Pt(), nJets30, tau0lepMMC, wTotal, nTuples3Lep, newTree3Lep, eventNumber)
+              met_p4.Pt(), nJets30, tau0lepMMC, wTotal, nTuples3Lep, newTree3Lep)
 
         # One positive charge, two negatives
         elif ((chargeList.count(+1) == 1) and (chargeList.count(-1) == 2)
@@ -284,11 +276,10 @@ def main(args):
               leptons_p4[(posIndex + 1)%3], tau0lepMMC, 2.7):
               fillHistograms(taus_p4[0], leptons_p4[(posIndex - 1)%3], leptons_p4[posIndex],
                 leptons_p4[(posIndex + 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, nTuples3Lep, newTree3Lep,
-                eventNumber, triLepHistograms)
+                triLepHistograms)
             else:
               fillHistograms(taus_p4[0], leptons_p4[(posIndex - 1)%3], leptons_p4[posIndex],
-                leptons_p4[(posIndex + 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, nTuples3Lep, newTree3Lep,
-                eventNumber)
+                leptons_p4[(posIndex + 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, nTuples3Lep, newTree3Lep)
 
           elif ((zCandidate1 > zCandidate2) and ((lCharge[(posIndex + 1)%3] == -tauCharge[0]))
             and (leptons_p4[(posIndex + 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass2 > 81) and (zMass2 < 101)):
@@ -300,11 +291,10 @@ def main(args):
               leptons_p4[(posIndex - 1)%3], tau0lepMMC, 2.7):
               fillHistograms(taus_p4[0], leptons_p4[(posIndex + 1)%3], leptons_p4[posIndex],
                 leptons_p4[(posIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, nTuples3Lep, newTree3Lep,
-                eventNumber, triLepHistograms)
+                triLepHistograms)
             else:
               fillHistograms(taus_p4[0], leptons_p4[(posIndex + 1)%3], leptons_p4[posIndex],
-                leptons_p4[(posIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, nTuples3Lep, newTree3Lep,
-                eventNumber)
+                leptons_p4[(posIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, nTuples3Lep, newTree3Lep)
 
         # Two positive charges, one negative
         elif ((chargeList.count(-1) == 1) and (chargeList.count(+1) == 2)
@@ -328,11 +318,10 @@ def main(args):
               leptons_p4[(negIndex + 1)%3], tau0lepMMC, 2.7):
               fillHistograms(taus_p4[0], leptons_p4[(negIndex - 1)%3], leptons_p4[negIndex],
                 leptons_p4[(negIndex + 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, nTuples3Lep, newTree3Lep,
-                eventNumber, triLepHistograms)
+                triLepHistograms)
             else:
               fillHistograms(taus_p4[0], leptons_p4[(negIndex - 1)%3], leptons_p4[negIndex],
-                leptons_p4[(negIndex + 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, nTuples3Lep, newTree3Lep,
-                eventNumber)
+                leptons_p4[(negIndex + 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, nTuples3Lep, newTree3Lep)
 
           elif ((zCandidate1 > zCandidate2) and ((lCharge[(negIndex + 1)%3] == -tauCharge[0]))
             and (leptons_p4[(negIndex + 1)%3].Pt() + taus_p4[0].Pt() > 60) and (zMass2 > 81) and (zMass2 < 101)):
@@ -344,11 +333,10 @@ def main(args):
               leptons_p4[(negIndex - 1)%3], tau0lepMMC, 2.7):
               fillHistograms(taus_p4[0], leptons_p4[(negIndex + 1)%3], leptons_p4[negIndex],
                 leptons_p4[(negIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, nTuples3Lep, newTree3Lep,
-                eventNumber, triLepHistograms)
+                triLepHistograms)
             else:
               fillHistograms(taus_p4[0], leptons_p4[(negIndex + 1)%3], leptons_p4[negIndex],
-                leptons_p4[(negIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, nTuples3Lep, newTree3Lep,
-                eventNumber)
+                leptons_p4[(negIndex - 1)%3], met_p4.Pt(), nJets30, tau0lepMMC, wTotal, nTuples3Lep, newTree3Lep)
 
   print("2lep selection cut integral yield:", diLepHistograms["tauPtSum"].Integral(0,
     diLepHistograms["tauPtSum"].GetNbinsX() + 1))

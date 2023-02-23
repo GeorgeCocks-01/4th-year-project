@@ -8,7 +8,7 @@ matplotlib.use("SVG") # Use SVG for matplotlib
 def predictionsROCPlotter(model, pred, y_test, y_train, X_train, cut, filename = None):
   ### Plots Predictions and ROC curve ###
   fpr, tpr, thresholds = roc_curve(y_test, pred) # Calculate the ROC curve
-  rocArea = auc(fpr, tpr) # Calculate the area under the ROC curv
+  rocArea = auc(fpr, tpr) # Calculate the area under the ROC curve
 
   # Plot the ROC curve
   plt.figure(figsize = (8, 6))
