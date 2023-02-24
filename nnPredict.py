@@ -21,6 +21,7 @@ def main(args):
 
     # Predict the labels
     pred = model.predict(x_test)
+    # Round the predictions to the nearest integer
     y_pred = np.rint(pred).astype(int)
 
     # Get the accuracy

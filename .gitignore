@@ -22,3 +22,5 @@ nnPlots/
 hyperTuning/
 nnModels/
 *.h5
+kFoldModels/
+kFoldPlots/

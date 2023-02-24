@@ -42,7 +42,7 @@ def predictionsROCPlotter(model, pred, y_test, y_train, X_train, cut, filename =
   if not filename:
     plt.savefig("nnPlots/predictions" + cut + ".png")
   else:
-    plt.savefig(filename)
+    plt.savefig(filename.split("/")[0] + "/predictions" + filename.split("/")[1])
   plt.clf()
 
 def trainingPlotter(modelFit, cut):
