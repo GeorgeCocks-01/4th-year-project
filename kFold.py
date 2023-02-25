@@ -3,6 +3,7 @@ import ROOT
 import uproot
 import argparse
 import numpy as np
+from math import sqrt
 from keras.models import load_model
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import KFold
@@ -19,6 +20,14 @@ def main(args):
   # Tuple of variables to get from each file
   variables = ("tauPtSum", "zMassSum", "metPt", "deltaRll", "deltaRtt", "deltaRttll", "deltaEtall", "deltaEtatt",
               "nJets", "deltaPhill", "deltaPhitt", "deltaPhilltt", "mmc")
+
+  # Create a canvas
+  ROOT.gROOT.LoadMacro('../atlasrootstyle/AtlasStyle.C')
+  ROOT.gROOT.LoadMacro('../atlasrootstyle/AtlasUtils.C')
+  ROOT.gROOT.SetBatch(ROOT.kTRUE)
+  ROOT.SetAtlasStyle()
+  canvas = ROOT.TCanvas("c", "c", 800, 600)
+  canvas.cd()
 
   for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 lepton)
     batch = 64 if cut == "2lep" else 128
@@ -53,20 +62,19 @@ def main(args):
     kf = KFold(n_splits = 5, shuffle = True, random_state = 0)
 
     # Create a ROOT histogram for the predictions and fill it
-    signal_predictions = ROOT.TH1D("predictions" + cut, "Predictions " + cut + " " + ";Prediction;Events", 30, 0, 1)
-    background_predictions = ROOT.TH1D("predictions" + cut, "Predictions " + cut + " " + ";Prediction;Events", 30, 0, 1)
+    signal_predictions = ROOT.TH1D("Signalpredictions" + cut, "Predictions " + cut + " " + ";Prediction;Events", 25, 0, 1)
+    background_predictions = ROOT.TH1D("Backgroundpredictions" + cut, "Predictions " + cut + " " + ";Prediction;Events", 25, 0, 1)
 
     i = 1
     # Loop over the kFold splits
     for train, test in kf.split(x):
-      print("Starting fold", i, "for", cut, "cut")
-
       model = load_model("nnModels/architechture" + cut + ".h5")
 
       x_train, x_test = x[train], x[test]
       y_train, y_test = y[train], y[test]
       weights_test = weight[test]
 
+      print("Starting fold", i, "for", cut, "cut")
       # Fit the model
       model.fit(x_train, y_train, batch_size = batch, epochs = 10, verbose = 0)
 
@@ -110,15 +118,6 @@ def main(args):
     # root_file.Close()
 
     ### PLOTTING ###
-    ROOT.gROOT.LoadMacro('../atlasrootstyle/AtlasStyle.C')
-    ROOT.gROOT.LoadMacro('../atlasrootstyle/AtlasUtils.C')
-    ROOT.gROOT.SetBatch(ROOT.kTRUE)
-    ROOT.SetAtlasStyle()
-
-    # Create a canvas
-    canvas = ROOT.TCanvas("c", "c", 800, 600)
-    canvas.cd()
-
     # Create a legend
     leg = ROOT.TLegend(0.7,0.6,0.8,0.85)
     leg.SetBorderSize(0)
@@ -128,26 +127,77 @@ def main(args):
     histos = [signal_predictions, background_predictions]
     colours = [ROOT.kRed, ROOT.kBlue]
     sample_name = ["Signal", "Background"]
+    prediction_yield = 0
     for i in range(len(histos)):
+      prediction_yield += histos[i].Integral(0, histos[i].GetNbinsX() + 1)
       histos[i].SetLineColor(colours[i])
 
       # Normalise the histograms
       histos[i].Scale(1./histos[i].Integral())
+
+    if histos[0].GetMaximum() > histos[1].GetMaximum():
+      maximum = histos[0].GetMaximum()
+    else:
+      maximum = histos[1].GetMaximum()
+
+    for i in range(len(histos)):
+      histos[i].SetMaximum(maximum * 1.3)
+
       # Draw the histograms
-      histos[i].Draw("hist") if i == 0 else histos[i].Draw("hist same")
+      histos[i].Draw("hist") if i == 0 else histos[i].Draw("histSAME")
 
       leg.AddEntry(histos[i], sample_name[i], "l")
-
-      prediction_yield = histos[i].Integral(0, histos[i].GetNbinsX() + 1)
 
     leg.Draw('SAME')
 
     # Save the canvas
-    canvas.SaveAs("kFoldPlots/prediction" + cut + ".pdf")
+    canvas.SaveAs("kFoldPlots/weightedPrediction" + cut + ".pdf")
     canvas.Clear()
     ### END OF PLOTTING ###
 
-    print("Yield for cut", cut, "is", prediction_yield)
+    ### SB ratio histograms ###
+    sb_1 = signal_predictions.Clone("SBsignal1" + cut)
+    sb_2 = signal_predictions.Clone("SBsignal2" + cut)
+
+    for i in range(1, signal_predictions.GetNbinsX() + 1):
+      # Calculate the S/sqrt(S+B) up to bin i
+      signal_yield = signal_predictions.Integral(0, i)
+      background_yield = background_predictions.Integral(0, i)
+      try:
+        SoverSqrtSB = signal_yield/sqrt(signal_yield + background_yield)
+      except ZeroDivisionError:
+        SoverSqrtSB = 0
+      except ValueError:
+        SoverSqrtSB = 0
+      sb_1.SetBinContent(i, SoverSqrtSB)
+
+      # Calculate the S/sqrt(S+B) from bin i to the end
+      signal_yield = signal_predictions.Integral(i, signal_predictions.GetNbinsX() + 1)
+      background_yield = background_predictions.Integral(i, background_predictions.GetNbinsX() + 1)
+      try:
+        SoverSqrtSB = signal_yield/sqrt(signal_yield + background_yield)
+      except ZeroDivisionError:
+        SoverSqrtSB = 0
+      except ValueError:
+        SoverSqrtSB = 0
+      sb_2.SetBinContent(i, SoverSqrtSB)
+
+    sb_1.SetMaximum(sb_1.GetMaximum()*3.5)
+    sb_1.SetLineWidth(3)
+    sb_1.SetMarkerColor(ROOT.kRed)
+    sb_1.SetLineColor(ROOT.kRed)
+    sb_1.Draw('hist')
+    sb_1.GetYaxis().SetTitle("S/sqrt(S+B)")
+
+    sb_2.SetMaximum(sb_2.GetMaximum()*5)
+    sb_2.SetMarkerColor(ROOT.kBlue)
+    sb_2.SetLineColor(ROOT.kBlue)
+    sb_2.Draw('histSAME')
+    canvas.SaveAs("kFoldPlots/SoverSqrtSB" + cut + ".pdf")
+    canvas.Clear()
+    ### End of SB ratio histograms ###
+
+    # print("Yield for cut", cut, "is", prediction_yield)
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(description = "Train a neural network on the nTuples.")

@@ -109,7 +109,9 @@ for cut in ["2_lep_", "3_lep_"]: # Loop over the different selection cuts (2 and
     total_background.Add(histos[1])
     total_background.Add(histos[2])
 
+    # Loop over the bins and calculate the S/sqrt(S+B) for each bin
     for i in range(1, histos[3].GetNbinsX() + 1):
+      # Integrating up
       signalYield = histos[3].Integral(0, i)
       backgroundYield = total_background.Integral(0, i)
       try:
@@ -120,6 +122,7 @@ for cut in ["2_lep_", "3_lep_"]: # Loop over the different selection cuts (2 and
         SoverSqrtSB = 0
       var_sig1.SetBinContent(i, SoverSqrtSB)
 
+      # Integrating inverse
       signalYield = histos[3].Integral(i, histos[3].GetNbinsX() + 1)
       backgroundYield = total_background.Integral(i, histos[3].GetNbinsX() + 1)
       try:
