@@ -182,14 +182,14 @@ def main(args):
         SoverSqrtSB = 0
       sb_2.SetBinContent(i, SoverSqrtSB)
 
-    sb_1.SetMaximum(sb_1.GetMaximum()*3.5)
+    sb_1.SetMaximum(sb_1.GetBinContent(sb_1.GetMaximumBin())*1.3)
     sb_1.SetLineWidth(3)
     sb_1.SetMarkerColor(ROOT.kRed)
     sb_1.SetLineColor(ROOT.kRed)
     sb_1.Draw('hist')
     sb_1.GetYaxis().SetTitle("S/sqrt(S+B)")
 
-    sb_2.SetMaximum(sb_2.GetMaximum()*5)
+    sb_2.SetMaximum(sb_2.GetMaximum()*3.5)
     sb_2.SetMarkerColor(ROOT.kBlue)
     sb_2.SetLineColor(ROOT.kBlue)
     sb_2.Draw('histSAME')
