@@ -1,4 +1,4 @@
-import array
+from array import array
 import ROOT
 import uproot
 import argparse
@@ -29,6 +29,9 @@ def main(args):
   canvas = ROOT.TCanvas("c", "c", 800, 600)
   canvas.cd()
 
+  # Create a TTree to store the predictions and the group number for kFoldCutting
+  output_ntuple_file = ROOT.TFile.Open(("kFoldNTuples/predictions.root"), "RECREATE")
+
   for cut in ["2lep", "3lep"]: # Loop over the different selection cuts (2 and 3 lepton)
     batch = 64 if cut == "2lep" else 128
 
@@ -36,9 +39,16 @@ def main(args):
     x = np.array([])
     y = np.array([])
     weight = np.array([])
+    group_number = np.array([])
+
+    # Create a TTree to store the predictions and the group number for kFoldCutting
+    ntuple = ROOT.TTree("nominal" + cut, "nominal" + cut)
+    prediction_array = array('f', [0])
+    ntuple.Branch("prediction", prediction_array, "prediction/F")
+    group_array = array('f', [0])
+    ntuple.Branch("group", group_array, "group/F")
 
     for sample in ntuple_samples: # Loop over the samples
-
       with uproot.open(sample + ":nominal" + cut) as tree:
         x_temp = tree.arrays(variables, library = "pd")
         weight_temp = tree["weight"].array(library = "np")
@@ -46,12 +56,23 @@ def main(args):
       x_temp = x_temp.iloc[:, :].values
 
       # 1 for signal, 0 for background
-      yTemp = np.zeros(len(x_temp)) if ntuple_samples[sample] == 0 else np.ones(len(x_temp))
+      y_temp = np.zeros(len(x_temp)) if ntuple_samples[sample] == 0 else np.ones(len(x_temp))
 
       # Concatenate the arrays
       x = np.concatenate((x, x_temp)) if x.size else x_temp
-      y = np.concatenate((y, yTemp)) if y.size else yTemp
+      y = np.concatenate((y, y_temp)) if y.size else y_temp
       weight = np.concatenate((weight, weight_temp)) if weight.size else weight_temp
+
+      # Add the group number to identify sample groups for kFoldCutting
+      match sample:
+        case "nTupleGroups/signalGroup.root":
+          group_number = np.concatenate((group_number, np.zeros(len(x_temp))))
+        case "nTupleGroups/llllGroup.root":
+          group_number = np.concatenate((group_number, np.ones(len(x_temp))))
+        case "nTupleGroups/backgroundGroup.root":
+          group_number = np.concatenate((group_number, np.full(len(x_temp), 2)))
+        case "nTupleGroups/jetsGroup.root":
+          group_number = np.concatenate((group_number, np.full(len(x_temp), 3)))
 
     # Scale the data
     sc = StandardScaler()
@@ -73,6 +94,7 @@ def main(args):
       x_train, x_test = x[train], x[test]
       y_train, y_test = y[train], y[test]
       weights_test = weight[test]
+      group_test = group_number[test]
 
       print("Starting fold", i, "for", cut, "cut")
       # Fit the model
@@ -94,27 +116,34 @@ def main(args):
       # Plot the ROC curve
       predictionsROCPlotter(model, pred, y_test, y_train, x_train, cut, "kFoldPlots/" + cut + str(i) + ".png")
 
-      # for j in pred: WOULD NEED TO BE CHANGED
-      #   signal_predictions.Fill(j, weights_test[j])
-      #   background_predictions.Fill(j, weights_test[j])
-
       # Arrays of predictions for signal and background
-      pred_signal = array.array('d', pred[y_test == 1])
-      pred_background = array.array('d', pred[y_test == 0])
+      pred_signal = array('d', pred[y_test == 1])
+      pred_background = array('d', pred[y_test == 0])
       # Arrays of weights for signal and background
-      weights_signal = array.array('d', weights_test[y_test == 1])
-      weights_background = array.array('d', weights_test[y_test == 0])
+      weights_signal = array('d', weights_test[y_test == 1])
+      weights_background = array('d', weights_test[y_test == 0])
 
       # Fill the histogram (must use python arrays)
       signal_predictions.FillN(len(pred_signal), pred_signal, weights_signal)
       background_predictions.FillN(len(pred_background), pred_background, weights_background)
 
+      # Fill the TTree
+      for j in range(len(pred)):
+        prediction_array[0] = pred[j]
+        group_array[0] = group_test[j]
+        ntuple.Fill()
+
       i += 1
 
-    # # Save the histogram to a ROOT file
+    # Save the TTree
+    ntuple.Write()
+    del ntuple
+
+    # # Save the signal histogram to a ROOT file
     # root_file = ROOT.TFile.Open("kFoldRoot/prediction" + cut + ".root", "RECREATE")
     # root_file.cd()
     # signal_predictions.Write()
+    # background_predictions.Write()
     # root_file.Close()
 
     ### PLOTTING ###
@@ -129,11 +158,12 @@ def main(args):
     sample_name = ["Signal", "Background"]
     prediction_yield = 0
     for i in range(len(histos)):
-      prediction_yield += histos[i].Integral(0, histos[i].GetNbinsX() + 1)
-      histos[i].SetLineColor(colours[i])
+      hist = histos[i]
+      prediction_yield += hist.Integral(0, hist.GetNbinsX() + 1)
+      hist.SetLineColor(colours[i])
 
       # Normalise the histograms
-      histos[i].Scale(1./histos[i].Integral())
+      hist.Scale(1./hist.Integral())
 
     if histos[0].GetMaximum() > histos[1].GetMaximum():
       maximum = histos[0].GetMaximum()
@@ -198,6 +228,9 @@ def main(args):
     ### End of SB ratio histograms ###
 
     # print("Yield for cut", cut, "is", prediction_yield)
+
+  # Close the output ntuple file
+  output_ntuple_file.Close()
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(description = "Train a neural network on the nTuples.")

@@ -24,7 +24,6 @@ def getSplitData(cut, seed):
   y = np.array([])
 
   for sample in nTupleSamples: # Loop over the samples
-
     with uproot.open(sample + ":nominal" + cut) as tree:
       x_temp = tree.arrays(variables, library = "pd")
       weight = tree["weight"].array(library = "np")
