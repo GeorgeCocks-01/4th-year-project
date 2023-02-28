@@ -79,7 +79,7 @@ def main():
 
     ### PLOTTING ###
     # Create a legend
-    leg = ROOT.TLegend(0.7,0.6,0.8,0.85)
+    leg = ROOT.TLegend()
     leg.SetBorderSize(0)
     leg.SetTextSize(0.03)
     leg.SetEntrySeparation(0.001)
