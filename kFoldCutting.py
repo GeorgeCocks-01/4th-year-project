@@ -4,6 +4,16 @@ import ROOT
 import numpy as np
 from selectionPlots import findAllFilesInPath
 
+def s_b_calc(lower, upper, signal_hist, background_hist):
+  signal_yield = signal_hist.Integral(lower, upper)
+  background_yield = background_hist.Integral(lower, upper)
+  try:
+    return signal_yield/np.sqrt(signal_yield + background_yield)
+  except ZeroDivisionError:
+    return 0
+  except ValueError:
+    return 0
+
 def main():
   # Create a canvas
   ROOT.gROOT.LoadMacro('../atlasrootstyle/AtlasStyle.C')
@@ -138,10 +148,35 @@ def main():
     leg.Draw('SAME')
     stacked_hist.GetXaxis().SetTitle(delta_phi_ll_histograms["llll"].GetXaxis().GetTitle())
     stacked_hist.GetYaxis().SetTitle(delta_phi_ll_histograms["llll"].GetYaxis().GetTitle())
-    canvas.SaveAs('signedDeltaPhill/stack_' + cut + '.pdf')
+    canvas.SaveAs("signedDeltaPhill/stack_" + cut + ".pdf")
     canvas.Clear()
-
     ### END OF PLOTTING ###
+
+    ### SB RATIO PLOTTING ###
+    sig_1 = delta_phi_ll_histograms["signal"].Clone("SBsignal1" + cut)
+    sig_2 = delta_phi_ll_histograms["signal"].Clone("SBsignal2" + cut)
+    total_background = delta_phi_ll_histograms["llll"].Clone("SBbackground" + cut)
+    total_background.Add(delta_phi_ll_histograms["other di-boson"])
+    total_background.Add(delta_phi_ll_histograms["jets"])
+
+    for i in range(1, 5):
+      sig_1.SetBinContent(i, s_b_calc(0, i, delta_phi_ll_histograms["signal"], total_background))
+      sig_2.SetBinContent(i, s_b_calc(i, 5, delta_phi_ll_histograms["signal"], total_background))
+
+    sig_1.SetMaximum(sig_1.GetBinContent(sig_1.GetMaximumBin())*1.3)
+    sig_1.SetLineWidth(3)
+    sig_1.SetMarkerColor(ROOT.kRed)
+    sig_1.SetLineColor(ROOT.kRed)
+    sig_1.Draw('hist')
+    sig_1.GetYaxis().SetTitle("S/sqrt(S+B)")
+
+    sig_2.SetMaximum(sig_2.GetBinContent(sig_2.GetMaximumBin())*1.3)
+    sig_2.SetMarkerColor(ROOT.kBlue)
+    sig_2.SetLineColor(ROOT.kBlue)
+    sig_2.Draw('histSAME')
+    canvas.SaveAs("signedDeltaPhill/SoverSqrtSB" + cut + ".pdf")
+    canvas.Clear()
+    ### END OF SB RATIO PLOTTING ###
 
 if __name__ == "__main__":
   main()
