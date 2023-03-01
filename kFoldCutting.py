@@ -79,10 +79,10 @@ def main():
 
     # Generate histogram for output
     delta_phi_ll_histograms =  {
-      "signal": ROOT.TH1D("signal" + cut, "delta_phi_ll" + cut + ";Delta Phi(Rad);Normalised Counts", 4, -4, 4),
       "llll": ROOT.TH1D("llll" + cut, "delta_phi_ll" + cut + ";Delta Phi(Rad);Normalised Counts", 4, -4, 4),
       "other di-boson": ROOT.TH1D("di-boson" + cut, "delta_phi_ll" + cut + ";Delta Phi(Rad);Normalised Counts", 4, -4, 4),
-      "jets": ROOT.TH1D("jets" + cut, "delta_phi_ll" + cut + ";Delta Phi(Rad);Normalised Counts", 4, -4, 4)
+      "jets": ROOT.TH1D("jets" + cut, "delta_phi_ll" + cut + ";Delta Phi(Rad);Normalised Counts", 4, -4, 4),
+      "signal": ROOT.TH1D("signal" + cut, "delta_phi_ll" + cut + ";Delta Phi(Rad);Normalised Counts", 4, -4, 4)
     }
 
     # Fill histogram with delta phi ll values
