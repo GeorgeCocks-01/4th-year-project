@@ -4,15 +4,14 @@ import ROOT
 import numpy as np
 from selectionPlots import findAllFilesInPath
 
-def s_b_calc(lower, upper, signal_hist, background_hist):
-  signal_yield = signal_hist.Integral(lower, upper)
-  background_yield = background_hist.Integral(lower, upper)
+def significance_calc(bin, signal_hist, background_hist):
+  signal_yield = signal_hist.GetBinContent(bin)
+  background_yield = background_hist.GetBinContent(bin)
   try:
-    return signal_yield/np.sqrt(signal_yield + background_yield)
-  except ZeroDivisionError:
-    return 0
-  except ValueError:
-    return 0
+    sb = signal_yield/np.sqrt(signal_yield + background_yield)
+  except RuntimeWarning:
+    sb = 0
+  return sb
 
 def main():
   # Create a canvas
@@ -113,7 +112,7 @@ def main():
     leg.SetTextSize(0.03)
     leg.SetEntrySeparation(0.001)
 
-    colours = [ROOT.kRed, ROOT.kBlack, ROOT.kBlue, ROOT.kGreen]
+    colours = [ROOT.kBlack, ROOT.kBlue, ROOT.kGreen, ROOT.kRed]
     maximum = -999
     stacked_hist = ROOT.THStack()
     for i, key in enumerate(delta_phi_ll_histograms):
@@ -162,28 +161,22 @@ def main():
     canvas.Clear()
     ### END OF PLOTTING ###
 
-    ### SB RATIO PLOTTING ###
+    ### SIGNIFICANCE PLOTTING ###
     sig_1 = delta_phi_ll_histograms["signal"].Clone("SBsignal1" + cut)
-    sig_2 = delta_phi_ll_histograms["signal"].Clone("SBsignal2" + cut)
     total_background = delta_phi_ll_histograms["llll"].Clone("SBbackground" + cut)
     total_background.Add(delta_phi_ll_histograms["other di-boson"])
     total_background.Add(delta_phi_ll_histograms["jets"])
 
     for i in range(1, sig_1.GetNbinsX() + 1):
-      sig_1.SetBinContent(i, s_b_calc(0, i, delta_phi_ll_histograms["signal"], total_background))
-      sig_2.SetBinContent(i, s_b_calc(i, sig_1.GetNbinsX() + 1, delta_phi_ll_histograms["signal"], total_background))
+      sig_1.SetBinContent(i, significance_calc(i, delta_phi_ll_histograms["signal"], total_background))
 
-    sig_1.SetMaximum(sig_1.GetBinContent(sig_1.GetMaximumBin())*1.3)
+    sig_1.SetMaximum(sig_1.GetBinContent(sig_1.GetMaximumBin())*1.1)
     sig_1.SetLineWidth(3)
     sig_1.SetMarkerColor(ROOT.kRed)
     sig_1.SetLineColor(ROOT.kRed)
     sig_1.Draw('hist')
-    sig_1.GetYaxis().SetTitle("S/sqrt(S+B)")
+    sig_1.GetYaxis().SetTitle("S/#sqrt{S+B}")
 
-    sig_2.SetMaximum(sig_2.GetBinContent(sig_2.GetMaximumBin())*1.3)
-    sig_2.SetMarkerColor(ROOT.kBlue)
-    sig_2.SetLineColor(ROOT.kBlue)
-    sig_2.Draw('histSAME')
     canvas.SaveAs("signedDeltaPhill/SoverSqrtSB" + cut + ".pdf")
     canvas.Clear()
     ### END OF SB RATIO PLOTTING ###
