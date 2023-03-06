@@ -79,10 +79,10 @@ def main():
 
     # Generate histogram for output
     delta_phi_ll_histograms =  {
-      "llll": ROOT.TH1D("llll" + cut, "delta_phi_ll" + cut + ";Delta Phi(Rad);Normalised Counts", 8, -3.14, 3.14),
-      "other di-boson": ROOT.TH1D("di-boson" + cut, "delta_phi_ll" + cut + ";Delta Phi(Rad);Normalised Counts", 8, -3.14, 3.14),
-      "jets": ROOT.TH1D("jets" + cut, "delta_phi_ll" + cut + ";Delta Phi(Rad);Normalised Counts", 8, -3.14, 3.14),
-      "signal": ROOT.TH1D("signal" + cut, "delta_phi_ll" + cut + ";Delta Phi(Rad);Normalised Counts", 8, -3.14, 3.14)
+      "llll": ROOT.TH1D("llll" + cut, "delta_phi_ll" + cut + ";#Delta #phi_{ll} (Rad);Normalised Counts", 8, -3.14, 3.14),
+      "other di-boson": ROOT.TH1D("di-boson" + cut, "delta_phi_ll" + cut + ";#Delta #phi_{ll} (Rad);Normalised Counts", 8, -3.14, 3.14),
+      "jets": ROOT.TH1D("jets" + cut, "delta_phi_ll" + cut + ";#Delta #phi_{ll} (Rad);Normalised Counts", 8, -3.14, 3.14),
+      "signal": ROOT.TH1D("signal" + cut, "delta_phi_ll" + cut + ";#Delta #phi_{ll} (Rad);Normalised Counts", 8, -3.14, 3.14)
     }
 
     # Fill histogram with delta phi ll values
@@ -108,7 +108,7 @@ def main():
 
     ### PLOTTING ###
     # Create a legend
-    leg = ROOT.TLegend()
+    leg = ROOT.TLegend(0.5, 0.9, 0.7, 0.75)
     leg.SetBorderSize(0)
     leg.SetTextSize(0.03)
     leg.SetEntrySeparation(0.001)
@@ -144,6 +144,15 @@ def main():
     # Save the canvas
     canvas.SaveAs("signedDeltaPhill/" + cut + ".pdf")
     canvas.Clear()
+
+    # Reset legend
+    leg = ROOT.TLegend(0.2, 0.5, 0.3, 0.65)
+    leg.SetBorderSize(0)
+    leg.SetTextSize(0.03)
+    leg.SetEntrySeparation(0.001)
+    for i, key in enumerate(delta_phi_ll_histograms):
+      hist = delta_phi_ll_histograms[key]
+      leg.AddEntry(hist, key, "l")
 
     stacked_hist.Draw("hist")
     leg.Draw('SAME')

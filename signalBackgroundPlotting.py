@@ -54,7 +54,7 @@ for cut in ["2_lep_", "3_lep_"]: # Loop over the different selection cuts (2 and
   cutYields = {samples[0][0]: None, samples[1][0]: None, samples[2][0]: None, samples[3][0]: None}
   for variable in varList: # Loop over the variables
     var = cut + variable
-    leg = TLegend(0.7,0.6,0.8,0.85)
+    leg = TLegend(0.7,0.7,0.8,0.85)
     leg.SetBorderSize(0)
     leg.SetTextSize(0.03)
     leg.SetEntrySeparation(0.001)
