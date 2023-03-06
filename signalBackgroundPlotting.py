@@ -31,13 +31,29 @@ varList = ["tau_pt_sum", "Z_lepton_mass_sum", "met_pt", "delta_R_ll", "delta_R_t
            "delta_Eta_ll", "delta_Eta_tt", "delta_R_tt_ll", "n_jets", "delta_Phi_ll",
            "delta_Phi_tt", "delta_Phi_ll_tt", "mmc_mass"]
 
+varXAxis = {
+    "tau_pt_sum": "p_{T}^{#tau_{sum}} (GeV)",
+    "Z_lepton_mass_sum": "M_{ll} (GeV)",
+    "met_pt": "E_{T}^{miss} (GeV)",
+    "delta_R_ll": "#Delta R_{ll}",
+    "delta_R_tt": "#Delta R_{#tau#tau}",
+    "delta_Eta_ll": "#Delta #eta_{ll}",
+    "delta_Eta_tt": "#Delta #eta_{#tau#tau}",
+    "delta_R_tt_ll": "#Delta R_{#tau#tau,ll}",
+    "n_jets": "Number of jets",
+    "delta_Phi_ll": "#Delta #phi_{ll}",
+    "delta_Phi_tt": "#Delta #phi_{#tau#tau}",
+    "delta_Phi_ll_tt": "#Delta #phi_{ll,#tau#tau}",
+    "mmc_mass": "MMC mass (GeV)"
+}
+
 # Clear plottingYields.txt
 open("plottingYields.txt", "w").close()
 
 for cut in ["2_lep_", "3_lep_"]: # Loop over the different selection cuts (2 and 3 lepton)
   cutYields = {samples[0][0]: None, samples[1][0]: None, samples[2][0]: None, samples[3][0]: None}
-  for var in varList: # Loop over the variables
-    var = cut + var
+  for variable in varList: # Loop over the variables
+    var = cut + variable
     leg = TLegend(0.7,0.6,0.8,0.85)
     leg.SetBorderSize(0)
     leg.SetTextSize(0.03)
@@ -81,8 +97,9 @@ for cut in ["2_lep_", "3_lep_"]: # Loop over the different selection cuts (2 and
 
     for i in range(len(histos)):
       if i == 0:
-        histos[i].SetMaximum(maximum * 1.3)
+        histos[i].SetMaximum(maximum * 1.1)
         histos[i].Draw('hist')
+        histos[i].GetXaxis().SetTitle(varXAxis[variable])
       else:
         histos[i].Draw('histSAME')
 
@@ -133,7 +150,7 @@ for cut in ["2_lep_", "3_lep_"]: # Loop over the different selection cuts (2 and
         SoverSqrtSB = 0
       var_sig2.SetBinContent(i, SoverSqrtSB)
 
-    var_sig1.SetMaximum(var_sig1.GetMaximum() * 1.3)
+    var_sig1.SetMaximum(var_sig1.GetMaximum() * 1.1)
     var_sig1.SetLineWidth(3)
     var_sig1.SetMarkerColor(kRed)
     var_sig1.SetLineColor(kRed)
