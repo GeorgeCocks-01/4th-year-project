@@ -27,7 +27,7 @@ def main():
   sample_names = findAllFilesInPath("*.root", "nTupleGroups/")
 
   # Thresholds for 2lep, 3lep cuts
-  thresholds = (0.5, 0.5)
+  thresholds = (0.52, 0.15)
 
   for cut, threshold in zip(("2lep", "3lep"), thresholds):
     # dictionary of the delta phi ll arrays for each sample
@@ -79,10 +79,10 @@ def main():
 
     # Generate histogram for output
     delta_phi_ll_histograms =  {
-      "llll": ROOT.TH1D("llll" + cut, "delta_phi_ll" + cut + ";Delta Phi(Rad);Normalised Counts", 4, -4, 4),
-      "other di-boson": ROOT.TH1D("di-boson" + cut, "delta_phi_ll" + cut + ";Delta Phi(Rad);Normalised Counts", 4, -4, 4),
-      "jets": ROOT.TH1D("jets" + cut, "delta_phi_ll" + cut + ";Delta Phi(Rad);Normalised Counts", 4, -4, 4),
-      "signal": ROOT.TH1D("signal" + cut, "delta_phi_ll" + cut + ";Delta Phi(Rad);Normalised Counts", 4, -4, 4)
+      "llll": ROOT.TH1D("llll" + cut, "delta_phi_ll" + cut + ";Delta Phi(Rad);Normalised Counts", 8, -3.14, 3.14),
+      "other di-boson": ROOT.TH1D("di-boson" + cut, "delta_phi_ll" + cut + ";Delta Phi(Rad);Normalised Counts", 8, -3.14, 3.14),
+      "jets": ROOT.TH1D("jets" + cut, "delta_phi_ll" + cut + ";Delta Phi(Rad);Normalised Counts", 8, -3.14, 3.14),
+      "signal": ROOT.TH1D("signal" + cut, "delta_phi_ll" + cut + ";Delta Phi(Rad);Normalised Counts", 8, -3.14, 3.14)
     }
 
     # Fill histogram with delta phi ll values
@@ -95,11 +95,12 @@ def main():
     print("Yields for " + cut + " cut")
     background_yield = 0
     for key in delta_phi_ll_histograms:
+      max_bin = delta_phi_ll_histograms[key].GetNbinsX() + 1
       if key == "signal":
-        signal_yield = delta_phi_ll_histograms[key].Integral(0, 5)
+        signal_yield = delta_phi_ll_histograms[key].Integral(0, max_bin)
         print("Signal yield: ", signal_yield)
       else:
-        temp_yield = delta_phi_ll_histograms[key].Integral(0, 5)
+        temp_yield = delta_phi_ll_histograms[key].Integral(0, max_bin)
         print(key, "yield: ", temp_yield)
         background_yield += temp_yield
     print("S/B:", signal_yield/background_yield)
@@ -159,9 +160,9 @@ def main():
     total_background.Add(delta_phi_ll_histograms["other di-boson"])
     total_background.Add(delta_phi_ll_histograms["jets"])
 
-    for i in range(1, 5):
+    for i in range(1, sig_1.GetNbinsX() + 1):
       sig_1.SetBinContent(i, s_b_calc(0, i, delta_phi_ll_histograms["signal"], total_background))
-      sig_2.SetBinContent(i, s_b_calc(i, 5, delta_phi_ll_histograms["signal"], total_background))
+      sig_2.SetBinContent(i, s_b_calc(i, sig_1.GetNbinsX() + 1, delta_phi_ll_histograms["signal"], total_background))
 
     sig_1.SetMaximum(sig_1.GetBinContent(sig_1.GetMaximumBin())*1.3)
     sig_1.SetLineWidth(3)

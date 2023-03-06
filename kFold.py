@@ -83,8 +83,8 @@ def main(args):
     kf = KFold(n_splits = 5, shuffle = True, random_state = 0)
 
     # Create a ROOT histogram for the predictions and fill it
-    signal_predictions = ROOT.TH1D("Signalpredictions" + cut, "Predictions " + cut + " " + ";Prediction;Events", 25, 0, 1)
-    background_predictions = ROOT.TH1D("Backgroundpredictions" + cut, "Predictions " + cut + " " + ";Prediction;Events", 25, 0, 1)
+    signal_predictions = ROOT.TH1D("Signalpredictions" + cut, "Predictions " + cut + " " + ";Prediction;Events", 13, 0, 1)
+    background_predictions = ROOT.TH1D("Backgroundpredictions" + cut, "Predictions " + cut + " " + ";Prediction;Events", 13, 0, 1)
 
     i = 1
     # Loop over the kFold splits
