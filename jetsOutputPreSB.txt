@@ -1,0 +1,105 @@
+Zee_MV1000_E_CMS/ : 2 files
+2lep selection cut integral yield: 0.05352788224675885
+3lep selection cut integral yield: 0.05480709836736452
+Zee_MV280_500_CFBV/ : 2 files
+2lep selection cut integral yield: 0.5923563283973526
+3lep selection cut integral yield: 0.6907553437301577
+Zee_MV280_500_CVBV/ : 2 files
+2lep selection cut integral yield: -0.18838763789877702
+3lep selection cut integral yield: 0.07266208994415452
+Zee_MV0_70_CFBV/ : 2 files
+2lep selection cut integral yield: 27.579205278295515
+3lep selection cut integral yield: 0.0
+Zee_MV0_70_CVBV/ : 3 files
+2lep selection cut integral yield: 32.72692909156397
+3lep selection cut integral yield: 0.0
+Zee_MV500_1000/ : 2 files
+2lep selection cut integral yield: 0.11462001849022985
+3lep selection cut integral yield: 0.2333894436211792
+Zee_MV140_280_CFBV/ : 3 files
+2lep selection cut integral yield: 1.2657104062537772
+3lep selection cut integral yield: 1.113324923318202
+Zee_MV0_70_BF/ : 3 files
+2lep selection cut integral yield: 15.05156474750736
+3lep selection cut integral yield: 1.7286064963230465
+Zee_MV280_500_BF/ : 3 files
+2lep selection cut integral yield: 0.10313981762748176
+3lep selection cut integral yield: 0.1766918706745426
+Zee_MV140_280_CVBV/ : 3 files
+2lep selection cut integral yield: 4.37020128329339
+3lep selection cut integral yield: 0.821733314370576
+Zee_MV70_140_BF/ : 24 files
+2lep selection cut integral yield: -0.03848778426015037
+3lep selection cut integral yield: 1.7816595817239256
+Zee_MV140_280_BF/ : 3 files
+2lep selection cut integral yield: 0.4717103878316777
+3lep selection cut integral yield: 0.46748779938500457
+Zmumu_MV1000_E_CMS/ : 2 files
+2lep selection cut integral yield: 0.0007773939930170067
+3lep selection cut integral yield: 0.0
+Zmumu_MV280_500_CFBV/ : 2 files
+2lep selection cut integral yield: 0.38620755677683094
+3lep selection cut integral yield: 0.0
+Zmumu_MV280_500_CVBV/ : 2 files
+2lep selection cut integral yield: 0.7917017504995464
+3lep selection cut integral yield: 0.029045269543307557
+Zee_MV70_140_CFBV/ : 2 files
+2lep selection cut integral yield: 8.210832919212049
+3lep selection cut integral yield: 0.0
+Zmumu_MV0_70_CFBV/ : 4 files
+2lep selection cut integral yield: -2.512801507531784
+3lep selection cut integral yield: 0.0
+Zmumu_MV0_70_CVBV/ : 3 files
+2lep selection cut integral yield: 105.7249524565647
+3lep selection cut integral yield: 0.0
+Zmumu_MV0_70_BF/ : 2 files
+2lep selection cut integral yield: 9.34405358221962
+3lep selection cut integral yield: 0.0
+Zmumu_MV140_280_CFBV/ : 2 files
+2lep selection cut integral yield: 6.378236844990659
+3lep selection cut integral yield: 0.0
+Zmumu_MV280_500_BF/ : 4 files
+2lep selection cut integral yield: 0.23699187789525672
+3lep selection cut integral yield: 0.19348122117023026
+Zmumu_MV140_280_CVBV/ : 4 files
+2lep selection cut integral yield: 5.302471337303454
+3lep selection cut integral yield: 1.1921763180155094
+Zee_MV70_140_CVBV/ : 3 files
+2lep selection cut integral yield: 18.887746261963716
+3lep selection cut integral yield: 6.503555806574714
+Zmumu_MV140_280_BF/ : 4 files
+2lep selection cut integral yield: 0.7676717352404295
+3lep selection cut integral yield: 0.6495024793455847
+Ztt_MV280_500_CFBV/ : 2 files
+2lep selection cut integral yield: 0.0
+3lep selection cut integral yield: 0.0
+Ztt_MV1000_E_CMS/ : 2 files
+2lep selection cut integral yield: 0.0
+3lep selection cut integral yield: 0.0
+Ztt_MV280_500_BF/ : 2 files
+2lep selection cut integral yield: 0.0
+3lep selection cut integral yield: 0.0
+Ztt_MV500_1000/ : 2 files
+2lep selection cut integral yield: 0.0
+3lep selection cut integral yield: 0.0
+Ztt_MV280_500_CVBV/ : 3 files
+2lep selection cut integral yield: 0.0
+3lep selection cut integral yield: 0.0
+Zmumu_MV70_140_CFBV/ : 2 files
+2lep selection cut integral yield: 2.2059193028388244
+3lep selection cut integral yield: -2.5503866477403543
+Zmumu_MV500_1000/ : 4 files
+2lep selection cut integral yield: 0.2721484414858794
+3lep selection cut integral yield: 0.1296724807650984
+Ztt_MV0_70_l15h20/ : 4 files
+2lep selection cut integral yield: 0.0
+3lep selection cut integral yield: -0.1326960847249103
+Ztt_MV0_70_l13l7/ : 3 files
+2lep selection cut integral yield: 0.3727496372452827
+3lep selection cut integral yield: -0.35923607118317835
+Zmumu_MV70_140_BF/ : 3 files
+2lep selection cut integral yield: 4.116856032153203
+3lep selection cut integral yield: 0.42403923032656193
+Zmumu_MV70_140_CVBV/ : 2 files
+2lep selection cut integral yield: -8.811529029899695
+3lep selection cut integral yield: -3.166979122558294

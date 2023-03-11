@@ -1,0 +1,27 @@
+llvv_lowMllPtComplement/ : 2 files
+2lep selection cut integral yield: 0.0
+3lep selection cut integral yield: 0.0
+llll_lowMllPtComplement/ : 2 files
+2lep selection cut integral yield: 0.0
+3lep selection cut integral yield: 0.0
+lllv_lowMllPtComplement/ : 2 files
+2lep selection cut integral yield: 0.0
+3lep selection cut integral yield: 0.0
+ttH/ : 1 files
+2lep selection cut integral yield: 0.6361948796246558
+3lep selection cut integral yield: 1.2278260872413995
+ZqqZll/ : 3 files
+2lep selection cut integral yield: 0.6891274761666768
+3lep selection cut integral yield: 0.06414131879824855
+WqqZll/ : 3 files
+2lep selection cut integral yield: 1.1355173582602314
+3lep selection cut integral yield: 0.09066052530236648
+llvv/ : 4 files
+2lep selection cut integral yield: 0.06774913817239123
+3lep selection cut integral yield: 0.03768591536296241
+lllv/ : 3 files
+2lep selection cut integral yield: 2.9201551385435147
+3lep selection cut integral yield: 39.90455065598655
+llll/ : 4 files
+2lep selection cut integral yield: 62.47506949548018
+3lep selection cut integral yield: 105.26020065663441

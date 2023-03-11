@@ -11,21 +11,23 @@ canv = TCanvas('c','c',600,600)
 canv.cd()
 colorList = [kBlack,kRed,kBlue,kGreen,kViolet,kMagenta,kAzure,kOrange,kYellow,kMagenta+3,kCyan,kYellow+2]
 
-zJetsSamples = []
-zJetsSamples.extend(findAllFilesInPath("*Zee*.root", "outputRoot/"))
-zJetsSamples.extend(findAllFilesInPath("*Zmumu*.root", "outputRoot/"))
-zJetsSamples.extend(findAllFilesInPath("*Ztt*.root", "outputRoot/"))
+folder = "outputRoot/"
 
-samples = (('llll', ('outputRoot/llll-weighted.root', 'outputRoot/llll_lowMllPtComplement-weighted.root'), kBlack),
-      ('other di-boson', ('outputRoot/ZqqZll-weighted.root',
-        'outputRoot/lllv-weighted.root',
-        'outputRoot/lllv_lowMllPtComplement-weighted.root',
-        'outputRoot/llvv-weighted.root',
-        'outputRoot/llvv_lowMllPtComplement-weighted.root',
-        'outputRoot/WqqZll-weighted.root',
-        'outputRoot/ttH-weighted.root'), kBlue),
+zJetsSamples = []
+zJetsSamples.extend(findAllFilesInPath("*Zee*.root", folder + "/"))
+zJetsSamples.extend(findAllFilesInPath("*Zmumu*.root", folder + "/"))
+zJetsSamples.extend(findAllFilesInPath("*Ztt*.root", folder + "/"))
+
+samples = (('llll', (folder + '/llll-weighted.root', folder + '/llll_lowMllPtComplement-weighted.root'), kBlack),
+      ('other di-boson', (folder + '/ZqqZll-weighted.root',
+        folder + '/lllv-weighted.root',
+        folder + '/lllv_lowMllPtComplement-weighted.root',
+        folder + '/llvv-weighted.root',
+        folder + '/llvv_lowMllPtComplement-weighted.root',
+        folder + '/WqqZll-weighted.root',
+        folder + '/ttH-weighted.root'), kBlue),
       ('Jets', zJetsSamples, kGreen),
-      ('signal', ('outputRoot/ZHlltt-weighted.root', 'outputRoot/ggZH-weighted.root'), kRed))
+      ('signal', (folder + '/ZHlltt-weighted.root', folder + '/ggZH-weighted.root'), kRed))
 
 varList = ["tau_pt_sum", "Z_lepton_mass_sum", "met_pt", "delta_R_ll", "delta_R_tt",
            "delta_Eta_ll", "delta_Eta_tt", "delta_R_tt_ll", "n_jets", "delta_Phi_ll",
@@ -155,11 +157,14 @@ for cut in ["2_lep_", "3_lep_"]: # Loop over the different selection cuts (2 and
     var_sig1.SetMarkerColor(kRed)
     var_sig1.SetLineColor(kRed)
     var_sig1.Draw('hist')
-    var_sig1.GetYaxis().SetTitle("S/sqrt(S+B)")
+    var_sig1.GetXaxis().SetTitle(varXAxis[variable])
+    var_sig1.GetYaxis().SetTitle("#frac{S}{#sqrt{S+B}}")
+
     var_sig2.SetMarkerColor(kBlue)
     var_sig2.SetLineColor(kBlue)
     var_sig2.Draw('histSAME')
-    canv.SaveAs('SBplots/SB_' + var + '.pdf')
+    var_sig2.GetXaxis().SetTitle(varXAxis[variable])
+    canv.SaveAs('oldSBplots/SB_' + var + '.png')
     canv.Clear()
 
   # Write the yields to a file
