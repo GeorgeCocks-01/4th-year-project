@@ -7,11 +7,11 @@ gROOT.LoadMacro('../atlasrootstyle/AtlasUtils.C')
 gROOT.SetBatch(kTRUE)
 SetAtlasStyle()
 
-canv = TCanvas('c','c',600,600)
+canv = TCanvas('c','c',1000,800)
 canv.cd()
 colorList = [kBlack,kRed,kBlue,kGreen,kViolet,kMagenta,kAzure,kOrange,kYellow,kMagenta+3,kCyan,kYellow+2]
 
-folder = "outputRoot/"
+folder = "preSBroots/"
 
 zJetsSamples = []
 zJetsSamples.extend(findAllFilesInPath("*Zee*.root", folder + "/"))
@@ -60,6 +60,7 @@ for cut in ["2_lep_", "3_lep_"]: # Loop over the different selection cuts (2 and
     leg.SetBorderSize(0)
     leg.SetTextSize(0.03)
     leg.SetEntrySeparation(0.001)
+    leg.SetTextFont(20)
 
     counter = 0
     histos=[]
@@ -158,7 +159,9 @@ for cut in ["2_lep_", "3_lep_"]: # Loop over the different selection cuts (2 and
     var_sig1.SetLineColor(kRed)
     var_sig1.Draw('hist')
     var_sig1.GetXaxis().SetTitle(varXAxis[variable])
-    var_sig1.GetYaxis().SetTitle("#frac{S}{#sqrt{S+B}}")
+    var_sig1.GetXaxis().SetTitleOffset(1.1)
+    var_sig1.GetYaxis().SetTitle("S/#sqrt{S+B}")
+    var_sig1.GetYaxis().SetTitleOffset(1.3)
 
     var_sig2.SetMarkerColor(kBlue)
     var_sig2.SetLineColor(kBlue)

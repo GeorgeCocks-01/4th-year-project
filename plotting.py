@@ -5,6 +5,12 @@ from sklearn.metrics import roc_curve, auc
 
 matplotlib.use("SVG") # Use SVG for matplotlib
 
+plt.rcParams['font.family'] = 'serif'
+plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
+plt.rcParams.update({'font.size': 20})
+
+legend_font_size = 18
+
 def predictionsROCPlotter(model, pred, y_test, y_train, X_train, cut, filename = None):
   ### Plots Predictions and ROC curve ###
   fpr, tpr, thresholds = roc_curve(y_test, pred) # Calculate the ROC curve
@@ -17,7 +23,7 @@ def predictionsROCPlotter(model, pred, y_test, y_train, X_train, cut, filename =
   plt.title(cut + " ROC curve")
   plt.ylabel("True positive rate")
   plt.xlabel("False positive rate")
-  plt.legend(["Baseline", "ROC curve (area = %0.3f)" % rocArea], loc = 'lower right')
+  plt.legend(["Baseline", "ROC curve (area = %0.3f)" % rocArea], loc = 'lower right', fontsize = legend_font_size)
   if not filename:
     plt.savefig("nnPlots/roc" + cut + ".png")
   else:
@@ -38,7 +44,7 @@ def predictionsROCPlotter(model, pred, y_test, y_train, X_train, cut, filename =
   plt.title(cut + " Prediction (testing)")
   plt.ylabel("Number of events")
   plt.xlabel("Prediction")
-  plt.legend(loc = 'upper center', ncol = 2)
+  plt.legend(loc = 'upper center', fontsize = legend_font_size)
   if not filename:
     plt.savefig("nnPlots/predictions" + cut + ".png")
   else:
