@@ -127,11 +127,11 @@ def main(args):
       signal_predictions.FillN(len(pred_signal), pred_signal, weights_signal)
       background_predictions.FillN(len(pred_background), pred_background, weights_background)
 
-      for j in range(signal_predictions.GetNbinsX()):
-        error = np.sqrt(signal_predictions.GetBinContent(i + 1))
-        signal_predictions.SetBinError(i + 1, error)
-        error = np.sqrt(background_predictions.GetBinContent(i + 1))
-        background_predictions.SetBinError(i + 1, error)
+      # for j in range(signal_predictions.GetNbinsX()):
+      #   error = np.sqrt(signal_predictions.GetBinContent(i + 1))
+      #   signal_predictions.SetBinError(i + 1, error)
+      #   error = np.sqrt(background_predictions.GetBinContent(i + 1))
+      #   background_predictions.SetBinError(i + 1, error)
 
       # Fill the TTree
       for j in range(len(pred)):
@@ -195,21 +195,9 @@ def main(args):
     ### END OF PLOTTING ###
 
     ### SB ratio histograms ###
-    sb_1 = signal_predictions.Clone("SBsignal1" + cut)
     sb_2 = signal_predictions.Clone("SBsignal2" + cut)
 
     for i in range(1, signal_predictions.GetNbinsX() + 1):
-      # Calculate the S/sqrt(S+B) up to bin i
-      signal_yield = signal_predictions.Integral(0, i)
-      background_yield = background_predictions.Integral(0, i)
-      try:
-        SoverSqrtSB = signal_yield/sqrt(signal_yield + background_yield)
-      except ZeroDivisionError:
-        SoverSqrtSB = 0
-      except ValueError:
-        SoverSqrtSB = 0
-      sb_1.SetBinContent(i, SoverSqrtSB)
-
       # Calculate the S/sqrt(S+B) from bin i to the end
       signal_yield = signal_predictions.Integral(i, signal_predictions.GetNbinsX() + 1)
       background_yield = background_predictions.Integral(i, background_predictions.GetNbinsX() + 1)
@@ -221,19 +209,14 @@ def main(args):
         SoverSqrtSB = 0
       sb_2.SetBinContent(i, SoverSqrtSB)
 
-    sb_1.SetMaximum(sb_1.GetBinContent(sb_1.GetMaximumBin())*1.2)
-    sb_1.SetLineWidth(3)
-    sb_1.SetMarkerColor(ROOT.kRed)
-    sb_1.SetLineColor(ROOT.kRed)
-    sb_1.Draw('hist')
-    sb_1.GetYaxis().SetTitle("S/#sqrt{S+B}")
-    sb_1.GetYaxis().SetTitleOffset(1.1)
-    sb_1.GetXaxis().SetTitleOffset(1.1)
-
-    sb_2.SetMaximum(sb_2.GetBinContent(sb_2.GetMaximumBin())*1.2)
+    sb_2.SetMaximum(sb_2.GetBinContent(sb_2.GetMaximumBin())*1.1)
+    sb_2.SetLineWidth(3)
     sb_2.SetMarkerColor(ROOT.kBlue)
     sb_2.SetLineColor(ROOT.kBlue)
-    sb_2.Draw('histSAME')
+    sb_2.Draw('hist')
+    sb_2.GetYaxis().SetTitle("S/#sqrt{S+B}")
+    sb_2.GetYaxis().SetTitleOffset(1.1)
+    sb_2.GetXaxis().SetTitleOffset(1.1)
     canvas.SaveAs("kFoldPlots/SoverSqrtSB" + cut + ".png")
     canvas.Clear()
     ### End of SB ratio histograms ###

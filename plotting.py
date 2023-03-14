@@ -48,7 +48,6 @@ def predictionsROCPlotter(model, pred, y_test, y_train, X_train, cut, filename =
     counts_density = counts/(len(i)*np.diff(bins))
     plt.errorbar(bin_centres, counts_density, yerr = errors, ls = "none", capsize = 2)
 
-  print(errors)
   # plt.title(cut + " Prediction (testing)")
   plt.ylabel("Normalised number of events")
   plt.xlabel("Prediction")

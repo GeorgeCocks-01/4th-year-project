@@ -79,10 +79,10 @@ def main():
 
     # Generate histogram for output
     delta_phi_ll_histograms =  {
-      "llll": ROOT.TH1D("llll" + cut, "delta_phi_ll" + cut + ";#Delta #phi_{ll} (Rad);Normalised Counts", 8, -3.14, 3.14),
-      "other di-boson": ROOT.TH1D("di-boson" + cut, "delta_phi_ll" + cut + ";#Delta #phi_{ll} (Rad);Normalised Counts", 8, -3.14, 3.14),
-      "jets": ROOT.TH1D("jets" + cut, "delta_phi_ll" + cut + ";#Delta #phi_{ll} (Rad);Normalised Counts", 8, -3.14, 3.14),
-      "signal": ROOT.TH1D("signal" + cut, "delta_phi_ll" + cut + ";#Delta #phi_{ll} (Rad);Normalised Counts", 8, -3.14, 3.14)
+      "llll": ROOT.TH1D("llll" + cut, "delta_phi_ll" + cut + ";#Delta #phi_{ll} (Rad);Normalised Counts", 6, -3.14, 3.14),
+      "other di-boson": ROOT.TH1D("di-boson" + cut, "delta_phi_ll" + cut + ";#Delta #phi_{ll} (Rad);Normalised Counts", 6, -3.14, 3.14),
+      "jets": ROOT.TH1D("jets" + cut, "delta_phi_ll" + cut + ";#Delta #phi_{ll} (Rad);Normalised Counts", 6, -3.14, 3.14),
+      "signal": ROOT.TH1D("signal" + cut, "delta_phi_ll" + cut + ";#Delta #phi_{ll} (Rad);Normalised Counts", 6, -3.14, 3.14)
     }
 
     # Fill histogram with delta phi ll values
@@ -129,10 +129,11 @@ def main():
 
     ### PLOTTING ###
     # Create a legend
-    leg = ROOT.TLegend(0.5, 0.9, 0.7, 0.75)
+    leg = ROOT.TLegend(0.35, 0.7, 0.55, 0.9)
     leg.SetBorderSize(0)
     leg.SetTextSize(0.03)
     leg.SetEntrySeparation(0.001)
+    leg.SetTextSize(0.05)
 
     colours = [ROOT.kBlack, ROOT.kBlue, ROOT.kGreen, ROOT.kRed]
     maximum = -999
@@ -155,31 +156,42 @@ def main():
       if i == 0:
         hist.SetMaximum(maximum * 1.2)
         hist.Draw("hist")
+        hist.GetYaxis().SetTitleOffset(1.2)
+        hist.GetXaxis().SetTitleOffset(1.)
       else:
         hist.Draw("histSAME")
 
-      leg.AddEntry(hist, key, "l")
+      if key == "jets":
+        leg.AddEntry(hist, "Z+jets", "l")
+      else:
+        leg.AddEntry(hist, key, "l")
 
     leg.Draw('SAME')
 
     # Save the canvas
-    canvas.SaveAs("signedDeltaPhill/" + cut + ".pdf")
+    canvas.SaveAs("signedDeltaPhill/" + cut + ".png")
     canvas.Clear()
 
     # Reset legend
-    leg = ROOT.TLegend(0.2, 0.5, 0.3, 0.65)
+    leg = ROOT.TLegend(0.45, 0.5, 0.6, 0.65)
     leg.SetBorderSize(0)
     leg.SetTextSize(0.03)
     leg.SetEntrySeparation(0.001)
+    leg.SetTextSize(0.05)
     for i, key in enumerate(delta_phi_ll_histograms):
       hist = delta_phi_ll_histograms[key]
-      leg.AddEntry(hist, key, "l")
+      if key == "jets":
+        leg.AddEntry(hist, "Z+jets", "l")
+      else:
+        leg.AddEntry(hist, key, "l")
 
     stacked_hist.Draw("hist")
+    stacked_hist.GetYaxis().SetTitleOffset(1.)
+    stacked_hist.GetXaxis().SetTitleOffset(1.)
     leg.Draw('SAME')
     stacked_hist.GetXaxis().SetTitle(delta_phi_ll_histograms["llll"].GetXaxis().GetTitle())
     stacked_hist.GetYaxis().SetTitle(delta_phi_ll_histograms["llll"].GetYaxis().GetTitle())
-    canvas.SaveAs("signedDeltaPhill/stack_" + cut + ".pdf")
+    canvas.SaveAs("signedDeltaPhill/stack_" + cut + ".png")
     canvas.Clear()
     ### END OF PLOTTING ###
 
@@ -198,8 +210,10 @@ def main():
     sig_1.SetLineColor(ROOT.kRed)
     sig_1.Draw('hist')
     sig_1.GetYaxis().SetTitle("S/#sqrt{S+B}")
+    sig_1.GetYaxis().SetTitleOffset(1.15)
+    sig_1.GetXaxis().SetTitleOffset(1.)
 
-    canvas.SaveAs("signedDeltaPhill/SoverSqrtSB" + cut + ".pdf")
+    canvas.SaveAs("signedDeltaPhill/SoverSqrtSB" + cut + ".png")
     canvas.Clear()
     ### END OF SB RATIO PLOTTING ###
 
