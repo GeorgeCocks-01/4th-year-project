@@ -27,6 +27,9 @@ def main(args):
     # Get the accuracy
     print("Accuracy for " + cut + " cut: " + str(accuracy_score(y_test, y_pred)))
 
+    # Get the loss
+    print("Loss for " + cut + " cut: " + str(model.evaluate(x_test, y_test)[0]))
+
     # Plot graphs
     predictionsROCPlotter(model, pred, y_test, y_train, x_train, cut)
 
