@@ -1,4 +1,5 @@
 from math import sqrt
+import ctypes
 from ROOT import *
 from selectionPlots import findAllFilesInPath
 
@@ -54,6 +55,7 @@ open("plottingYields.txt", "w").close()
 
 for cut in ["2_lep_", "3_lep_"]: # Loop over the different selection cuts (2 and 3 lepton)
   cutYields = {samples[0][0]: None, samples[1][0]: None, samples[2][0]: None, samples[3][0]: None}
+  cutErrors = {samples[0][0]: None, samples[1][0]: None, samples[2][0]: None, samples[3][0]: None}
   for variable in varList: # Loop over the variables
     var = cut + variable
     leg = TLegend(0.7,0.7,0.8,0.85)
@@ -88,7 +90,9 @@ for cut in ["2_lep_", "3_lep_"]: # Loop over the different selection cuts (2 and
 
       # print(var + ":" + (str)(histos[i].Integral(0, histos[i].GetNbinsX() + 1)))
       if var == cut + "tau_pt_sum":
-        cutYields[sample[0]] = histos[i].Integral(0, histos[i].GetNbinsX() + 1)
+        error = ctypes.c_double()
+        cutYields[sample[0]] = histos[i].IntegralAndError(0, histos[i].GetNbinsX() + 1, error)
+        cutErrors[sample[0]] = error.value
 
       histos[i].Scale(1./histos[i].Integral())
       legName = sample[0]
@@ -173,11 +177,29 @@ for cut in ["2_lep_", "3_lep_"]: # Loop over the different selection cuts (2 and
   # Write the yields to a file
   f = open("plottingYields.txt", "a")
   backgroundYield = cutYields["llll"] + cutYields["other di-boson"] + cutYields["Jets"]
-  f.write((str)(cut) + ": " + (str)(cutYields) + "\n")
-  f.write("S/B: " + (str)(cutYields["signal"]/backgroundYield) + "\n")
-  f.write("S/sqrt(S+B): " + (str)(cutYields["signal"]/sqrt(cutYields["signal"] + backgroundYield)) + "\n\n")
+  backgroundError = sqrt(cutErrors["llll"]**2 + cutErrors["other di-boson"]**2 + cutErrors["Jets"]**2)
+
+  s_over_b_error = sqrt(
+    ((cutYields["signal"] + cutErrors["signal"])/backgroundYield
+     - cutYields["signal"]/backgroundYield)**2
+    + (cutYields["signal"]/(backgroundYield + backgroundError)
+       - cutYields["signal"]/backgroundYield)**2
+  )
+
+  significance_error = sqrt(
+    ((cutYields["signal"] + cutErrors["signal"])/sqrt(cutYields["signal"] + cutErrors["signal"] + backgroundYield)
+     - cutYields["signal"]/sqrt(cutYields["signal"] + backgroundYield))**2
+    + (cutYields["signal"]/sqrt(cutYields["signal"] + backgroundYield + backgroundError)
+       - cutYields["signal"]/sqrt(cutYields["signal"] + backgroundYield))**2
+  )
+
+  f.write((str)(cut) + ": " + (str)(cutYields) + "\n errors: " + (str)(cutErrors) + "\n")
+  f.write("S/B: " + (str)(cutYields["signal"]/backgroundYield) + " and error: " + (str)(s_over_b_error) + "\n")
+  f.write("S/sqrt(S+B): " + (str)(cutYields["signal"]/sqrt(cutYields["signal"] + backgroundYield)) +
+          " and error: " + (str)(significance_error) + "\n\n")
   f.close()
   # Print the yields
-  print((str)(cut) + ": " + (str)(cutYields))
-  print("S/B: " + (str)(cutYields["signal"]/backgroundYield))
-  print("S/sqrt(S+B): " + (str)(cutYields["signal"]/sqrt(cutYields["signal"] + backgroundYield)) + "\n")
+  print((str)(cut) + ": " + (str)(cutYields) + "\nerrors: " + (str)(cutErrors))
+  print("S/B: " + (str)(cutYields["signal"]/backgroundYield) + " and error: " + (str)(s_over_b_error))
+  print("S/sqrt(S+B): " + (str)(cutYields["signal"]/sqrt(cutYields["signal"] + backgroundYield)) +
+        " and error: " + (str)(significance_error) + "\n")

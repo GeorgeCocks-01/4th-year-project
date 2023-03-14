@@ -26,7 +26,7 @@ def main(args):
   ROOT.gROOT.LoadMacro('../atlasrootstyle/AtlasUtils.C')
   ROOT.gROOT.SetBatch(ROOT.kTRUE)
   ROOT.SetAtlasStyle()
-  canvas = ROOT.TCanvas("c", "c", 800, 600)
+  canvas = ROOT.TCanvas("c", "c", 1200, 900)
   canvas.cd()
 
   # Create a TTree to store the predictions and the group number for kFoldCutting
@@ -83,8 +83,8 @@ def main(args):
     kf = KFold(n_splits = 5, shuffle = True, random_state = 0)
 
     # Create a ROOT histogram for the predictions and fill it
-    signal_predictions = ROOT.TH1D("Signalpredictions" + cut, "Predictions " + cut + " " + ";Prediction;Events", 13, 0, 1)
-    background_predictions = ROOT.TH1D("Backgroundpredictions" + cut, "Predictions " + cut + " " + ";Prediction;Events", 13, 0, 1)
+    signal_predictions = ROOT.TH1D("Signalpredictions" + cut, "Predictions " + cut + " " + ";Prediction;Normalised Counts", 13, 0, 1)
+    background_predictions = ROOT.TH1D("Backgroundpredictions" + cut, "Predictions " + cut + " " + ";Prediction;Normalised Counts", 13, 0, 1)
 
     i = 1
     # Loop over the kFold splits
@@ -127,6 +127,12 @@ def main(args):
       signal_predictions.FillN(len(pred_signal), pred_signal, weights_signal)
       background_predictions.FillN(len(pred_background), pred_background, weights_background)
 
+      for j in range(signal_predictions.GetNbinsX()):
+        error = np.sqrt(signal_predictions.GetBinContent(i + 1))
+        signal_predictions.SetBinError(i + 1, error)
+        error = np.sqrt(background_predictions.GetBinContent(i + 1))
+        background_predictions.SetBinError(i + 1, error)
+
       # Fill the TTree
       for j in range(len(pred)):
         prediction_array[0] = pred[j]
@@ -152,6 +158,7 @@ def main(args):
     leg.SetBorderSize(0)
     leg.SetTextSize(0.03)
     leg.SetEntrySeparation(0.001)
+    leg.SetTextSize(0.05)
 
     histos = [signal_predictions, background_predictions]
     colours = [ROOT.kRed, ROOT.kBlue]
@@ -171,7 +178,9 @@ def main(args):
       maximum = histos[1].GetMaximum()
 
     for i in range(len(histos)):
-      histos[i].SetMaximum(maximum * 1.3)
+      histos[i].SetMaximum(maximum * 1.2)
+      histos[i].GetXaxis().SetTitleOffset(1.1)
+      histos[i].GetYaxis().SetTitleOffset(1.1)
 
       # Draw the histograms
       histos[i].Draw("hist") if i == 0 else histos[i].Draw("histSAME")
@@ -181,7 +190,7 @@ def main(args):
     leg.Draw('SAME')
 
     # Save the canvas
-    canvas.SaveAs("kFoldPlots/weightedPrediction" + cut + ".pdf")
+    canvas.SaveAs("kFoldPlots/weightedPrediction" + cut + ".png")
     canvas.Clear()
     ### END OF PLOTTING ###
 
@@ -212,18 +221,20 @@ def main(args):
         SoverSqrtSB = 0
       sb_2.SetBinContent(i, SoverSqrtSB)
 
-    sb_1.SetMaximum(sb_1.GetBinContent(sb_1.GetMaximumBin())*1.3)
+    sb_1.SetMaximum(sb_1.GetBinContent(sb_1.GetMaximumBin())*1.2)
     sb_1.SetLineWidth(3)
     sb_1.SetMarkerColor(ROOT.kRed)
     sb_1.SetLineColor(ROOT.kRed)
     sb_1.Draw('hist')
-    sb_1.GetYaxis().SetTitle("S/sqrt(S+B)")
+    sb_1.GetYaxis().SetTitle("S/#sqrt{S+B}")
+    sb_1.GetYaxis().SetTitleOffset(1.1)
+    sb_1.GetXaxis().SetTitleOffset(1.1)
 
-    sb_2.SetMaximum(sb_2.GetBinContent(sb_2.GetMaximumBin())*1.3)
+    sb_2.SetMaximum(sb_2.GetBinContent(sb_2.GetMaximumBin())*1.2)
     sb_2.SetMarkerColor(ROOT.kBlue)
     sb_2.SetLineColor(ROOT.kBlue)
     sb_2.Draw('histSAME')
-    canvas.SaveAs("kFoldPlots/SoverSqrtSB" + cut + ".pdf")
+    canvas.SaveAs("kFoldPlots/SoverSqrtSB" + cut + ".png")
     canvas.Clear()
     ### End of SB ratio histograms ###
 

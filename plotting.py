@@ -8,9 +8,9 @@ matplotlib.use("SVG") # Use SVG for matplotlib
 
 plt.rcParams['font.family'] = 'serif'
 plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
-plt.rcParams.update({'font.size': 28})
+plt.rcParams.update({'font.size': 30})
 
-legend_font_size = 26
+legend_font_size = 28
 
 def predictionsROCPlotter(model, pred, y_test, y_train, X_train, cut, filename = None):
   ### Plots Predictions and ROC curve ###
@@ -48,8 +48,9 @@ def predictionsROCPlotter(model, pred, y_test, y_train, X_train, cut, filename =
     counts_density = counts/(len(i)*np.diff(bins))
     plt.errorbar(bin_centres, counts_density, yerr = errors, ls = "none", capsize = 2)
 
+  print(errors)
   # plt.title(cut + " Prediction (testing)")
-  plt.ylabel("Number of events")
+  plt.ylabel("Normalised number of events")
   plt.xlabel("Prediction")
   plt.legend(loc = 'upper center', fontsize = legend_font_size)
   if not filename:

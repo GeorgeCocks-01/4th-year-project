@@ -1,5 +1,6 @@
 from array import array
 import uproot
+import ctypes
 import ROOT
 import numpy as np
 from selectionPlots import findAllFilesInPath
@@ -93,17 +94,38 @@ def main():
     # Print yields
     print("Yields for " + cut + " cut")
     background_yield = 0
+    error = ctypes.c_double()
+    bg_errors = dict.fromkeys(delta_phi_ll_histograms)
     for key in delta_phi_ll_histograms:
       max_bin = delta_phi_ll_histograms[key].GetNbinsX() + 1
       if key == "signal":
-        signal_yield = delta_phi_ll_histograms[key].Integral(0, max_bin)
-        print("Signal yield: ", signal_yield)
+        signal_yield = delta_phi_ll_histograms[key].IntegralAndError(0, max_bin, error)
+        bg_errors[key] = error.value
+        print("Signal yield: ", signal_yield, " +/- ", bg_errors[key])
       else:
-        temp_yield = delta_phi_ll_histograms[key].Integral(0, max_bin)
-        print(key, "yield: ", temp_yield)
+        temp_yield = delta_phi_ll_histograms[key].IntegralAndError(0, max_bin, error)
+        bg_errors[key] = error.value
+        print(key, "yield: ", temp_yield, " +/- ", bg_errors[key])
         background_yield += temp_yield
-    print("S/B:", signal_yield/background_yield)
-    print("S/sqrt(S+B):", signal_yield/np.sqrt(signal_yield + background_yield))
+
+    backgroundError = np.sqrt(bg_errors["llll"]**2 + bg_errors["other di-boson"]**2 + bg_errors["jets"]**2)
+
+    s_over_b_error = np.sqrt(
+      ((signal_yield + bg_errors["signal"])/background_yield
+       - signal_yield/background_yield)**2 +
+       (signal_yield/(background_yield + backgroundError)
+        - signal_yield/background_yield)**2
+    )
+
+    significance_error = np.sqrt(
+    ((signal_yield + bg_errors["signal"])/np.sqrt(signal_yield + bg_errors["signal"] + background_yield)
+     - signal_yield/np.sqrt(signal_yield + background_yield))**2
+    + (signal_yield/np.sqrt(signal_yield + background_yield + backgroundError)
+       - signal_yield/np.sqrt(signal_yield + background_yield))**2
+    )
+
+    print("S/B:", signal_yield/background_yield, " +/- ", s_over_b_error)
+    print("S/sqrt(S+B):", signal_yield/np.sqrt(signal_yield + background_yield), " +/- ", significance_error)
 
     ### PLOTTING ###
     # Create a legend
