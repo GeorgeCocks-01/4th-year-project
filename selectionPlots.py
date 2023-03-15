@@ -124,9 +124,9 @@ def main(args):
     "deltaEtatt":ROOT.TH1D("2_lep_delta_Eta_tt", "delta_Eta_tt;Delta Eta(Rad);Normalised Counts", 50, 0, 5),
     "deltaRttll": ROOT.TH1D("2_lep_delta_R_tt_ll", "delta_R_ttll;Delta R(Rad);Normalised Counts", 50, 0, 5),
     "nJets": ROOT.TH1D("2_lep_n_jets", "n_jets;n_jets;Normalised Counts", 10, 0, 10),
-    "deltaPhill": ROOT.TH1D("2_lep_delta_Phi_ll", "delta_Phi_ll;Delta Phi(Rad);Normalised Counts", 50, -3.14, 3.14),
-    "deltaPhitt": ROOT.TH1D("2_lep_delta_Phi_tt", "delta_Phi_tt;Delta Phi(Rad);Normalised Counts", 50, -3.14, 3.14),
-    "deltaPhilltt": ROOT.TH1D("2_lep_delta_Phi_ll_tt", "delta_Phi_lltt;Delta Phi(Rad);Normalised Counts", 50, -3.14, 3.14),
+    "deltaPhill": ROOT.TH1D("2_lep_delta_Phi_ll", "delta_Phi_ll;Delta Phi(Rad);Normalised Counts", 4, -3.14, 3.14),
+    "deltaPhitt": ROOT.TH1D("2_lep_delta_Phi_tt", "delta_Phi_tt;Delta Phi(Rad);Normalised Counts", 4, -3.14, 3.14),
+    "deltaPhilltt": ROOT.TH1D("2_lep_delta_Phi_ll_tt", "delta_Phi_lltt;Delta Phi(Rad);Normalised Counts", 4, -3.14, 3.14),
     "mmc": ROOT.TH1D("2_lep_mmc_mass", "MMC_mass;Mass(GeV);Normalised Counts", 50, 0, 300)
   }
   triLepHistograms = dict.fromkeys(diLepHistograms.keys()) # list for histograms of the three lepton cut

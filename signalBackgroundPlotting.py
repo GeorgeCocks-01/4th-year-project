@@ -2,24 +2,25 @@ from math import sqrt
 import ctypes
 from ROOT import *
 from selectionPlots import findAllFilesInPath
+from kFoldCutting import significance_calc
 
 gROOT.LoadMacro('../atlasrootstyle/AtlasStyle.C')
 gROOT.LoadMacro('../atlasrootstyle/AtlasUtils.C')
 gROOT.SetBatch(kTRUE)
 SetAtlasStyle()
 
-canv = TCanvas('c','c',1200,900)
+canv = TCanvas('c','c',1300,900)
 canv.cd()
 colorList = [kBlack,kRed,kBlue,kGreen,kViolet,kMagenta,kAzure,kOrange,kYellow,kMagenta+3,kCyan,kYellow+2]
 
-folder = "preSBroots/"
+folder = "outputRoot/"
 
 zJetsSamples = []
 zJetsSamples.extend(findAllFilesInPath("*Zee*.root", folder + "/"))
 zJetsSamples.extend(findAllFilesInPath("*Zmumu*.root", folder + "/"))
 zJetsSamples.extend(findAllFilesInPath("*Ztt*.root", folder + "/"))
 
-samples = (('llll', (folder + '/llll-weighted.root', folder + '/llll_lowMllPtComplement-weighted.root'), kBlack),
+samples = (('llll', (folder + '/llll-weighted.root', folder + '/llll_lowMllPtComplement-weighted.root'), kMagenta),
       ('other di-boson', (folder + '/ZqqZll-weighted.root',
         folder + '/lllv-weighted.root',
         folder + '/lllv_lowMllPtComplement-weighted.root',
@@ -44,9 +45,9 @@ varXAxis = {
     "delta_Eta_tt": "#Delta #eta_{#tau#tau}",
     "delta_R_tt_ll": "#Delta R_{#tau#tau,ll}",
     "n_jets": "Number of jets",
-    "delta_Phi_ll": "#Delta #phi_{ll} (Rad)",
-    "delta_Phi_tt": "#Delta #phi_{#tau#tau} (Rad)",
-    "delta_Phi_ll_tt": "#Delta #phi_{ll,#tau#tau} (Rad)",
+    "delta_Phi_ll": "#Delta#phi_{ll} (Rad)",
+    "delta_Phi_tt": "#Delta#phi_{#tau#tau} (Rad)",
+    "delta_Phi_ll_tt": "#Delta#phi_{ll,#tau#tau} (Rad)",
     "mmc_mass": "MMC mass (GeV)"
 }
 
@@ -58,11 +59,11 @@ for cut in ["2_lep_", "3_lep_"]: # Loop over the different selection cuts (2 and
   cutErrors = {samples[0][0]: None, samples[1][0]: None, samples[2][0]: None, samples[3][0]: None}
   for variable in varList: # Loop over the variables
     var = cut + variable
-    leg = TLegend(0.7,0.7,0.8,0.85)
+    leg = TLegend(0.37, 0.5, 0.73, 0.73) #0.5,0.7,0.7,0.85
     leg.SetBorderSize(0)
     leg.SetTextSize(0.03)
     leg.SetEntrySeparation(0.001)
-    leg.SetTextFont(20)
+    leg.SetTextSize(0.055)
 
     counter = 0
     histos=[]
@@ -86,7 +87,9 @@ for cut in ["2_lep_", "3_lep_"]: # Loop over the different selection cuts (2 and
       histos[i].SetMarkerColor(sample[2])
       histos[i].SetLineColor(sample[2])
 
-      stackedHisto.Add(histos[i].Clone())
+      cloned_histo = histos[i].Clone()
+      cloned_histo.SetFillColor(sample[2])
+      stackedHisto.Add(cloned_histo)
 
       # print(var + ":" + (str)(histos[i].Integral(0, histos[i].GetNbinsX() + 1)))
       if var == cut + "tau_pt_sum":
@@ -95,7 +98,7 @@ for cut in ["2_lep_", "3_lep_"]: # Loop over the different selection cuts (2 and
         cutErrors[sample[0]] = error.value
 
       histos[i].Scale(1./histos[i].Integral())
-      legName = sample[0]
+      legName = sample[0] if sample[0] != "Jets" else "Z+jets"
 
       if histos[i].GetMaximum() > maximum:
         maximum = histos[i].GetMaximum()
@@ -116,14 +119,16 @@ for cut in ["2_lep_", "3_lep_"]: # Loop over the different selection cuts (2 and
 
     #myText(0.19,0.76,kBlack,'#sqrt{s} = 13 TeV, 140 fb^{-1}')
 
-    canv.SaveAs('plots/' + var + '.pdf')
+    canv.SaveAs('plots/' + var + '.png')
     canv.Clear()
 
     stackedHisto.Draw('hist')
+    stackedHisto.GetYaxis().SetTitleOffset(1.)
+    stackedHisto.GetXaxis().SetTitleOffset(0.95)
     leg.Draw('SAME')
-    stackedHisto.GetXaxis().SetTitle(histos[i].GetXaxis().GetTitle())
+    stackedHisto.GetXaxis().SetTitle(varXAxis[variable])
     stackedHisto.GetYaxis().SetTitle(histos[i].GetYaxis().GetTitle())
-    canv.SaveAs('stackPlots/stack_' + var + '.pdf')
+    canv.SaveAs('stackPlots/stack_' + var + '.png')
     canv.Clear()
 
     # SB ratio plots
@@ -171,8 +176,38 @@ for cut in ["2_lep_", "3_lep_"]: # Loop over the different selection cuts (2 and
     var_sig2.SetLineColor(kBlue)
     var_sig2.Draw('histSAME')
     var_sig2.GetXaxis().SetTitle(varXAxis[variable])
-    canv.SaveAs('oldSBplots/SB_' + var + '.png')
+    canv.SaveAs('SBplots/SB_' + var + '.png')
     canv.Clear()
+
+    ### SIGNIFICANCE PLOTTING ###
+    if variable == "delta_Phi_ll":
+      new_sig1 = histos[3].Clone()
+      full_background = histos[0].Clone()
+      full_background.Add(histos[1])
+      full_background.Add(histos[2])
+
+      for i in range(1, new_sig1.GetNbinsX() + 1):
+        signal_yield = histos[3].GetBinContent(int(i))
+        background_yield = full_background.GetBinContent(int(i))
+        try:
+          sb = signal_yield/sqrt(signal_yield + background_yield)
+        except:
+          sb = 0
+        new_sig1.SetBinContent(i, sb)
+
+      new_sig1.SetMaximum(new_sig1.GetBinContent(new_sig1.GetMaximumBin())*1.1)
+      new_sig1.SetLineWidth(3)
+      new_sig1.SetMarkerColor(kRed)
+      new_sig1.SetLineColor(kRed)
+      new_sig1.Draw('hist')
+      new_sig1.GetYaxis().SetTitle("S/#sqrt{S+B}")
+      new_sig1.GetYaxis().SetTitleOffset(1.1)
+      new_sig1.GetXaxis().SetTitle(varXAxis[variable])
+      new_sig1.GetXaxis().SetTitleOffset(0.95)
+
+      canv.SaveAs("signedDeltaPhill/cutSoverSqrtSB" + cut + ".png")
+      canv.Clear()
+    ### END OF SB RATIO PLOTTING ###
 
   # Write the yields to a file
   f = open("plottingYields.txt", "a")

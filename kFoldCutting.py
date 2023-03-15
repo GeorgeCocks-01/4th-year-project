@@ -10,7 +10,7 @@ def significance_calc(bin, signal_hist, background_hist):
   background_yield = background_hist.GetBinContent(bin)
   try:
     sb = signal_yield/np.sqrt(signal_yield + background_yield)
-  except RuntimeWarning:
+  except:
     sb = 0
   return sb
 
@@ -79,10 +79,10 @@ def main():
 
     # Generate histogram for output
     delta_phi_ll_histograms =  {
-      "llll": ROOT.TH1D("llll" + cut, "delta_phi_ll" + cut + ";#Delta #phi_{ll} (Rad);Normalised Counts", 6, -3.14, 3.14),
-      "other di-boson": ROOT.TH1D("di-boson" + cut, "delta_phi_ll" + cut + ";#Delta #phi_{ll} (Rad);Normalised Counts", 6, -3.14, 3.14),
-      "jets": ROOT.TH1D("jets" + cut, "delta_phi_ll" + cut + ";#Delta #phi_{ll} (Rad);Normalised Counts", 6, -3.14, 3.14),
-      "signal": ROOT.TH1D("signal" + cut, "delta_phi_ll" + cut + ";#Delta #phi_{ll} (Rad);Normalised Counts", 6, -3.14, 3.14)
+      "llll": ROOT.TH1D("llll" + cut, "delta_phi_ll" + cut + ";#Delta#phi_{ll} (Rad);Normalised Counts", 4, -3.14, 3.14),
+      "other di-boson": ROOT.TH1D("di-boson" + cut, "delta_phi_ll" + cut + ";#Delta#phi_{ll} (Rad);Normalised Counts", 4, -3.14, 3.14),
+      "jets": ROOT.TH1D("jets" + cut, "delta_phi_ll" + cut + ";#Delta#phi_{ll} (Rad);Normalised Counts", 4, -3.14, 3.14),
+      "signal": ROOT.TH1D("signal" + cut, "delta_phi_ll" + cut + ";#Delta#phi_{ll} (Rad);Normalised Counts", 4, -3.14, 3.14)
     }
 
     # Fill histogram with delta phi ll values
@@ -129,20 +129,22 @@ def main():
 
     ### PLOTTING ###
     # Create a legend
-    leg = ROOT.TLegend(0.35, 0.7, 0.55, 0.9)
+    leg = ROOT.TLegend(0.3, 0.7, 0.45, 0.9)
     leg.SetBorderSize(0)
     leg.SetTextSize(0.03)
     leg.SetEntrySeparation(0.001)
     leg.SetTextSize(0.05)
 
-    colours = [ROOT.kBlack, ROOT.kBlue, ROOT.kGreen, ROOT.kRed]
+    colours = [ROOT.kMagenta, ROOT.kBlue, ROOT.kGreen, ROOT.kRed]
     maximum = -999
     stacked_hist = ROOT.THStack()
     for i, key in enumerate(delta_phi_ll_histograms):
       hist = delta_phi_ll_histograms[key]
       hist.SetLineColor(colours[i])
 
-      stacked_hist.Add(hist.Clone())
+      cloned_hist = hist.Clone()
+      cloned_hist.SetFillColor(colours[i])
+      stacked_hist.Add(cloned_hist)
 
       # Normalise the histograms
       hist.Scale(1./hist.Integral())
@@ -152,19 +154,20 @@ def main():
         maximum = hist.GetMaximum()
 
     for i, key in enumerate(delta_phi_ll_histograms):
+      if key == "jets": continue
       hist = delta_phi_ll_histograms[key]
       if i == 0:
-        hist.SetMaximum(maximum * 1.2)
+        hist.SetMaximum(maximum * 1.1)
         hist.Draw("hist")
         hist.GetYaxis().SetTitleOffset(1.2)
         hist.GetXaxis().SetTitleOffset(1.)
       else:
         hist.Draw("histSAME")
 
-      if key == "jets":
-        leg.AddEntry(hist, "Z+jets", "l")
-      else:
-        leg.AddEntry(hist, key, "l")
+      # if key == "jets":
+      #   leg.AddEntry(hist, "Z+jets", "l")
+      # else:
+      leg.AddEntry(hist, key, "l")
 
     leg.Draw('SAME')
 
@@ -173,7 +176,7 @@ def main():
     canvas.Clear()
 
     # Reset legend
-    leg = ROOT.TLegend(0.45, 0.5, 0.6, 0.65)
+    leg = ROOT.TLegend(0.4, 0.5, 0.75, 0.7)
     leg.SetBorderSize(0)
     leg.SetTextSize(0.03)
     leg.SetEntrySeparation(0.001)
@@ -187,7 +190,7 @@ def main():
 
     stacked_hist.Draw("hist")
     stacked_hist.GetYaxis().SetTitleOffset(1.)
-    stacked_hist.GetXaxis().SetTitleOffset(1.)
+    stacked_hist.GetXaxis().SetTitleOffset(0.95)
     leg.Draw('SAME')
     stacked_hist.GetXaxis().SetTitle(delta_phi_ll_histograms["llll"].GetXaxis().GetTitle())
     stacked_hist.GetYaxis().SetTitle(delta_phi_ll_histograms["llll"].GetYaxis().GetTitle())
@@ -210,8 +213,8 @@ def main():
     sig_1.SetLineColor(ROOT.kRed)
     sig_1.Draw('hist')
     sig_1.GetYaxis().SetTitle("S/#sqrt{S+B}")
-    sig_1.GetYaxis().SetTitleOffset(1.15)
-    sig_1.GetXaxis().SetTitleOffset(1.)
+    sig_1.GetYaxis().SetTitleOffset(1.1)
+    sig_1.GetXaxis().SetTitleOffset(0.95)
 
     canvas.SaveAs("signedDeltaPhill/SoverSqrtSB" + cut + ".png")
     canvas.Clear()
